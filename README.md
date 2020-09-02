@@ -1,7 +1,10 @@
 Advanced Resource Template (module for Omeka S)
 ===============================================
 
-[Advanced Resource Template] is a module for [Omeka S] that add new settings to
+> This module is based on th pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S.
+
+
+[Advanced Resource Template] is a module for [Omeka S] that adds new settings to
 the resource templates in order to simplify and to improve the edition of
 resources:
 
