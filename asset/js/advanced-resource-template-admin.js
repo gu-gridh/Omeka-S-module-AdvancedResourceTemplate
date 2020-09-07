@@ -426,8 +426,17 @@ $(document).ready(function() {
                             service: autofillerName,
                             template: $('#resource-template-select').val(),
                         },
+                        showNoSuggestionNotice: true,
+                        noSuggestionNotice: Omeka.jsTranslate('No results'),
+                        preventBadQueries: false,
                         transformResult: function(response) {
                             return response.data;
+                        },
+                        onSearchStart: function (params) {
+                            $(this).css('cursor', 'progress');
+                        },
+                        onSearchComplete: function (query, suggestions) {
+                            $(this).css('cursor', 'default');
                         },
                         onSearchError: function (query, jqXHR, textStatus, errorThrown) {
                             // If there is no response, the request is aborted for autocompletion.
@@ -472,8 +481,19 @@ $(document).ready(function() {
                 prop: autocompleteField.closest('.resource-values.field').data('property-id'),
                 type: autocompleteField.closest('.resource-values.field').data('autocomplete'),
             },
+            deferRequestBy: 200,
+            // minChars: 3,
+            // showNoSuggestionNotice: true,
+            //. noSuggestionNotice: Omeka.jsTranslate('No results'),
+            preventBadQueries: false,
             transformResult: function(response) {
                 return response.data;
+            },
+            onSearchStart: function (params) {
+                $(this).css('cursor', 'progress');
+            },
+            onSearchComplete: function (query, suggestions) {
+                $(this).css('cursor', 'default');
             },
             onSearchError: function (query, jqXHR, textStatus, errorThrown) {
                 // If there is no response, the request is aborted for autocompletion.
