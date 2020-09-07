@@ -43,6 +43,10 @@ body.modal header,
 body.modal footer {
     display: none !important;
 }
+body.modal .resource-form .section-nav #item-media-label,
+body.modal .resource-form .section-nav #thumbnail-label {
+    display: none !important;
+}
 .quick-add-resource {
     min-height: 0 !important;
     background-color: rgba(0,0,0,.08) !important;
