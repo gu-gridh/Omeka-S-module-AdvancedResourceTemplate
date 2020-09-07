@@ -3,6 +3,24 @@
 namespace AdvancedResourceTemplate;
 
 return [
+    'autofillers' => [
+        'factories' => [
+            Autofiller\GeonamesAutofiller::class => Service\Autofiller\AutofillerFactory::class,
+            Autofiller\IdRefAutofiller::class => Service\Autofiller\AutofillerFactory::class,
+        ],
+        'aliases' => [
+            'geonames' => Autofiller\GeonamesAutofiller::class,
+            'idref' => Autofiller\IdRefAutofiller::class,
+        ],
+    ],
+    'service_manager' => [
+        'factories' => [
+            Autofiller\AutofillerPluginManager::class => Service\Autofiller\AutofillerPluginManagerFactory::class,
+        ],
+        'aliases' => [
+            'Autofiller\Manager' => Autofiller\AutofillerPluginManager::class,
+        ],
+    ],
     'view_manager' => [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
@@ -10,6 +28,7 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
     ],
     'controllers' => [
@@ -17,18 +36,50 @@ return [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
         ],
     ],
+    'controller_plugins' => [
+        'invokables' => [
+            'fieldNameToProperty' => Mvc\Controller\Plugin\FieldNameToProperty::class,
+            'mapper' => Mvc\Controller\Plugin\Mapper::class,
+        ],
+        'factories' => [
+            'mapperHelper' => Service\ControllerPlugin\MapperHelperFactory::class,
+        ],
+    ],
     'router' => [
         'routes' => [
             'admin' => [
                 'child_routes' => [
-                    'adv-res-temp' => [
+                    'values' => [
                         'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/autocomplete',
+                            'route' => '/values',
                             'defaults' => [
                                 '__NAMESPACE__' => 'AdvancedResourceTemplate\Controller\Admin',
                                 'controller' => 'Index',
-                                'action' => 'browse',
+                                'action' => 'values',
+                            ],
+                        ],
+                    ],
+                    'autofiller' => [
+                        'type' => \Zend\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/autofiller',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'AdvancedResourceTemplate\Controller\Admin',
+                                'controller' => 'Index',
+                                'action' => 'autofiller',
+                            ],
+                        ],
+                        'may_terminate' => true,
+                        'child_routes' => [
+                            'settings' => [
+                                'type' => \Zend\Router\Http\Literal::class,
+                                'options' => [
+                                    'route' => '/settings',
+                                    'defaults' => [
+                                        'action' => 'autofillerSettings',
+                                    ],
+                                ],
                             ],
                         ],
                     ],
@@ -46,6 +97,15 @@ return [
             ],
         ],
     ],
+    'js_translate_strings' => [
+        'New item', // @translate
+        'New item set', // @translate
+        'No results', // @translate
+    ],
     'advancedresourcetemplate' => [
+        'settings' => [
+            // The default autofillers are in /data/mapping/mappings.ini.
+            'advancedresourcetemplate_autofillers' => [],
+        ],
     ],
 ];

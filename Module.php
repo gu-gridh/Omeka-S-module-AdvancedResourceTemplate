@@ -9,15 +9,26 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Laminas\EventManager\Event;
-use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\Form\Element;
-use Laminas\Mvc\MvcEvent;
+use Zend\EventManager\Event;
+use Zend\EventManager\SharedEventManagerInterface;
+use Zend\Form\Element;
+use Zend\Mvc\MvcEvent;
 use Omeka\Form\Element\ArrayTextarea;
 
 class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
+
+    protected function postInstall()
+    {
+        $filepath = __DIR__. '/data/mapping/mappings.ini';
+        if (!file_exists($filepath) || is_file($filepath) || !is_readable($filepath)) {
+            return;
+        }
+        $mapping = $this->stringToAutofillers(file_get_contents($filepath));
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings->set('advancedresourcetemplate_autofillers', $mapping);
+    }
 
     public function onBootstrap(MvcEvent $event)
     {
@@ -54,6 +65,17 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
+            \Omeka\Form\SettingForm::class,
+            'form.add_elements',
+            [$this, 'handleMainSettings']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Form\SettingForm::class,
+            'form.add_input_filters',
+            [$this, 'handleMainSettingsFilters']
+        );
+
+        $sharedEventManager->attach(
             \Omeka\Form\ResourceForm::class,
             'form.add_elements',
             [$this, 'fixResourceForm']
@@ -62,6 +84,11 @@ class Module extends AbstractModule
             \Omeka\Form\ResourceTemplateForm::class,
             'form.add_elements',
             [$this, 'addResourceTemplateFormElements']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Form\ResourceTemplateForm::class,
+            'form.add_input_filters',
+            [$this, 'addResourceTemplateFormFilters']
         );
         $sharedEventManager->attach(
             \Omeka\Form\ResourceTemplatePropertyFieldset::class,
@@ -112,16 +139,62 @@ class Module extends AbstractModule
             return;
         }
 
+        $isModal = $view->params()->fromQuery('window') === 'modal';
+        if ($isModal) {
+            $view->htmlElement('body')->appendAttribute('class', 'modal');
+        }
+
         $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
         $view->headLink()->appendStylesheet($assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
         $view->headScript()
-            ->appendScript(sprintf('var autocompleteUrl = %s;', json_encode($view->url('admin/default', ['controller' => 'autocomplete']), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
+            ->appendScript(sprintf('var baseUrl = %s;', json_encode($view->basePath('/'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
             ->appendFile($assetUrl('vendor/jquery-autocomplete/jquery.autocomplete.min.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer'])
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
     }
 
+    public function handleMainSettings(Event $event)
+    {
+        parent::handleMainSettings($event);
+
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        $autofillers = $settings->get('advancedresourcetemplate_autofillers') ?: [];
+        $value = $this->autofillersToString($autofillers);
+
+        $event
+            ->getTarget()
+            ->get('advancedresourcetemplate')
+            ->get('advancedresourcetemplate_autofillers')
+            ->setValue($value);
+    }
+
+    public function handleMainSettingsFilters(Event $event)
+    {
+        $event->getParam('inputFilter')
+            ->get('advancedresourcetemplate')
+            ->add([
+                'name' => 'advancedresourcetemplate_autofillers',
+                'required' => false,
+                'filters' => [
+                    [
+                        'name' => \Zend\Filter\Callback::class,
+                        'options' => [
+                            'callback' => [$this, 'stringToAutofillers'],
+                        ],
+                    ],
+                ],
+            ]);
+    }
+
     public function addResourceTemplateFormElements(Event $event)
     {
+        $services = $this->getServiceLocator();
+        $autofillers = [];
+        foreach ($services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []) as $key => $value) {
+            $autofillers[$key] = $value['label'] ?: $key;
+        }
+
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
         $form->get('o:settings')
@@ -171,6 +244,33 @@ class Module extends AbstractModule
                 'attributes' => [
                     'id' => 'no_language',
                 ],
+            ])
+            ->add([
+                'name' => 'autofillers',
+                'type' => Element\Select::class,
+                'options' => [
+                    'label' => 'Autofillers', // @translate
+                    'value_options' => $autofillers,
+                    'empty_option' => count($autofillers)
+                        ? ''
+                        : $services->get('MvcTranslator')->translate('No configured autofiller.'), // @translate
+                ],
+                'attributes' => [
+                    'id' => 'autofillers',
+                    'multiple' => true,
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select autofillers…', // @translate
+                ],
+            ]);
+    }
+
+    public function addResourceTemplateFormFilters(Event $event)
+    {
+        $event->getParam('inputFilter')
+            ->get('o:settings')
+            ->add([
+                'name' => 'autofillers',
+                'required' => false,
             ]);
     }
 
@@ -265,5 +365,107 @@ class Module extends AbstractModule
                     'value' => 'template',
                 ],
             ]);
+    }
+
+    protected function autofillersToString($autofillers)
+    {
+        if (is_string($autofillers)) {
+            return $autofillers;
+        }
+
+        $result = '';
+        foreach ($autofillers as $key => $autofiller) {
+            $label = isset($autofiller['label']) && $autofiller['label'] !== $key ? $autofiller['label'] : '';
+            $result .= $label ? "[$key] = $label\n" : "[$key]\n";
+            if (!empty($autofiller['query'])) {
+                $result .= '?' . $autofiller['query'] . "\n";
+            }
+            if (!empty($autofiller['mapping'])) {
+                foreach ($autofiller['mapping'] as $map) {
+                    $to = &$map['to'];
+                    if (!empty($map['from'])) {
+                        $result .= $map['from'];
+                    }
+                    $result .= ' = ';
+                    if (!empty($to['field'])) {
+                        $result .= $to['field'];
+                    }
+                    if (!empty($to['type'])) {
+                        $result .= ' ^^' . $to['type'];
+                    }
+                    if (!empty($to['@language'])) {
+                        $result .= ' @' . $to['@language'];
+                    }
+                    if (!empty($to['is_public'])) {
+                        $result .= ' §' . ($to['is_public'] === 'private' ? 'private' : 'public');
+                    }
+                    if (!empty($to['pattern'])) {
+                        $result .= ' ~ ' . $to['pattern'];
+                    }
+                    $result .= "\n";
+                }
+            }
+            $result .= "\n";
+        }
+
+        return mb_substr($result, 0, -1);
+    }
+
+    public function stringToAutofillers($string)
+    {
+        if (is_array($string)) {
+            return $string;
+        }
+
+        $fieldNameToProperty = $this->getServiceLocator()->get('ControllerPluginManager')->get('fieldNameToProperty');
+
+        $result = [];
+        $lines = $this->stringToList($string);
+        $matches = [];
+        $autofillerKey = null;
+        foreach ($lines as $line) {
+            // Start a new autofiller.
+            $first = mb_substr($line, 0, 1);
+            if ($first === '[') {
+                preg_match('~^\[\s*(?<service>[a-zA-Z][a-zA-Z0-9]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))?\s*(?:#\s*(?<variant>[^\]]+))?\s*\]\s*(?:=?\s*(?<label>.*))$~', $line, $matches);
+                if (empty($matches['service'])) {
+                    continue;
+                }
+                $autofillerKey = $matches['service']
+                    . (empty($matches['sub']) ? '' : ':' . $matches['sub'])
+                    . (empty($matches['variant']) ? '' : ' #' . $matches['variant']);
+                $result[$autofillerKey] = [
+                    'service' => $matches['service'],
+                    'sub' => $matches['sub'],
+                    'label' => empty($matches['label']) ? $autofillerKey : $matches['label'],
+                    'mapping' => [],
+                ];
+            } elseif (!$autofillerKey) {
+                // Nothing.
+            } elseif ($first === '?') {
+                $result[$autofillerKey]['query'] = mb_substr($line, 1);
+            } else {
+                // Fill a map of an autofiller.
+                $pos = $first === '~'
+                    ? mb_strpos($line, '=')
+                    : mb_strrpos(strtok($line, '~'), '=');
+                $from = trim(mb_substr($line, 0, $pos));
+                $to = trim(mb_substr($line, $pos + 1));
+                if (!$from || !$to) {
+                    continue;
+                }
+                $to = $fieldNameToProperty($to);
+                if (!$to) {
+                    continue;
+                }
+                $result[$autofillerKey]['mapping'][] = [
+                    'from' => $from,
+                    'to' => array_filter($to, function ($v) {
+                        return !is_null($v);
+                    }),
+                ];
+            }
+        }
+        return $result;
     }
 }
