@@ -393,7 +393,7 @@ $(document).ready(function() {
         $('#resource-values .non-properties .field.autofiller').remove();
 
         var templateSettings = $('#resource-values').data('template-settings');
-        if (!templateSettings.autofillers || !templateSettings.autofillers.length) {
+        if (!templateSettings || !templateSettings.autofillers || !templateSettings.autofillers.length) {
             return;
         }
 
@@ -448,7 +448,13 @@ $(document).ready(function() {
 
     function autofill(values) {
         Object.keys(values).forEach(function(term) {
+            var fields = $('.resource-values.field[data-property-term="' + term + '"]');
             values[term].forEach(function(value) {
+                var field = fields.filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
+                if (!field.length) {
+                    field = makeNewField(term);
+                }
+                field.first().find('.values').append(makeNewValue(term, value.type, value));
             });
         });
     }
