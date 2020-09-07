@@ -399,6 +399,9 @@ class Module extends AbstractModule
                     if (!empty($to['is_public'])) {
                         $result .= ' §' . ($to['is_public'] === 'private' ? 'private' : 'public');
                     }
+                    if (!empty($to['pattern'])) {
+                        $result .= ' ~ ' . $to['pattern'];
+                    }
                     $result .= "\n";
                 }
             }
@@ -443,7 +446,9 @@ class Module extends AbstractModule
                 $result[$autofillerKey]['query'] = mb_substr($line, 1);
             } else {
                 // Fill a map of an autofiller.
-                $pos = mb_strrpos($line, '=');
+                $pos = $first === '~'
+                    ? mb_strpos($line, '=')
+                    : mb_strrpos(strtok($line, '~'), '=');
                 $from = trim(mb_substr($line, 0, $pos));
                 $to = trim(mb_substr($line, $pos + 1));
                 if (!$from || !$to) {

@@ -112,13 +112,34 @@ class Mapper extends AbstractPlugin
         $this->result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         foreach ($this->mapping as $map) {
-            if (!isset($input[$map['from']])) {
-                continue;
+            $target = $map['to'];
+            if (!empty($target['replace'])) {
+                $target['replace'] = array_fill_keys($target['replace'], '');
+                foreach ($target['replace'] as $query => &$value) {
+                    if ($query === '__value__') {
+                        continue;
+                    }
+                    $query = mb_substr($query, 1, -1);
+                    if (isset($input[$query])) {
+                        $value = $input[$query];
+                    }
+                }
+                unset($value);
+            }
+
+            $query = $map['from'];
+            if ($query === '~') {
+                $value = '';
+            } else {
+                if (!isset($input[$query])) {
+                    continue;
+                }
+                $value = $input[$query];
             }
 
             $this->simpleExtract
-                ? $this->simpleExtract($input[$map['from']], $map['to'], $map['from'])
-                : $this->appendValueToTarget($input[$map['from']], $map['to']);
+                ? $this->simpleExtract($value, $target, $query)
+                : $this->appendValueToTarget($value, $target);
         }
 
         return $this->result->exchangeArray([]);
@@ -157,19 +178,41 @@ class Mapper extends AbstractPlugin
         }
 
         foreach ($this->mapping as $map) {
-            $query = $map['from'];
             $target = $map['to'];
-            $nodeList = $xpath->query($query);
-            if (!$nodeList || !$nodeList->length) {
-                continue;
+            if (!empty($target['replace'])) {
+                $target['replace'] = array_fill_keys($target['replace'], '');
+                foreach ($target['replace'] as $query => &$value) {
+                    if ($query === '{__value__}') {
+                        continue;
+                    }
+                    $nodeList = $xpath->query(mb_substr($query, 1, -1));
+                    if (!$nodeList || !$nodeList->length) {
+                        continue;
+                    }
+                    $value = $nodeList->item(0)->nodeValue;
+                }
+                unset($value);
             }
 
-            // The answer has many nodes.
-            foreach ($nodeList as $node) {
+            $query = $map['from'];
+            if ($query === '~') {
+                $value = '';
                 $this->simpleExtract
-                    ? $this->simpleExtract($node->nodeValue, $target, $query)
-                    : $this->appendValueToTarget($node->nodeValue, $target);
+                    ? $this->simpleExtract($value, $target, $query)
+                    : $this->appendValueToTarget($value, $target);
+            } else {
+                $nodeList = $xpath->query($query);
+                if (!$nodeList || !$nodeList->length) {
+                    continue;
+                }
+                // The answer has many nodes.
+                foreach ($nodeList as $node) {
+                    $this->simpleExtract
+                        ? $this->simpleExtract($node->nodeValue, $target, $query)
+                        : $this->appendValueToTarget($node->nodeValue, $target);
+                }
             }
+
         }
 
         return $this->result->exchangeArray([]);
@@ -187,6 +230,13 @@ class Mapper extends AbstractPlugin
     protected function appendValueToTarget($value, $target)
     {
         $v = $target;
+        unset($v['field'], $v['pattern'], $v['replace']);
+
+        if (!empty($target['pattern'])) {
+            $target['replace']['{__value__}'] = $value;
+            $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+        }
+
         switch ($v['type']) {
             default:
             case 'literal':
@@ -250,6 +300,8 @@ class Mapper extends AbstractPlugin
 
     /**
      * Recursive helper to flat an array with separator ".".
+     *
+     * @todo Find a way to keep the last level of array (list of subjects…).
      *
      * @param array $array
      * @param array $flatArray
