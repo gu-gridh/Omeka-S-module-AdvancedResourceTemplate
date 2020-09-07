@@ -9,10 +9,10 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Laminas\EventManager\Event;
-use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\Form\Element;
-use Laminas\Mvc\MvcEvent;
+use Zend\EventManager\Event;
+use Zend\EventManager\SharedEventManagerInterface;
+use Zend\Form\Element;
+use Zend\Mvc\MvcEvent;
 use Omeka\Form\Element\ArrayTextarea;
 
 class Module extends AbstractModule

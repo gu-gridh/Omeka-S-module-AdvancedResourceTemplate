@@ -3,7 +3,7 @@
 namespace AdvancedResourceTemplate\Controller\Admin;
 
 use Doctrine\ORM\EntityManager;
-use Laminas\Mvc\Controller\AbstractRestfulController;
+use Zend\Mvc\Controller\AbstractRestfulController;
 use Omeka\View\Model\ApiJsonModel;
 
 class IndexController extends AbstractRestfulController
