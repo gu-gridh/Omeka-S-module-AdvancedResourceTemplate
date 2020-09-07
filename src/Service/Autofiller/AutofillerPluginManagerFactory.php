@@ -5,7 +5,7 @@ namespace AdvancedResourceTemplate\Service\Autofiller;
 use AdvancedResourceTemplate\Autofiller\AutofillerPluginManager;
 use Interop\Container\ContainerInterface;
 use Omeka\Service\Exception;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class AutofillerPluginManagerFactory implements FactoryInterface
 {

@@ -5,7 +5,7 @@ namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 use ArrayObject;
 use DOMDocument;
 use DOMXPath;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
  * Extract data from a string with a mapping.

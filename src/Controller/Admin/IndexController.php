@@ -4,8 +4,8 @@ namespace AdvancedResourceTemplate\Controller\Admin;
 
 use AdvancedResourceTemplate\Autofiller\AutofillerPluginManager as AutofillerManager;
 use Doctrine\ORM\EntityManager;
-use Zend\Http\Response as HttpResponse;
-use Zend\Mvc\Controller\AbstractRestfulController;
+use Laminas\Http\Response as HttpResponse;
+use Laminas\Mvc\Controller\AbstractRestfulController;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Stdlib\Message;
@@ -139,7 +139,7 @@ class IndexController extends AbstractRestfulController
     }
 
     /**
-     * @return \AdvancedResourceTemplate\Autofiller\AutofillerInterface|\Zend\Http\Response
+     * @return \AdvancedResourceTemplate\Autofiller\AutofillerInterface|\Laminas\Http\Response
      */
     protected function requestToAutofiller()
     {
@@ -204,7 +204,7 @@ class IndexController extends AbstractRestfulController
      * @param string|array $message
      * @param int $statusCode
      * @param array $errors
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     protected function returnError($message, $statusCode = HttpResponse::STATUS_CODE_400, array $errors = null)
     {
