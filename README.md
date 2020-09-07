@@ -11,6 +11,7 @@ resources:
 - auto-completion with existing values,
 - locked values,
 - language selection and pre-selection,
+- creation of a new resource during edition of a resource,
 - autofill multiple fields with external data ([IdRef] and [Geonames]).
 
 
@@ -90,12 +91,12 @@ countryName = dcterms:isPartOf
 
 Note that [geonames] requires a user name (that should be the one of your
 institution, but it can be "demo", "google", or "johnsmith"). Test it on
-[http://api.geonames.org/searchJSON?username=demo].
+https://api.geonames.org/searchJSON?username=demo.
 
 More largely, you can append any arguments to the query sent to the remote
 service: simply append them url encoded on a line beginning with `?`.
 
-It’s also possible to format the values: simply append use `~` to indicate the
+It’s also possible to format the values: simply append `~` to indicate the
 pattern to use and `{__value__}` to set the value from the source. For a complex
 pattern, you can use any source path between `{` and `}`.
 
