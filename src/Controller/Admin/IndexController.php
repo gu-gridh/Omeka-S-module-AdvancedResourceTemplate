@@ -178,8 +178,11 @@ class IndexController extends AbstractRestfulController
             )), HttpResponse::STATUS_CODE_501);
         }
 
+        $serviceOptions = $serviceMapping;
+        unset($serviceOptions['mapping']);
+
         return $this->autofillerManager
-            ->get($serviceMapping['service'], ['sub' => $serviceMapping['sub']])
+            ->get($serviceMapping['service'], $serviceOptions)
             ->setMapping($serviceMapping['mapping']);
     }
 

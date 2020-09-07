@@ -88,7 +88,12 @@ class IdRefAutofiller extends AbstractAutofiller
         } else {
             $query = urlencode($query);
         }
+        if (!empty($this->options['query'])) {
+            $query .= '&' . $this->options['query'];
+        }
+
         $url = $this->types[$service]['url'] . $query;
+
 
         $response = $this->httpClient->setUri($url)->send();
         if (!$response->isSuccess()) {
@@ -131,7 +136,7 @@ class IdRefAutofiller extends AbstractAutofiller
                 'value' => $value,
                 'data' => $metadata,
             ];
-            if (++$total > $maxResult) {
+            if (++$total >= $maxResult) {
                 break;
             }
         }

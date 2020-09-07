@@ -377,25 +377,30 @@ class Module extends AbstractModule
         foreach ($autofillers as $key => $autofiller) {
             $label = isset($autofiller['label']) && $autofiller['label'] !== $key ? $autofiller['label'] : '';
             $result .= $label ? "[$key] = $label\n" : "[$key]\n";
-            foreach ($autofiller['mapping'] as $map) {
-                $to = &$map['to'];
-                if (!empty($map['from'])) {
-                    $result .= $map['from'];
+            if (!empty($autofiller['query'])) {
+                $result .= '?' . $autofiller['query'] . "\n";
+            }
+            if (!empty($autofiller['mapping'])) {
+                foreach ($autofiller['mapping'] as $map) {
+                    $to = &$map['to'];
+                    if (!empty($map['from'])) {
+                        $result .= $map['from'];
+                    }
+                    $result .= ' = ';
+                    if (!empty($to['field'])) {
+                        $result .= $to['field'];
+                    }
+                    if (!empty($to['type'])) {
+                        $result .= ' ^^' . $to['type'];
+                    }
+                    if (!empty($to['@language'])) {
+                        $result .= ' @' . $to['@language'];
+                    }
+                    if (!empty($to['is_public'])) {
+                        $result .= ' §' . ($to['is_public'] === 'private' ? 'private' : 'public');
+                    }
+                    $result .= "\n";
                 }
-                $result .= ' = ';
-                if (!empty($to['field'])) {
-                    $result .= $to['field'];
-                }
-                if (!empty($to['type'])) {
-                    $result .= ' ^^' . $to['type'];
-                }
-                if (!empty($to['@language'])) {
-                    $result .= ' @' . $to['@language'];
-                }
-                if (!empty($to['is_public'])) {
-                    $result .= ' §' . ($to['is_public'] === 'private' ? 'private' : 'public');
-                }
-                $result .= "\n";
             }
             $result .= "\n";
         }
@@ -417,8 +422,9 @@ class Module extends AbstractModule
         $autofillerKey = null;
         foreach ($lines as $line) {
             // Start a new autofiller.
-            if (mb_substr($line, 0, 1) === '[') {
-                preg_match('~^\[\s*(?<service>[a-zA-Z][a-zA-Z0-9]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))\s*(?:#\s*(?<variant>[^\[\]#]+))?\s*\]\s*(?:=?\s*(?<label>.+)?)$~', $line, $matches);
+            $first = mb_substr($line, 0, 1);
+            if ($first === '[') {
+                preg_match('~^\[\s*(?<service>[a-zA-Z][a-zA-Z0-9]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))?\s*(?:#\s*(?<variant>[^\]]+))?\s*\]\s*(?:=?\s*(?<label>.*))$~', $line, $matches);
                 if (empty($matches['service'])) {
                     continue;
                 }
@@ -431,27 +437,29 @@ class Module extends AbstractModule
                     'label' => empty($matches['label']) ? $autofillerKey : $matches['label'],
                     'mapping' => [],
                 ];
-                continue;
             } elseif (!$autofillerKey) {
-                continue;
+                // Nothing.
+            } elseif ($first === '?') {
+                $result[$autofillerKey]['query'] = mb_substr($line, 1);
+            } else {
+                // Fill a map of an autofiller.
+                $pos = mb_strrpos($line, '=');
+                $from = trim(mb_substr($line, 0, $pos));
+                $to = trim(mb_substr($line, $pos + 1));
+                if (!$from || !$to) {
+                    continue;
+                }
+                $to = $fieldNameToProperty($to);
+                if (!$to) {
+                    continue;
+                }
+                $result[$autofillerKey]['mapping'][] = [
+                    'from' => $from,
+                    'to' => array_filter($to, function ($v) {
+                        return !is_null($v);
+                    }),
+                ];
             }
-            // Fill a map of an autofiller.
-            $pos = mb_strrpos($line, '=');
-            $from = trim(mb_substr($line, 0, $pos));
-            $to = trim(mb_substr($line, $pos + 1));
-            if (!$from || !$to) {
-                continue;
-            }
-            $to = $fieldNameToProperty($to);
-            if (!$to) {
-                continue;
-            }
-            $result[$autofillerKey]['mapping'][] = [
-                'from' => $from,
-                'to' => array_filter($to, function ($v) {
-                    return !is_null($v);
-                }),
-            ];
         }
         return $result;
     }
