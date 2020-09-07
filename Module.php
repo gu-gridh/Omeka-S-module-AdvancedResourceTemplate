@@ -54,6 +54,17 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
+            \Omeka\Form\SettingForm::class,
+            'form.add_elements',
+            [$this, 'handleMainSettings']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Form\SettingForm::class,
+            'form.add_input_filters',
+            [$this, 'handleMainSettingsFilters']
+        );
+
+        $sharedEventManager->attach(
             \Omeka\Form\ResourceForm::class,
             'form.add_elements',
             [$this, 'fixResourceForm']
@@ -130,11 +141,48 @@ class Module extends AbstractModule
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
     }
 
+    public function handleMainSettings(Event $event)
+    {
+        parent::handleMainSettings($event);
+
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        $autofillers = $settings->get('advancedresourcetemplate_autofillers') ?: [];
+        $value = $this->autofillersToString($autofillers);
+
+        $event
+            ->getTarget()
+            ->get('advancedresourcetemplate')
+            ->get('advancedresourcetemplate_autofillers')
+            ->setValue($value);
+    }
+
+    public function handleMainSettingsFilters(Event $event)
+    {
+        $event->getParam('inputFilter')
+            ->get('advancedresourcetemplate')
+            ->add([
+                'name' => 'advancedresourcetemplate_autofillers',
+                'required' => false,
+                'filters' => [
+                    [
+                        'name' => \Zend\Filter\Callback::class,
+                        'options' => [
+                            'callback' => [$this, 'stringToAutofillers'],
+                        ],
+                    ],
+                ],
+            ]);
+    }
+
     public function addResourceTemplateFormElements(Event $event)
     {
         $services = $this->getServiceLocator();
-        $autofillers = $services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []);
-        $autofillers = array_combine($autofillers, 'label', 'label');
+        $autofillers = [];
+        foreach ($services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []) as $key => $value) {
+            $autofillers[$key] = $value['label'] ?: $key;
+        }
 
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
@@ -191,16 +239,16 @@ class Module extends AbstractModule
                 'type' => Element\Select::class,
                 'options' => [
                     'label' => 'Autofillers', // @translate
-                    'info' => 'List of autofillers to use for this template.', // @translate
-                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate',
-                    'option_values' => $autofillers,
+                    'value_options' => $autofillers,
                     'empty_option' => count($autofillers)
                         ? ''
                         : $services->get('MvcTranslator')->translate('No configured autofiller.'), // @translate
                 ],
                 'attributes' => [
                     'id' => 'autofillers',
+                    'multiple' => true,
                     'class' => 'chosen-select',
+                    'data-placeholder' => 'Select autofillers…', // @translate
                 ],
             ]);
     }
@@ -306,5 +354,94 @@ class Module extends AbstractModule
                     'value' => 'template',
                 ],
             ]);
+    }
+
+    protected function autofillersToString($autofillers)
+    {
+        if (is_string($autofillers)) {
+            return $autofillers;
+        }
+
+        $result = '';
+        foreach ($autofillers as $key => $autofiller) {
+            $label = isset($autofiller['label']) && $autofiller['label'] !== $key ? $autofiller['label'] : '';
+            $result .= $label ? "[$key] = $label\n" : "[$key]\n";
+            foreach ($autofiller['mapping'] as $map) {
+                $to = &$map['to'];
+                if (!empty($map['from'])) {
+                    $result .= $map['from'];
+                }
+                $result .= ' = ';
+                if (!empty($to['field'])) {
+                    $result .= $to['field'];
+                }
+                if (!empty($to['type'])) {
+                    $result .= ' ^^' . $to['type'];
+                }
+                if (!empty($to['@language'])) {
+                    $result .= ' @' . $to['@language'];
+                }
+                if (!empty($to['is_public'])) {
+                    $result .= ' §' . ($to['is_public'] === 'private' ? 'private' : 'public');
+                }
+                $result .= "\n";
+            }
+            $result .= "\n";
+        }
+
+        return mb_substr($result, 0, -1);
+    }
+
+    public function stringToAutofillers($string)
+    {
+        if (is_array($string)) {
+            return $string;
+        }
+
+        $fieldNameToProperty = $this->getServiceLocator()->get('ControllerPluginManager')->get('fieldNameToProperty');
+
+        $result = [];
+        $lines = $this->stringToList($string);
+        $matches = [];
+        $autofillerKey = null;
+        foreach ($lines as $line) {
+            // Start a new autofiller.
+            if (mb_substr($line, 0, 1) === '[') {
+                preg_match('~^\[\s*(?<service>[a-zA-Z][a-zA-Z0-9]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))\s*(?:#\s*(?<variant>[^\[\]#]+))?\s*\]\s*(?:=?\s*(?<label>.+)?)$~', $line, $matches);
+                if (empty($matches['service'])) {
+                    continue;
+                }
+                $autofillerKey = $matches['service']
+                    . (empty($matches['sub']) ? '' : ':' . $matches['sub'])
+                    . (empty($matches['variant']) ? '' : ' #' . $matches['variant']);
+                $result[$autofillerKey] = [
+                    'service' => $matches['service'],
+                    'sub' => $matches['sub'],
+                    'label' => empty($matches['label']) ? $autofillerKey : $matches['label'],
+                    'mapping' => [],
+                ];
+                continue;
+            } elseif (!$autofillerKey) {
+                continue;
+            }
+            // Fill a map of an autofiller.
+            $pos = mb_strrpos($line, '=');
+            $from = trim(mb_substr($line, 0, $pos));
+            $to = trim(mb_substr($line, $pos + 1));
+            if (!$from || !$to) {
+                continue;
+            }
+            $to = $fieldNameToProperty($to);
+            if (!$to) {
+                continue;
+            }
+            $result[$autofillerKey]['mapping'][] = [
+                'from' => $from,
+                'to' => array_filter($to, function ($v) {
+                    return !is_null($v);
+                }),
+            ];
+        }
+        return $result;
     }
 }

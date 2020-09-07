@@ -18,6 +18,11 @@ return [
             dirname(__DIR__) . '/view',
         ],
     ],
+    'form_elements' => [
+        'invokables' => [
+            Form\SettingsFieldset::class => Form\SettingsFieldset::class,
+        ],
+    ],
     'controllers' => [
         'factories' => [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
@@ -73,5 +78,8 @@ return [
         'New item set', // @translate
     ],
     'advancedresourcetemplate' => [
+        'settings' => [
+            'advancedresourcetemplate_autofillers' => [],
+        ],
     ],
 ];
