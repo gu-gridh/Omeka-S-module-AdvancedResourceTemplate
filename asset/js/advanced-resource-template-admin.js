@@ -162,6 +162,106 @@ $(document).ready(function() {
     }
 
     /**
+     * Make a new property field with data stored in the property selector.
+     *
+     * Copy of resource-form.js, not available here.
+     * @see resource-form.js makeNewField()
+     */
+    var makeNewField = function(property, dataTypes) {
+        // Prepare data type name of the field.
+        if (!dataTypes || dataTypes.length < 1) {
+            dataTypes = $('#properties').data('default-data-types').split(',');
+        }
+
+        // Sort out whether property is the LI that holds data, or the id.
+        var propertyLi, propertyId;
+        switch (typeof property) {
+            case 'object':
+                propertyLi = property;
+                propertyId = propertyLi.data('property-id');
+            break;
+
+            case 'number':
+                propertyId = property;
+                propertyLi = $('#property-selector').find("li[data-property-id='" + propertyId + "']");
+            break;
+
+            case 'string':
+                propertyLi = $('#property-selector').find("li[data-property-term='" + property + "']");
+                propertyId = propertyLi.data('property-id');
+            break;
+
+            default:
+                return null;
+        }
+
+        var term = propertyLi.data('property-term');
+        var field = $('.resource-values.field.template').clone(true);
+        field.removeClass('template');
+        field.find('.field-label').text(propertyLi.data('child-search')).attr('id', 'property-' + propertyId + '-label');
+        field.find('.field-term').text(term);
+        field.find('.field-description').prepend(propertyLi.find('.field-comment').text());
+        field.data('property-term', term);
+        field.data('property-id', propertyId);
+        field.data('data-types', dataTypes.join(','));
+        // Adding the attr because selectors need them to find the correct field
+        // and count when adding more.
+        field.attr('data-property-term', term);
+        field.attr('data-property-id', propertyId);
+        field.attr('data-data-types', dataTypes.join(','));
+        field.attr('aria-labelledby', 'property-' + propertyId + '-label');
+        $('div#properties').append(field);
+        return field;
+    };
+
+    /**
+     * Make a new value.
+     *
+     * Copy of resource-form.js, not available here.
+     * @see resource-form.js makeNewValue()
+     */
+    var makeNewValue = function(term, dataType, valueObj) {
+        var field = $('.resource-values.field[data-property-term="' + term + '"]');
+        // Get the value node from the templates.
+        if (!dataType || typeof dataType !== 'string') {
+            dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
+        }
+        var fieldForDataType = field.filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; });
+        field = fieldForDataType.length ? fieldForDataType.first() : field.first();
+        var value = $('.value.template[data-data-type="' + dataType + '"]').clone(true);
+        value.removeClass('template');
+        value.data('term', term);
+
+        // Get and display the value's visibility.
+        var isPublic = true; // values are public by default
+        if (field.hasClass('private') || (valueObj && false === valueObj['is_public'])) {
+            isPublic = false;
+        }
+        var valueVisibilityButton = value.find('a.value-visibility');
+        if (isPublic) {
+            valueVisibilityButton.removeClass('o-icon-private').addClass('o-icon-public');
+            valueVisibilityButton.attr('aria-label', Omeka.jsTranslate('Make private'));
+            valueVisibilityButton.attr('title', Omeka.jsTranslate('Make private'));
+        } else {
+            valueVisibilityButton.removeClass('o-icon-public').addClass('o-icon-private');
+            valueVisibilityButton.attr('aria-label', Omeka.jsTranslate('Make public'));
+            valueVisibilityButton.attr('title', Omeka.jsTranslate('Make public'));
+        }
+        // Prepare the value node.
+        var valueLabelID = 'property-' + field.data('property-id') + '-label';
+        value.find('input.is_public')
+            .val(isPublic ? 1 : 0);
+        value.find('span.label')
+            .attr('id', valueLabelID);
+        value.find('textarea.input-value')
+            .attr('aria-labelledby', valueLabelID);
+        value.attr('aria-labelledby', valueLabelID);
+        $(document).trigger('o:prepare-value', [dataType, value, valueObj]);
+
+        return value;
+    };
+
+    /**
      * Fill a new value, that can be empty.
      *
      * @see makeNewValue() in resource-form.js: the same, except that the empty
