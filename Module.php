@@ -121,7 +121,6 @@ class Module extends AbstractModule
         $view->headLink()->appendStylesheet($assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
         $view->headScript()
             ->appendScript(sprintf('var baseUrl = %s;', json_encode($view->basePath('/'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
-            ->appendScript(sprintf('var autocompleteUrl = %s;', json_encode($view->url('admin/default', ['controller' => 'autocomplete']), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
             ->appendFile($assetUrl('vendor/jquery-autocomplete/jquery.autocomplete.min.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer'])
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
     }

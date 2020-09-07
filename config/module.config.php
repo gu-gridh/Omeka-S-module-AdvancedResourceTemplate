@@ -8,10 +8,6 @@ return [
             dirname(__DIR__) . '/view',
         ],
     ],
-    'form_elements' => [
-        'invokables' => [
-        ],
-    ],
     'controllers' => [
         'factories' => [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
@@ -21,14 +17,14 @@ return [
         'routes' => [
             'admin' => [
                 'child_routes' => [
-                    'adv-res-temp' => [
+                    'values' => [
                         'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/autocomplete',
+                            'route' => '/values',
                             'defaults' => [
                                 '__NAMESPACE__' => 'AdvancedResourceTemplate\Controller\Admin',
                                 'controller' => 'Index',
-                                'action' => 'browse',
+                                'action' => 'values',
                             ],
                         ],
                     ],
