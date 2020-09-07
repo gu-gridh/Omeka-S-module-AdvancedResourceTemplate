@@ -396,6 +396,61 @@ $(document).ready(function() {
         if (!templateSettings.autofillers || !templateSettings.autofillers.length) {
             return;
         }
+
+        templateSettings.autofillers.forEach(function(autofillerName) {
+            $.get(baseUrl + 'admin/autofiller/settings', {
+                    service: autofillerName,
+                    template: $('#resource-template-select').val(),
+                })
+                .done(function(data) {
+                    var autofiller = data.data.autofiller;
+                    var autofillerId = 'autofiller-' + autofillerName.replace(':', '-');
+                    $('#resource-values .non-properties').append(`
+<div class="field autofiller">
+    <div class="field-meta">
+        <label for="autofiller-input">${autofiller.label}</label>
+    </div>
+    <div class="inputs">
+        <input type="text" class="autofiller" id="${autofillerId}">
+    </div>
+</div>`);
+                    var autofillerField = $('#' + autofillerId);
+                    autofillerField.autocomplete({
+                        serviceUrl: baseUrl + 'admin/autofiller',
+                        dataType: 'json',
+                        maxHeight: 600,
+                        paramName: 'q',
+                        params: {
+                            service: autofillerName,
+                            template: $('#resource-template-select').val(),
+                        },
+                        transformResult: function(response) {
+                            return response.data;
+                        },
+                        onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+                            // If there is no response, the request is aborted for autocompletion.
+                            if (jqXHR.responseJSON) {
+                                if (jqXHR.responseJSON.status === 'fail') {
+                                    alert(jqXHR.responseJSON.data.suggestions);
+                                } else {
+                                    alert(jqXHR.responseJSON.message);
+                                }
+                                autofillerField.autocomplete().dispose();
+                            }
+                        },
+                        onSelect: function (suggestion) {
+                            autofill(suggestion.data);
+                        },
+                    });
+                });
+        });
+    }
+
+    function autofill(values) {
+        Object.keys(values).forEach(function(term) {
+            values[term].forEach(function(value) {
+            });
+        });
     }
 
     function initAutocomplete() {
@@ -448,6 +503,7 @@ $(document).ready(function() {
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
         });
+
         if (!$('#resource-values').data('locked-ready')) {
             fields.each(function(index, field) {
                 prepareFieldLocked($(field));
