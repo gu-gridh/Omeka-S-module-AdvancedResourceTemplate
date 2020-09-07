@@ -312,18 +312,29 @@ $(document).ready(function() {
     }
 
     function initAutocomplete() {
-        var searchField = $(this);
-        searchField.autocomplete({
+        var autocompleteField = $(this);
+        autocompleteField.autocomplete({
             serviceUrl: baseUrl + 'admin/values',
             dataType: 'json',
             maxHeight: 600,
             paramName: 'q',
             params: {
-                prop: searchField.closest('.resource-values.field').data('property-id'),
-                type: searchField.closest('.resource-values.field').data('autocomplete'),
+                prop: autocompleteField.closest('.resource-values.field').data('property-id'),
+                type: autocompleteField.closest('.resource-values.field').data('autocomplete'),
             },
             transformResult: function(response) {
                 return response.data;
+            },
+            onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+                // If there is no response, the request is aborted for autocompletion.
+                if (jqXHR.responseJSON) {
+                    if (jqXHR.responseJSON.status === 'fail') {
+                        alert(jqXHR.responseJSON.data.suggestions);
+                    } else {
+                        alert(jqXHR.responseJSON.message);
+                    }
+                    autofillerField.autocomplete().dispose();
+                }
             },
         });
     }
