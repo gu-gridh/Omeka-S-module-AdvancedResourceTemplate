@@ -62,6 +62,18 @@ return [
                                 'action' => 'autofiller',
                             ],
                         ],
+                        'may_terminate' => true,
+                        'child_routes' => [
+                            'settings' => [
+                                'type' => \Zend\Router\Http\Literal::class,
+                                'options' => [
+                                    'route' => '/settings',
+                                    'defaults' => [
+                                        'action' => 'autofillerSettings',
+                                    ],
+                                ],
+                            ],
+                        ],
                     ],
                 ],
             ],

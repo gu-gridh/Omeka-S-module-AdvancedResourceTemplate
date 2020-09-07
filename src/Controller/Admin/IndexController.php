@@ -88,6 +88,62 @@ class IndexController extends AbstractRestfulController
             return $this->returnError(['suggestions' => $this->translate('The query is empty.')]); // @translate
         }
 
+        /** @var \AdvancedResourceTemplate\Autofiller\AutofillerInterface $autofiller */
+        $autofiller = $this->requestToAutofiller();
+        if ($autofiller instanceof HttpResponse) {
+            return $autofiller;
+        }
+
+        $lang = $this->userSettings()->get('locale')
+            ?: ($this->settings()->get('locale')
+                ?: $this->viewHelpers()->get('translate')->getTranslatorTextDomain()->getDelegatedTranslator()->getLocale());
+
+        $results = $autofiller
+            ->getResults($q, $lang);
+
+        if (is_null($results)) {
+            return $this->returnError($this->translate(new Message(
+                'The remote service "%s" seems unavailable.', // @translate
+                $autofiller->getLabel()
+            )), HttpResponse::STATUS_CODE_502);
+        }
+
+        return new ApiJsonModel([
+            'status' => 'success',
+            'data' => [
+                'suggestions' => $results,
+            ],
+        ]);
+    }
+
+    public function autofillerSettingsAction()
+    {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
+        /** @var \AdvancedResourceTemplate\Autofiller\AutofillerInterface $autofiller */
+        $autofiller = $this->requestToAutofiller();
+        if ($autofiller instanceof HttpResponse) {
+            return $autofiller;
+        }
+
+        return new ApiJsonModel([
+            'status' => 'success',
+            'data' => [
+                'autofiller' => [
+                    'label' => $autofiller->getLabel(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @return \AdvancedResourceTemplate\Autofiller\AutofillerInterface|\Zend\Http\Response
+     */
+    protected function requestToAutofiller()
+    {
+        $query = $this->params()->fromQuery();
         if (empty($query['service'])) {
             return $this->returnError(['suggestions' => $this->translate('The service is empty.')]); // @translate
         }
@@ -122,30 +178,9 @@ class IndexController extends AbstractRestfulController
             )), HttpResponse::STATUS_CODE_501);
         }
 
-        /** @var \AdvancedResourceTemplate\Autofiller\AutofillerInterface $autofiller */
-        $autofiller = $this->autofillerManager->get($serviceMapping['service'], ['sub' => $serviceMapping['sub']]);
-
-        $lang = $this->userSettings()->get('locale')
-            ?: ($this->settings()->get('locale')
-                ?: $this->viewHelpers()->get('translate')->getTranslatorTextDomain()->getDelegatedTranslator()->getLocale());
-
-        $results = $autofiller
-            ->setMapping($serviceMapping['mapping'])
-            ->getResults($q, $lang);
-
-        if (is_null($results)) {
-            return $this->returnError($this->translate(new Message(
-                'The remote service "%s" seems unavailable.', // @translate
-                $autofiller->getLabel()
-            )), HttpResponse::STATUS_CODE_502);
-        }
-
-        return new ApiJsonModel([
-            'status' => 'success',
-            'data' => [
-                'suggestions' => $results,
-            ],
-        ]);
+        return $this->autofillerManager
+            ->get($serviceMapping['service'], ['sub' => $serviceMapping['sub']])
+            ->setMapping($serviceMapping['mapping']);
     }
 
     protected function prepareServiceMapping(ResourceTemplateRepresentation $template, $service)
