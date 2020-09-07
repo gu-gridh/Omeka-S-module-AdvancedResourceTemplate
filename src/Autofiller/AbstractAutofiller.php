@@ -47,9 +47,16 @@ abstract class AbstractAutofiller implements AutofillerInterface
 
     public function getLabel()
     {
-        return empty($this->options['sub'])
-            ? $this->label
-            : sprintf('%1$s: %2$s', $this->label, $this->options['sub']); // @translate
+        if (empty($this->options['sub'])) {
+            return $this->label;
+        }
+        return sprintf(
+            '%1$s: %2$s', // @translate
+            $this->label,
+            is_array($this->options['sub']) && $this->options['sub']['label']
+                ? $this->options['sub']['label']
+                : $this->options['sub']
+        );
     }
 
     public function setMapping(array $mapping)

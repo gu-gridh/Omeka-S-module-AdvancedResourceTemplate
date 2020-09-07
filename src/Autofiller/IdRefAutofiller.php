@@ -6,15 +6,79 @@ class IdRefAutofiller extends AbstractAutofiller
 {
     protected $label = 'IdRef'; // @translate
 
+    /**
+     * @see \ValueSuggest\Service\IdRefDataTypeFactory::types
+     * @link http://documentation.abes.fr/aideidrefdeveloppeur/index.html#presentation
+     *
+     * @todo Supprimer "fl" et traiter directement le json (plus rapide mais moins complet).
+     *
+     * Tri par pertinence par défaut.
+     */
+    protected $types = [
+        'idref' => [
+            'label' => 'IdRef', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=0&rows=30&indent=on&fl=id,ppn_z,affcourt_r&q=all%3A',
+        ],
+        'idref:person' => [
+            'label' => 'IdRef: Person names', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=persname_t%3A',
+        ],
+        'idref:corporation' => [
+            'label' => 'IdRef: Collectivities', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=corpname_t%3A',
+        ],
+        'idref:conference' => [
+            'label' => 'IdRef: Conferences', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=conference_t%3A',
+        ],
+        'idref:subject' => [
+            'label' => 'IdRef: Subjects', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=subjectheading_t%3A',
+        ],
+        'idref:rameau' => [
+            'label' => 'IdRef: Subjects Rameau', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=recordtype_z%3Ar%20AND%20subjectheading_t%3A',
+        ],
+        'idref:fmesh' => [
+            'label' => 'IdRef: Subjects F-MeSH', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=recordtype_z%3At%20AND%20subjectheading_t%3A',
+        ],
+        'idref:geo' => [
+            'label' => 'IdRef: Geography', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=geogname_t%3A',
+        ],
+        'idref:family' => [
+            'label' => 'IdRef: Family names', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=famname_t%3A',
+        ],
+        'idref:title' => [
+            'label' => 'IdRef: Uniform titles', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=uniformtitle_t%3A',
+        ],
+        'idref:authorTitle' => [
+            'label' => 'IdRef: Authors-Titles', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=nametitle_t%3A',
+        ],
+        'idref:trademark' => [
+            'label' => 'IdRef: Trademarks', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=trademark_t%3A',
+        ],
+        'idref:ppn' => [
+            'label' => 'IdRef: PPN id', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=ppn_z%3A',
+        ],
+        'idref:library' => [
+            'label' => 'IdRef: Library registry (RCR)', // @translate
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_r&q=rcr_t%3A',
+        ],
+    ];
+
     public function getResults($query, $lang = null)
     {
         $maxResult = 12;
 
-        $sub = $this->options['sub'] ?? null;
-        $urls = [
-            'person' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=persname_t%3A',
-        ];
-        if (empty($urls[$sub])) {
+        $service = empty($this->options['sub']) ? 'idref' : 'idref:' . $this->options['sub'];
+        if (empty($this->types[$service])) {
             return null;
         }
 
@@ -24,7 +88,7 @@ class IdRefAutofiller extends AbstractAutofiller
         } else {
             $query = urlencode($query);
         }
-        $url = $urls[$sub] . $query;
+        $url = $this->types[$service]['url'] . $query;
 
         $response = $this->httpClient->setUri($url)->send();
         if (!$response->isSuccess()) {
