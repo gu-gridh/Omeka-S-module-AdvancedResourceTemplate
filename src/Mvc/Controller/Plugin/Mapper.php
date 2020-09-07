@@ -261,11 +261,15 @@ class Mapper extends AbstractPlugin
 
     protected function normalizeMapping(array $mapping)
     {
+        $translate = $this->getController()->plugin('translate');
         foreach ($mapping as &$map) {
             $to = &$map['to'];
             $to['property_id'] = $this->mapperHelper->getPropertyId($to['field']);
             if (empty($to['type'])) {
                 $to['type'] = 'literal';
+            }
+            if (empty($to['property_label'])) {
+                $to['property_label'] = $translate($this->mapperHelper->getPropertyLabel($to['field']));;
             }
         }
         return $mapping;

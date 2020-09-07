@@ -449,6 +449,19 @@ $(document).ready(function() {
                                 autofillerField.autocomplete().dispose();
                             }
                         },
+                        beforeRender: function (container, suggestions) {
+                            container.children().each(function(index) {
+                                if (Object.keys(suggestions[index].data).length) {
+                                    var info = $(this).append('<div class="suggest-info autofill"><dl></dl></div>').find('.suggest-info dl');
+                                    $.each(suggestions[index].data, function(term, value) {
+                                        info.append(`<dt>${value[0].property_label ? value[0].property_label : term }</dt>`);
+                                        value.forEach(function(val) {
+                                            info.append(`<dd>${typeof val['@value'] === 'undefined' || String(val['@value']) && !String(val['@value']).length ? val['@id'] : val['@value'] }</dd>`);
+                                        });
+                                    });
+                                }
+                            });
+                        },
                         onSelect: function (suggestion) {
                             autofill(suggestion.data);
                         },

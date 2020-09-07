@@ -32,6 +32,16 @@ a.value-language.no-language {
     border-bottom: 1px solid #000;
 }
 
+.autocomplete-suggestion .suggest-info.autofill {
+    font-size: 0.8rem;
+    margin-left: 6px;
+    color: #666666b0;
+}
+.autocomplete-suggestion .suggest-info.autofill dl {
+    margin-top: 0;
+    margin-bottom: 2px;
+}
+
 body.modal div[role="main"] > h1:first-of-type {
     width: 100%;
 }
