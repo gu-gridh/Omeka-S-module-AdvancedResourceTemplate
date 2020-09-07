@@ -4,6 +4,12 @@ namespace AdvancedResourceTemplate;
 
 return [
     'autofillers' => [
+        'factories' => [
+            Autofiller\IdRefAutofiller::class => Service\Autofiller\AutofillerFactory::class,
+        ],
+        'aliases' => [
+            'idref' => Autofiller\IdRefAutofiller::class,
+        ],
     ],
     'service_manager' => [
         'factories' => [
