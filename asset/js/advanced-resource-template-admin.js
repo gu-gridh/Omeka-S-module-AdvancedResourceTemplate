@@ -417,6 +417,8 @@ $(document).ready(function() {
                     var autofillerField = $('#' + autofillerId);
                     autofillerField.autocomplete({
                         serviceUrl: baseUrl + 'admin/autofiller',
+                        deferRequestBy: 200,
+                        // minChars: 3,
                         dataType: 'json',
                         maxHeight: 600,
                         paramName: 'q',
