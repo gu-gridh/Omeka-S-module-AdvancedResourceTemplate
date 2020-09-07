@@ -31,7 +31,7 @@ class GeonamesAutofiller extends AbstractAutofiller
         }
 
         $response = $this->httpClient
-            ->setUri('https://api.geonames.org/searchJSON')
+            ->setUri('http://api.geonames.org/searchJSON')
             ->setParameterGet($params)
             ->send();
         if (!$response->isSuccess()) {
