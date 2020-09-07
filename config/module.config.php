@@ -23,6 +23,11 @@ return [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
         ],
     ],
+    'controller_plugins' => [
+        'invokables' => [
+            'fieldNameToProperty' => Mvc\Controller\Plugin\FieldNameToProperty::class,
+        ],
+    ],
     'router' => [
         'routes' => [
             'admin' => [
