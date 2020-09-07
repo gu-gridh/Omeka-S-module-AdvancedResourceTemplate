@@ -5,9 +5,11 @@ namespace AdvancedResourceTemplate;
 return [
     'autofillers' => [
         'factories' => [
+            Autofiller\GeonamesAutofiller::class => Service\Autofiller\AutofillerFactory::class,
             Autofiller\IdRefAutofiller::class => Service\Autofiller\AutofillerFactory::class,
         ],
         'aliases' => [
+            'geonames' => Autofiller\GeonamesAutofiller::class,
             'idref' => Autofiller\IdRefAutofiller::class,
         ],
     ],
