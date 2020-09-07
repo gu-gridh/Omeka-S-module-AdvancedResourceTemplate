@@ -390,18 +390,19 @@ $(document).ready(function() {
     // Append the button to create a new resource.
     $(document).on('o:sidebar-content-loaded', 'body.sidebar-open', function(e) {
         var sidebar = $('#select-resource.sidebar');
-        if (sidebar.find('.quick-add-resource').length) {
+        if (sidebar.find('.quick-add-resource').length || !sidebar.find('#sidebar-resource-search').length) {
             return;
         }
         // TODO Determine the resource type in a cleaner way.
-        var resourceType = sidebar.find('#item-results').length ? 'item' : null
-        if (!resourceType) {
+        var resourceType = sidebar.find('#sidebar-resource-search').data('search-url');
+        resourceType = resourceType.substring(resourceType.lastIndexOf('/admin/') + 7, resourceType.lastIndexOf('/sidebar-select'));
+        if (!resourceType || resourceType === 'media') {
             return;
         }
         var button = `<div data-data-type="resource:${resourceType}">
-    <a class="o-icon-${resourceType}s button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType)}</a>
+    <a class="o-icon-${resourceType}s button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
 </div>`;
-        sidebar.find('#item-results .search-nav').after(button)
+        sidebar.find('.search-nav').after(button)
     });
     // Allow to create a new resource in a modal window during edition of another resource.
     $(document).on('click', '.quick-add-resource', function(e) {
