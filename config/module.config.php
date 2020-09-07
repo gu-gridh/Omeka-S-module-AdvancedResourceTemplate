@@ -46,6 +46,9 @@ return [
             ],
         ],
     ],
+    'js_translate_strings' => [
+        'New item', // @translate
+    ],
     'advancedresourcetemplate' => [
     ],
 ];
