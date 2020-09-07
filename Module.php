@@ -19,6 +19,17 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
+    protected function postInstall()
+    {
+        $filepath = __DIR__. '/data/mapping/mappings.ini';
+        if (!file_exists($filepath) || is_file($filepath) || !is_readable($filepath)) {
+            return;
+        }
+        $mapping = $this->stringToAutofillers(file_get_contents($filepath));
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings->set('advancedresourcetemplate_autofillers', $mapping);
+    }
+
     public function onBootstrap(MvcEvent $event)
     {
         parent::onBootstrap($event);

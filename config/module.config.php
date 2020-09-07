@@ -101,6 +101,7 @@ return [
     ],
     'advancedresourcetemplate' => [
         'settings' => [
+            // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
         ],
     ],
