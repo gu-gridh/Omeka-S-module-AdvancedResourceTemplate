@@ -32,6 +32,9 @@ return [
         'invokables' => [
             'fieldNameToProperty' => Mvc\Controller\Plugin\FieldNameToProperty::class,
         ],
+        'factories' => [
+            'mapperHelper' => Service\ControllerPlugin\MapperHelperFactory::class,
+        ],
     ],
     'router' => [
         'routes' => [
