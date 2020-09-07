@@ -10,7 +10,8 @@ resources:
 
 - auto-completion with existing values,
 - locked values,
-- language selection and pre-selection.
+- language selection and pre-selection,
+- autofill multiple fields with external data ([IdRef] and [Geonames]).
 
 
 Installation
@@ -38,18 +39,72 @@ the module to `AdvancedResourceTemplate`, go to the root module, and run:
 composer install --no-dev
 ```
 
-The next times:
-
-```sh
-composer update --no-dev
-```
-
 
 Usage
 -----
 
+### Main usage
+
 Simply update your resource templates with the new options and use them in the
 resource forms.
+
+### Autofilling
+
+For the autofilling, you have to set the mappings inside the main settings, then
+to select it inside the resource template.
+
+The mapping is a simple text specifying the services and the mappings. it uses
+the same format than the modules [Bulk Export], [Bulk Import], and [Bulk Import Files].
+
+For example, if the service returns an xml Marc like for [Colbert], the mapping
+can be a list of XPath and properties with some arguments:
+```
+[idref:person] = IdRef Person
+/record/controlfield[@tag="003"] = dcterms:identifier ^^uri
+/record/datafield[@tag="900"]/subfield[@code="a"] = dcterms:title
+/record/datafield[@tag="200"]/subfield[@code="a"] = foaf:lastName
+/record/datafield[@tag="200"]/subfield[@code="b"] = foaf:firstName
+/record/datafield[@tag="200"]/subfield[@code="f"] = dcterms:date
+/record/datafield[@tag="340"]/subfield[@code="a"] = dcterms:description @fra
+```
+
+The first line contains the key and the label of the mapping, that will be
+listed in the resource template form. Multiple mapping can be appended for
+different services.
+
+You can use the same autofiller with multiple mappings for different purposes:
+append a number to the key (`[idref:person #2]`). If the mapping isn’t available,
+it will be skipped. Don’t change it once defined, else you will have to check
+all resource templates that use it.
+
+For a json service, use the object notation:
+```
+[geonames]
+?username=demo
+toponymName = dcterms:title
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+adminCodes1.ISO3166_2 = dcterms:identifier
+countryName = dcterms:isPartOf
+~ = dcterms:spatial ~ Coordonnées : {lat}/{lng}
+```
+
+Note that [geonames] requires a user name (that should be the one of your
+institution, but it can be "demo", "google", or "johnsmith"). Test it on
+[http://api.geonames.org/searchJSON?username=demo].
+
+More largely, you can append any arguments to the query sent to the remote
+service: simply append them url encoded on a line beginning with `?`.
+
+It’s also possible to format the values: simply append use `~` to indicate the
+pattern to use and `{__value__}` to set the value from the source. For a complex
+pattern, you can use any source path between `{` and `}`.
+
+
+TODO
+----
+
+- [ ] Include all suggesters from module [Value Suggest].
+- [ ] Create a generic mapper.
 
 
 Warning
@@ -108,6 +163,11 @@ Université des Antilles and Université de la Guyane, currently managed with
 [Installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
+[IdRef]: https://www.idref.fr
+[Geonames]: https://www.geonames.org
+[Colbert]: https://www.idref.fr/027274527.xml
+[geonames]: https://www.geonames.org/export/geonames-search.html
+[Value Suggest]: https://github.com/omeka-s-modules/ValueSuggest
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
