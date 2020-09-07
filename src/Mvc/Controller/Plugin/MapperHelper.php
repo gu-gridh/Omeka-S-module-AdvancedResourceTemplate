@@ -211,7 +211,7 @@ class MapperHelper extends AbstractPlugin
     {
         $ids = $this->getResourceClassIds();
         return is_numeric($termOrId)
-            ? (array_search($termOrId, $ids ) ?: null)
+            ? (array_search($termOrId, $ids) ?: null)
             : (array_key_exists($termOrId, $ids) ? $termOrId : null);
     }
 
@@ -294,7 +294,7 @@ class MapperHelper extends AbstractPlugin
     {
         $ids = $this->getResourceTemplateIds();
         return is_numeric($labelOrId)
-            ? (array_search($labelOrId, $ids ) ?: null)
+            ? (array_search($labelOrId, $ids) ?: null)
             : (array_key_exists($labelOrId, $ids) ? $labelOrId : null);
     }
 

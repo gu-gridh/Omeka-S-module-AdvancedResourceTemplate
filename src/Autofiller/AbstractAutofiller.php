@@ -31,11 +31,18 @@ abstract class AbstractAutofiller implements AutofillerInterface
      */
     protected $httpClient;
 
+    /**
+     * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper
+     */
+    protected $mapper;
+
     public function __construct(ServiceLocatorInterface $services, array $options = null)
     {
         $this->services = $services;
         $this->options = $options ?: [];
         $this->httpClient = $services->get('Omeka\HttpClient');
+        $pluginManager = $services->get('ControllerPluginManager');
+        $this->mapper = $pluginManager->get('mapper');
     }
 
     public function getLabel()
