@@ -133,6 +133,20 @@ class MapperHelper extends AbstractPlugin
     }
 
     /**
+     * Get a property label by term or id.
+     *
+     * @param string|int $termOrId
+     * @return string|null
+     */
+    public function getPropertyLabel($termOrId)
+    {
+        $term = $this->getPropertyTerm($termOrId);
+        return $term
+            ? $this->getPropertyLabels()[$term]
+            : null;
+    }
+
+    /**
      * Get all property ids by term.
      *
      * @return array Associative array of ids by term.
@@ -177,6 +191,43 @@ class MapperHelper extends AbstractPlugin
     }
 
     /**
+     * Get all property local labels by term.
+     *
+     * @return array Associative array of labels by term.
+     */
+    public function getPropertyLabels()
+    {
+        static $propertyLabels;
+
+        if (is_array($propertyLabels)) {
+            return $propertyLabels;
+        }
+
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select([
+                'DISTINCT property.id AS id',
+                'CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+                'property.label AS label',
+                // Only the two first selects are needed, but some databases
+                // require "order by" or "group by" value to be in the select.
+                'vocabulary.id',
+                'property.id',
+            ])
+            ->from('property', 'property')
+            ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
+            ->orderBy('vocabulary.id', 'asc')
+            ->addOrderBy('property.id', 'asc')
+            ->addGroupBy('property.id')
+        ;
+        $stmt = $this->connection->executeQuery($qb);
+        // Fetch by key pair is not supported by doctrine 2.0.
+        $propertiyLabels = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $propertiyLabels = array_column($propertiyLabels, 'label', 'term');
+        return $propertiyLabels;
+    }
+
+    /**
      * Check if a string or a id is a resource class.
      *
      * @param string|int $termOrId
@@ -216,7 +267,21 @@ class MapperHelper extends AbstractPlugin
     }
 
     /**
-     * Get all resource classes by term.
+     * Get a resource class label by term or id.
+     *
+     * @param string|int $termOrId
+     * @return string|null
+     */
+    public function getResourceClassLabel($termOrId)
+    {
+        $term = $this->getResourceClassTerm($termOrId);
+        return $term
+            ? $this->getResourceClassLabels()[$term]
+            : null;
+    }
+
+    /**
+     * Get all resource class ids by term.
      *
      * @return array Associative array of ids by term.
      */
@@ -230,7 +295,7 @@ class MapperHelper extends AbstractPlugin
         $qb
             ->select([
                 'DISTINCT resource_class.id AS id',
-                "CONCAT(vocabulary.prefix, ':', resource_class.local_name) AS term",
+                'CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
                 // Only the two first selects are needed, but some databases
                 // require "order by" or "group by" value to be in the select.
                 'vocabulary.id',
@@ -257,6 +322,43 @@ class MapperHelper extends AbstractPlugin
     public function getResourceClassTerms()
     {
         return array_flip($this->getResourceClassIds());
+    }
+
+    /**
+     * Get all resource class labels by term.
+     *
+     * @return array Associative array of ids by term.
+     */
+    public function getResourceClassLabels()
+    {
+        static $resourceClassLabels;
+
+        if (is_array($resourceClassLabels)) {
+            return $resourceClassLabels;
+        }
+
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select([
+                'DISTINCT resource_class.id AS id',
+                'CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
+                'resource_class.label AS label',
+                // Only the two first selects are needed, but some databases
+                // require "order by" or "group by" value to be in the select.
+                'vocabulary.id',
+                'resource_class.id',
+            ])
+            ->from('resource_class', 'resource_class')
+            ->innerJoin('resource_class', 'vocabulary', 'vocabulary', 'resource_class.vocabulary_id = vocabulary.id')
+            ->orderBy('vocabulary.id', 'asc')
+            ->addOrderBy('resource_class.id', 'asc')
+            ->addGroupBy('resource_class.id')
+        ;
+        $stmt = $this->connection->executeQuery($qb);
+        // Fetch by key pair is not supported by doctrine 2.0.
+        $resourceClassLabels = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $resourceClassLabels = array_column($resourceClassLabels, 'label', 'term');
+        return $resourceClassLabels;
     }
 
     /**
