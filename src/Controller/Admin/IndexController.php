@@ -2,23 +2,36 @@
 
 namespace AdvancedResourceTemplate\Controller\Admin;
 
+use AdvancedResourceTemplate\Autofiller\AutofillerPluginManager as AutofillerManager;
 use Doctrine\ORM\EntityManager;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Controller\AbstractRestfulController;
+use Omeka\Api\Exception\NotFoundException;
+use Omeka\Api\Representation\ResourceTemplateRepresentation;
+use Omeka\Stdlib\Message;
 use Omeka\View\Model\ApiJsonModel;
 
 class IndexController extends AbstractRestfulController
 {
+    /**
+     * @var AutofillerManager
+     */
+    protected $autofillerManager;
+
     /**
      * @var EntityManager
      */
     protected $entityManager;
 
     /**
+     * @param AutofillerManager $autofillerManager
      * @param EntityManager $entityManager
      */
-    public function __construct(EntityManager $entityManager)
-    {
+    public function __construct(
+        AutofillerManager $autofillerManager,
+        EntityManager $entityManager
+    ) {
+        $this->autofillerManager = $autofillerManager;
         $this->entityManager = $entityManager;
     }
 
@@ -65,6 +78,84 @@ class IndexController extends AbstractRestfulController
                 'suggestions' => $result,
             ],
         ]);
+    }
+
+    public function autofillerAction()
+    {
+        $query = $this->params()->fromQuery();
+        $q = isset($query['q']) ? trim($query['q']) : '';
+        if (!strlen($q)) {
+            return $this->returnError(['suggestions' => $this->translate('The query is empty.')]); // @translate
+        }
+
+        if (empty($query['service'])) {
+            return $this->returnError(['suggestions' => $this->translate('The service is empty.')]); // @translate
+        }
+
+        if (empty($query['template'])) {
+            return $this->returnError(['suggestions' => $this->translate('The template is empty.')]); // @translate
+        }
+
+        /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
+        try {
+            // Resource template does not support search by id, so use read().
+            $template = $this->api()->read('resource_templates', ['id' => $query['template']])->getContent();
+        } catch (NotFoundException $e) {
+            return $this->returnError(['suggestions' => $this->translate(new Message(
+                'The template "%s" is not available.', // @translate
+                $template
+            ))]);
+        }
+
+        $serviceMapping = $this->prepareServiceMapping($template, $query['service']);
+        if (empty($serviceMapping)) {
+            return $this->returnError($this->translate(new Message(
+                'The service "%1" has no mapping.', // @translate
+                $query['service']
+            )), HttpResponse::STATUS_CODE_501);
+        }
+
+        if (!$this->autofillerManager->has($serviceMapping['service'])) {
+            return $this->returnError($this->translate(new Message(
+                'The service "%s" is not available.', // @translate
+                $query['service']
+            )), HttpResponse::STATUS_CODE_501);
+        }
+
+        /** @var \AdvancedResourceTemplate\Autofiller\AutofillerInterface $autofiller */
+        $autofiller = $this->autofillerManager->get($serviceMapping['service'], ['sub' => $serviceMapping['sub']]);
+
+        $lang = $this->userSettings()->get('locale')
+            ?: ($this->settings()->get('locale')
+                ?: $this->viewHelpers()->get('translate')->getTranslatorTextDomain()->getDelegatedTranslator()->getLocale());
+
+        $results = $autofiller
+            ->setMapping($serviceMapping['mapping'])
+            ->getResults($q, $lang);
+
+        if (is_null($results)) {
+            return $this->returnError($this->translate(new Message(
+                'The remote service "%s" seems unavailable.', // @translate
+                $autofiller->getLabel()
+            )), HttpResponse::STATUS_CODE_502);
+        }
+
+        return new ApiJsonModel([
+            'status' => 'success',
+            'data' => [
+                'suggestions' => $results,
+            ],
+        ]);
+    }
+
+    protected function prepareServiceMapping(ResourceTemplateRepresentation $template, $service)
+    {
+        $autofillers = $template->setting('autofillers');
+        if (empty($autofillers)) {
+            return [];
+        }
+        $mappings = $this->settings()->get('advancedresourcetemplate_autofillers', []);
+        return $mappings[$service] ?? [];
     }
 
     /**

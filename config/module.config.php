@@ -38,6 +38,17 @@ return [
                             ],
                         ],
                     ],
+                    'autofiller' => [
+                        'type' => \Zend\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/autofiller',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'AdvancedResourceTemplate\Controller\Admin',
+                                'controller' => 'Index',
+                                'action' => 'autofiller',
+                            ],
+                        ],
+                    ],
                 ],
             ],
         ],

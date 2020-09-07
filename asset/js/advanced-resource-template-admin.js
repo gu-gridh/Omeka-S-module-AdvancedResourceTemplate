@@ -311,6 +311,15 @@ $(document).ready(function() {
         }
     }
 
+    function prepareAutofiller() {
+        $('#resource-values .non-properties .field.autofiller').remove();
+
+        var templateSettings = $('#resource-values').data('template-settings');
+        if (!templateSettings.autofillers || !templateSettings.autofillers.length) {
+            return;
+        }
+    }
+
     function initAutocomplete() {
         var autocompleteField = $(this);
         autocompleteField.autocomplete({
@@ -348,6 +357,13 @@ $(document).ready(function() {
         }
     }
 
+    $(document).on('o:form-loaded', 'form.resource-form', function() {
+        if (typeof $('#resource-values').data('is-loaded') === 'undefined') {
+            prepareAutofiller();
+            $('#resource-values').data('is-loaded', $('#resource-template-select').val());
+        }
+    });
+
     $(document).on('o:template-applied', 'form.resource-form', function() {
         var fields = $('#properties .resource-values.field');
         fields.each(function(index, field) {
@@ -359,6 +375,10 @@ $(document).ready(function() {
                 prepareFieldLocked($(field));
             });
             $('#resource-values').data('locked-ready', true);
+        }
+
+        if (typeof $('#resource-values').data('is-loaded') !== 'undefined') {
+            prepareAutofiller();
         }
     });
 

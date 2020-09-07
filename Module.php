@@ -64,6 +64,11 @@ class Module extends AbstractModule
             [$this, 'addResourceTemplateFormElements']
         );
         $sharedEventManager->attach(
+            \Omeka\Form\ResourceTemplateForm::class,
+            'form.add_input_filters',
+            [$this, 'addResourceTemplateFormFilters']
+        );
+        $sharedEventManager->attach(
             \Omeka\Form\ResourceTemplatePropertyFieldset::class,
             'form.add_elements',
             [$this, 'addResourceTemplatePropertyFieldsetElements']
@@ -127,6 +132,10 @@ class Module extends AbstractModule
 
     public function addResourceTemplateFormElements(Event $event)
     {
+        $services = $this->getServiceLocator();
+        $autofillers = $services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []);
+        $autofillers = array_combine($autofillers, 'label', 'label');
+
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
         $form->get('o:settings')
@@ -176,6 +185,33 @@ class Module extends AbstractModule
                 'attributes' => [
                     'id' => 'no_language',
                 ],
+            ])
+            ->add([
+                'name' => 'autofillers',
+                'type' => Element\Select::class,
+                'options' => [
+                    'label' => 'Autofillers', // @translate
+                    'info' => 'List of autofillers to use for this template.', // @translate
+                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate',
+                    'option_values' => $autofillers,
+                    'empty_option' => count($autofillers)
+                        ? ''
+                        : $services->get('MvcTranslator')->translate('No configured autofiller.'), // @translate
+                ],
+                'attributes' => [
+                    'id' => 'autofillers',
+                    'class' => 'chosen-select',
+                ],
+            ]);
+    }
+
+    public function addResourceTemplateFormFilters(Event $event)
+    {
+        $event->getParam('inputFilter')
+            ->get('o:settings')
+            ->add([
+                'name' => 'autofillers',
+                'required' => false,
             ]);
     }
 
