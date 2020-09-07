@@ -3,6 +3,16 @@
 namespace AdvancedResourceTemplate;
 
 return [
+    'autofillers' => [
+    ],
+    'service_manager' => [
+        'factories' => [
+            Autofiller\AutofillerPluginManager::class => Service\Autofiller\AutofillerPluginManagerFactory::class,
+        ],
+        'aliases' => [
+            'Autofiller\Manager' => Autofiller\AutofillerPluginManager::class,
+        ],
+    ],
     'view_manager' => [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
