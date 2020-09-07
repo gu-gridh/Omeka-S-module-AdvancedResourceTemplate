@@ -112,22 +112,13 @@ class Mapper extends AbstractPlugin
         $this->result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         foreach ($this->mapping as $map) {
-            $query = $map['from'];
-            $target = $map['to'];
-
-            $queryMapping = explode('.', $query);
-            $inputFields = $input;
-            foreach ($queryMapping as $qm) {
-                if (isset($inputFields[$qm])) {
-                    $inputFields = $inputFields[$qm];
-                }
+            if (!isset($input[$map['from']])) {
+                continue;
             }
 
-            if (!is_array($inputFields)) {
-                $this->simpleExtract
-                    ? $this->simpleExtract($inputFields, $target, $query)
-                    : $this->appendValueToTarget($inputFields, $target);
-            }
+            $this->simpleExtract
+                ? $this->simpleExtract($input[$map['from']], $map['to'], $map['from'])
+                : $this->appendValueToTarget($input[$map['from']], $map['to']);
         }
 
         return $this->result->exchangeArray([]);
@@ -228,5 +219,50 @@ class Mapper extends AbstractPlugin
             }
         }
         return $mapping;
+    }
+
+    /**
+     * Create a flat array from a recursive array.
+     *
+     * @example
+     * ```
+     * // The following recursive array:
+     * 'video' => [
+     *      'dataformat' => 'jpg',
+     *      'bits_per_sample' => 24;
+     * ]
+     * // is converted into:
+     * [
+     *     'video.dataformat' => 'jpg',
+     *     'video.bits_per_sample' => 24,
+     * ]
+     * ```
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function flatArray(array $array)
+    {
+        $flatArray = [];
+        $this->_flatArray($array, $flatArray);
+        return $flatArray;
+    }
+
+    /**
+     * Recursive helper to flat an array with separator ".".
+     *
+     * @param array $array
+     * @param array $flatArray
+     * @param string $keys
+     */
+    private function _flatArray(array &$array, &$flatArray, $keys = null)
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $this->_flatArray($value, $flatArray, $keys . '.' . $key);
+            } else {
+                $flatArray[trim($keys . '.' . $key, '.')] = $value;
+            }
+        }
     }
 }
