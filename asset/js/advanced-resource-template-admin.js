@@ -453,7 +453,9 @@ $(document).ready(function() {
                         },
                         showNoSuggestionNotice: true,
                         noSuggestionNotice: Omeka.jsTranslate('No results'),
-                        // preventBadQueries: false,
+                        // Required, because when multiple characters are typed,
+                        // the previous requests are stopped.
+                        preventBadQueries: false,
                         transformResult: function(response) {
                             return response.data;
                         },
@@ -523,7 +525,9 @@ $(document).ready(function() {
             // minChars: 3,
             // showNoSuggestionNotice: true,
             //. noSuggestionNotice: Omeka.jsTranslate('No results'),
-            // preventBadQueries: false,
+            // Required, because when multiple characters are typed,
+            // the previous requests are stopped.
+            preventBadQueries: false,
             transformResult: function(response) {
                 return response.data;
             },
