@@ -39,8 +39,13 @@ class FieldNameToProperty extends AbstractPlugin
             $first = mb_substr($part, 0, 1);
             if ($first === '~') {
                 $base['pattern'] = trim(mb_substr($field, mb_strpos($field, '~', 1) + 1));
-                if ($base['pattern'] && preg_match_all('~\{([^{}]+)\}*~', $base['pattern'], $matches) !== false) {
+                // Use negative look behind/ahead to separate simple replace and
+                // twig commands.
+                if ($base['pattern'] && preg_match_all('~(?<![\{])\{([^{}]+)\}(?!\})~', $base['pattern'], $matches) !== false) {
                     $base['replace'] = $matches[0] ?? [];
+                }
+                if ($base['pattern'] && preg_match_all('~\{{2} ([^{}]+) \}{2}~', $base['pattern'], $matches) !== false) {
+                    $base['twig'] = $matches[0] ?? [];
                 }
                 break;
             } elseif ($first === '@') {
@@ -60,6 +65,12 @@ class FieldNameToProperty extends AbstractPlugin
                 if (preg_match('~^(?<type>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][\w-]*|[a-zA-Z][\w-]*|)~', trim(mb_substr($part, 2)), $matches)) {
                     $base['type'] = $matches['type'];
                 }
+            } elseif (in_array($part, ['{__label__}', '{list}'])) {
+                $base = [];
+                $base['field'] = $part;
+                $base['pattern'] = $part;
+                $base['replace'] = [$part];
+                break;
             } elseif (preg_match('~^(?<field>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*)$~', $part, $matches)) {
                 $base['field'] = $matches['field'];
             }

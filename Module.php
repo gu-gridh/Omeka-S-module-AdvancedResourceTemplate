@@ -375,12 +375,27 @@ class Module extends AbstractModule
 
         $result = '';
         foreach ($autofillers as $key => $autofiller) {
-            $label = isset($autofiller['label']) && $autofiller['label'] !== $key ? $autofiller['label'] : '';
+            $label = empty($autofiller['label']) ? '' : $autofiller['label'];
             $result .= $label ? "[$key] = $label\n" : "[$key]\n";
+            if (!empty($autofiller['url'])) {
+                $result .= $autofiller['url'] . "\n";
+            }
             if (!empty($autofiller['query'])) {
                 $result .= '?' . $autofiller['query'] . "\n";
             }
             if (!empty($autofiller['mapping'])) {
+                // For generic resource, display the label and the list first.
+                $mapping = $autofiller['mapping'];
+                foreach ($autofiller['mapping'] as $key => $map) {
+                    if (isset($map['to']['pattern'])
+                        && in_array($map['to']['pattern'], ['{__label__}', '{list}'])
+                    ) {
+                        unset($mapping[$key]);
+                        unset($map['to']['pattern']);
+                        $mapping = [$key => $map] + $mapping;
+                    }
+                }
+                $autofiller['mapping'] = $mapping;
                 foreach ($autofiller['mapping'] as $map) {
                     $to = &$map['to'];
                     if (!empty($map['from'])) {
@@ -437,13 +452,15 @@ class Module extends AbstractModule
                 $result[$autofillerKey] = [
                     'service' => $matches['service'],
                     'sub' => $matches['sub'],
-                    'label' => empty($matches['label']) ? $autofillerKey : $matches['label'],
+                    'label' => empty($matches['label']) ? null : $matches['label'],
                     'mapping' => [],
                 ];
             } elseif (!$autofillerKey) {
                 // Nothing.
             } elseif ($first === '?') {
                 $result[$autofillerKey]['query'] = mb_substr($line, 1);
+            } elseif (mb_strpos($line, 'https://') === 0 || mb_strpos($line, 'http://') === 0) {
+                $result[$autofillerKey]['url'] = $line;
             } else {
                 // Fill a map of an autofiller.
                 $pos = $first === '~'

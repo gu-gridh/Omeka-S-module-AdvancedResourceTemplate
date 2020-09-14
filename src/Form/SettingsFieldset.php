@@ -18,7 +18,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'label' => 'Autofillers', // @translate
                     'info' => 'List of autofillers to use for this template.', // @translate
-                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate',
+                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate#autofilling',
                 ],
                 'attributes' => [
                     'id' => 'advancedresourcetemplate_autofillers',

@@ -111,12 +111,14 @@ class Mapper extends AbstractPlugin
 
         $this->result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
+        $input = $this->flatArray($input);
+
         foreach ($this->mapping as $map) {
             $target = $map['to'];
             if (!empty($target['replace'])) {
                 $target['replace'] = array_fill_keys($target['replace'], '');
                 foreach ($target['replace'] as $query => &$value) {
-                    if ($query === '__value__') {
+                    if (in_array($query, ['{__value__}', '{__label__}'])) {
                         continue;
                     }
                     $query = mb_substr($query, 1, -1);
@@ -182,7 +184,7 @@ class Mapper extends AbstractPlugin
             if (!empty($target['replace'])) {
                 $target['replace'] = array_fill_keys($target['replace'], '');
                 foreach ($target['replace'] as $query => &$value) {
-                    if ($query === '{__value__}') {
+                    if (in_array($query, ['{__value__}', '{__label__}'])) {
                         continue;
                     }
                     $nodeList = $xpath->query(mb_substr($query, 1, -1));
@@ -212,10 +214,62 @@ class Mapper extends AbstractPlugin
                         : $this->appendValueToTarget($node->nodeValue, $target);
                 }
             }
-
         }
 
         return $this->result->exchangeArray([]);
+    }
+
+    /**
+     * @param array $array
+     * @param string $path
+     * @return array|null
+     */
+    public function extractSubArray(array $array, $path)
+    {
+        foreach (explode('.', $path) as $subpath) {
+            if (isset($array[$subpath])) {
+                $array = $array[$subpath];
+            } else {
+                return null;
+            }
+        }
+        return is_array($array) ? $array : null;
+    }
+
+    /**
+     * @param string $xml
+     * @param string $xpath
+     * @return array|null
+     */
+    public function extractSubArrayXml($xml, $path)
+    {
+        // Check if the xml is fully formed.
+        $xml = trim($xml);
+        if (strpos($xml, '<?xml ') !== 0) {
+            $xml = '<?xml version="1.1" encoding="utf-8"?>' . $xml;
+        }
+
+        libxml_use_internal_errors(true);
+        $doc = new DOMDocument();
+        $doc->loadXML($xml);
+        $xpath = new DOMXPath($doc);
+
+        // Register all namespaces to allow prefixes.
+        $xpathN = new DOMXPath($doc);
+        foreach ($xpathN->query('//namespace::*') as $node) {
+            $xpath->registerNamespace($node->prefix, $node->nodeValue);
+        }
+
+        $nodeList = $xpath->query($path);
+        if (!$nodeList || !$nodeList->length) {
+            return null;
+        }
+
+        $array = [];
+        foreach ($nodeList as $node) {
+            $array[] = $node->C14N();
+        }
+        return $array;
     }
 
     protected function simpleExtract($value, $target, $source)
@@ -233,8 +287,14 @@ class Mapper extends AbstractPlugin
         unset($v['field'], $v['pattern'], $v['replace']);
 
         if (!empty($target['pattern'])) {
-            $target['replace']['{__value__}'] = $value;
-            $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+            if (!empty($target['replace'])) {
+                $target['replace']['{__value__}'] = $value;
+                $target['replace']['{__label__}'] = $value;
+                $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+            }
+            if (!empty($target['twig'])) {
+                $value = $this->twig($value, $target);
+            }
         }
 
         switch ($v['type']) {
@@ -259,6 +319,93 @@ class Mapper extends AbstractPlugin
         }
     }
 
+    /**
+     * Convert a value into another value via twig filters.
+     *
+     * Only some filters are managed basically on value.
+     *
+     * @param string $value
+     * @param array $target
+     * @return string
+     */
+    protected function twig($value, $target)
+    {
+        $matches = [];
+        $target['twig'] = array_fill_keys($target['twig'], '');
+        foreach ($target['twig'] as $query => &$output) {
+            $v = $value;
+            $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
+            unset($filters[0]);
+            foreach ($filters as $filter) switch ($filter) {
+                case 'abs':
+                    $v = is_numeric($v) ? abs($v) : $v;
+                    break;
+                case 'capitalize':
+                    $v = ucfirst($v);
+                    break;
+                case 'e':
+                case 'escape':
+                    $v =  htmlspecialchars($v);
+                    break;
+                case 'first':
+                    $v =  mb_substr($v, 0, 1);
+                    break;
+                case 'last':
+                    $v =  mb_substr($v, -1);
+                    break;
+                case 'length':
+                    $v =  mb_strlen($v);
+                    break;
+                case 'lower':
+                    $v =  mb_strtolower($v);
+                    break;
+                case 'striptags':
+                    $v =  strip_tags($v);
+                    break;
+                case 'title':
+                    $v = ucwords($v);
+                    break;
+                case 'trim':
+                    $v = trim($v);
+                    break;
+                case 'upper':
+                    $v =  mb_strtoupper($v);
+                    break;
+                case 'url_encode':
+                    $v =  rawurlencode($v);
+                    break;
+                case preg_match('~date\s*\(\s*["|\'](?<format>[^"\']+?)["|\']\s*\)~', $filter, $matches) > 0:
+                    try {
+                        $v = @date($matches['format'], @strtotime($value));
+                    } catch (\Exception $e) {
+                        // Nothing.
+                    }
+                    break;
+                case preg_match('~format\s*\(\s*(?<args>.*?)\s*\)~', $filter, $matches) > 0:
+                    $args = $matches['args'];
+                    preg_match_all('~\s*(?<args>__value__|"[^"]*?"|\'[^\']*?\')\s*,?\s*~', $args, $matches);
+                    $args = array_map(function ($v) {
+                        return $v === '__value__' ? $v : mb_substr($v, 1, -1);
+                    }, $matches['args']);
+                    try {
+                        $v = @vsptintf($v, $args);
+                    } catch (\Exception $e) {
+                        // Nothing.
+                    }
+                    break;
+                case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
+                    $v = mb_substr($value, $matches['start'], $matches['length']);
+                    break;
+                default:
+                    // Nothing.
+                    break;
+            }
+            $output = $v;
+        }
+        unset($output);
+        return str_replace(array_keys($target['twig']), array_values($target['twig']), $target['pattern']);
+    }
+
     protected function normalizeMapping(array $mapping)
     {
         $translate = $this->getController()->plugin('translate');
@@ -269,7 +416,7 @@ class Mapper extends AbstractPlugin
                 $to['type'] = 'literal';
             }
             if (empty($to['property_label'])) {
-                $to['property_label'] = $translate($this->mapperHelper->getPropertyLabel($to['field']));;
+                $to['property_label'] = $translate($this->mapperHelper->getPropertyLabel($to['field']));
             }
         }
         return $mapping;

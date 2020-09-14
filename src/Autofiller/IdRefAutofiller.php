@@ -94,18 +94,18 @@ class IdRefAutofiller extends AbstractAutofiller
 
         $url = $this->types[$service]['url'] . $query;
 
-
         $response = $this->httpClient->setUri($url)->send();
         if (!$response->isSuccess()) {
             return null;
         }
 
-        // Parse the JSON response.
         $suggestions = [];
+
+        // Parse the JSON response.
         $results = json_decode($response->getBody(), true);
 
         // Prepare mapper one time.
-        $mapper = $this->mapper->setMapping($this->mapping);
+        $this->mapper->setMapping($this->mapping);
 
         // First clean results.
         if (empty($results['response']['docs'])) {
@@ -128,7 +128,7 @@ class IdRefAutofiller extends AbstractAutofiller
             // The results are only one or two labels and an id, so do a second
             // request for each result to get all metadata.
             $urlPpn = 'https://www.idref.fr/' . $result['ppn_z'] . '.xml';
-            $metadata = $mapper->urlXml($urlPpn);
+            $metadata = $this->mapper->urlXml($urlPpn);
             if (!$metadata) {
                 continue;
             }

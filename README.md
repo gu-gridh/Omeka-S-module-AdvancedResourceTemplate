@@ -1,7 +1,7 @@
 Advanced Resource Template (module for Omeka S)
 ===============================================
 
-> This module is based on th pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S.
+> This module is based on th pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S and [backport](https://github.com/Daniel-KM/Omeka-S/tree/backport) for Omeka Classic.
 
 
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
@@ -11,7 +11,9 @@ resources:
 - auto-completion with existing values,
 - locked values,
 - language selection and pre-selection,
-- autofill multiple fields with external data ([IdRef] and [Geonames]).
+- creation of a new resource during edition of a resource,
+- autofill multiple fields with external data ([IdRef], and [Geonames] and generic
+  json or xml services).
 
 
 Installation
@@ -56,6 +58,8 @@ to select it inside the resource template.
 The mapping is a simple text specifying the services and the mappings. it uses
 the same format than the modules [Bulk Export], [Bulk Import], and [Bulk Import Files].
 
+#### Integrated services
+
 For example, if the service returns an xml Marc like for [Colbert], the mapping
 can be a list of XPath and properties with some arguments:
 ```
@@ -83,28 +87,93 @@ For a json service, use the object notation:
 ?username=demo
 toponymName = dcterms:title
 geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
-adminCodes1.ISO3166_2 = dcterms:identifier
+adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
 countryName = dcterms:isPartOf
 ~ = dcterms:spatial ~ Coordonnées : {lat}/{lng}
 ```
 
 Note that [geonames] requires a user name (that should be the one of your
 institution, but it can be "demo", "google", or "johnsmith"). Test it on
-[http://api.geonames.org/searchJSON?username=demo].
+https://api.geonames.org/searchJSON?username=demo.
 
 More largely, you can append any arguments to the query sent to the remote
 service: simply append them url encoded on a line beginning with `?`.
 
-It’s also possible to format the values: simply append use `~` to indicate the
+It’s also possible to format the values: simply append `~` to indicate the
 pattern to use and `{__value__}` to set the value from the source. For a complex
 pattern, you can use any source path between `{` and `}`.
+
+For more complex pattern, you can use some [Twig filters] with the current
+value. For example, to convert a date `17890804` into a standard [ISO 8601]
+numeric date time `1789-08-04`, you can use:
+```
+/record/datafield[@tag="103"]/subfield[@code="b"] = dcterms:valid ^^numeric:timestamp ~ {{ value|trim|slice(1,4) }}-{{ value|trim|slice(5,2) }}-{{ value|trim|slice(7,2) }}
+```
+
+The Twig filter starts with two `{` and a space and finishes with a space and
+two `}`. it works only with the current `value`.
+
+
+#### Other services
+
+If you want to include a service that is not supported currently, you can choose
+the autofiller `generic:json` or `generic:xml`. Two required and two optional
+params sjhould be added on four separate lines:
+- the full url of the service,
+  Note that the protocol may need to be `http`, not `https` on some servers (the
+  server where Omeka is installed), because the request is done by Omeka itself,
+  not by the browser. So, to use the recommended `https`, you may have to [config the keys]
+  `sslcapath` and `sslcafile` in the Omeka file `config/local.config.php`.
+- the query with the placeholder `{query}`, starting with a `?`,
+- the path to the list of results, when it is not root, in order to loop them,
+  indicated with `{list}`,
+- the path to the value to use as a label for each result, indicated with
+  `{__label__}`. If absent, the first field will be used).
+
+
+For exemple, you can query another Omeka S service (try with "archives"), or the
+services above:
+```
+[generic:json #Mall History] Omeka S demo Mall History
+http://dev.omeka.org/omeka-s-sandbox/api/items?site_id=4
+?fulltext_search={query}
+o:title = {__label__}
+dcterms:title.0.@value = dcterms:title
+dcterms:date.0.@value = dcterms:date
+o:id = dcterms:identifier ^^uri ~ https://dev.omeka.org/omeka-s-sandbox/s/mallhistory/item/{__value__}
+
+[generic:json #geonames] = Geonames generic
+http://api.geonames.org/searchJSON
+?username=johnsmith&q={query}
+geonames = {list}
+toponymName = dcterms:title
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
+countryName = dcterms:isPartOf
+~ = dcterms:spatial ~ Coordinates: {lat}/{lng}
+
+[generic:xml #IdRef Person] = IdRef Person
+https://www.idref.fr/Sru/Solr
+?version=2.2&rows=30&q=persname_t%3A{query}
+/doc/str[@name="affcourt_z"] = {__label__}
+/response/result/doc = {list}
+/doc/arr[@name="affcourt_r"]/str = dcterms:title
+/doc/arr[@name="nom_t"] = foaf:lastName
+/doc/arr[@name="prenom_t"] = foaf:firstName
+/doc/date[@name="datenaissance_dt"] = dcterms:date ^^numeric:timestamp
+/doc/str[@name="ppn_z"] = dcterms:identifier ^^uri ~ https://idref.fr/{__value__}
+```
 
 
 TODO
 ----
 
+- [ ] Replace `{__value__}` and `{__label__}` by `{value}` and `{label}`.
 - [ ] Include all suggesters from module [Value Suggest].
-- [ ] Create a generic mapper.
+- [ ] Limit autocompletion to selected resource.
+- [ ] Fill autocompletion with resource, not value.
+- [x] Use twig for more complex format.
+- [x] Create a generic mapper.
 
 
 Warning
@@ -167,6 +236,8 @@ Université des Antilles and Université de la Guyane, currently managed with
 [Geonames]: https://www.geonames.org
 [Colbert]: https://www.idref.fr/027274527.xml
 [geonames]: https://www.geonames.org/export/geonames-search.html
+[Twig filters]: https://twig.symfony.com/doc/3.x
+[ISO 8601]: https://www.iso.org/iso-8601-date-and-time-format.html
 [Value Suggest]: https://github.com/omeka-s-modules/ValueSuggest
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html

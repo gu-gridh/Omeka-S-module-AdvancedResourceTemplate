@@ -47,6 +47,9 @@ abstract class AbstractAutofiller implements AutofillerInterface
 
     public function getLabel()
     {
+        if (!empty($this->options['label'])) {
+            return $this->options['label'];
+        }
         if (empty($this->options['sub'])) {
             return $this->label;
         }
