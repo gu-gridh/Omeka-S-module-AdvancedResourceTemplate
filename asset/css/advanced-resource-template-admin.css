@@ -40,6 +40,39 @@ a.value-language.no-language {
 .autocomplete-suggestion .suggest-info.autofill dl {
     margin-top: 0;
     margin-bottom: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    width:100%;
+    max-width: 100%;
+    word-wrap: normal;
+    word-break: normal;
+    white-space: normal
+}
+.autocomplete-suggestion .suggest-info.autofill dl > * {
+    padding-top: 0.5em;
+}
+.autocomplete-suggestion .suggest-info.autofill dl dt {
+    width:30%;
+    font-size: 0.7rem;
+    text-align:right;
+    padding-right: 4px;
+}
+.autocomplete-suggestion .suggest-info.autofill dl dd {
+    width:60%;
+    padding-left:1em;
+    margin-left: 0px;
+    white-space: nowrap;
+}
+.autocomplete-suggestion .suggest-info.autofill dl dd + dd {
+    width: 100%;
+    padding-left: calc(30% + 1em);
+}
+.autocomplete-suggestion .suggest-info.autofill dl dt + dt {
+    padding-right: 60%;
+}
+.autocomplete-suggestion .suggest-info.autofill dl dt + dt + dd {
+    margin-top: -1.625em; /* own height including padding * /
+    padding-left: calc(30% + 1em);
 }
 
 body.modal div[role="main"] > h1:first-of-type {
