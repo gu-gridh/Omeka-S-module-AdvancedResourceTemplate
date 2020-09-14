@@ -38,15 +38,16 @@ class GeonamesAutofiller extends AbstractAutofiller
             return null;
         }
 
-        // Parse the JSON response.
         $suggestions = [];
+
+        // Parse the JSON response.
         $results = json_decode($response->getBody(), true);
 
         // Prepare mapper one time.
-        $mapper = $this->mapper->setMapping($this->mapping);
+        $this->mapper->setMapping($this->mapping);
 
         foreach ($results['geonames'] as $result) {
-            $metadata = $mapper->array($result);
+            $metadata = $this->mapper->array($result);
             if (!$metadata) {
                 continue;
             }

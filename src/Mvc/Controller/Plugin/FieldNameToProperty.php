@@ -60,6 +60,12 @@ class FieldNameToProperty extends AbstractPlugin
                 if (preg_match('~^(?<type>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][\w-]*|[a-zA-Z][\w-]*|)~', trim(mb_substr($part, 2)), $matches)) {
                     $base['type'] = $matches['type'];
                 }
+            } elseif (in_array($part, ['{__label__}', '{__list__}'])) {
+                $base = [];
+                $base['field'] = $part;
+                $base['pattern'] = $part;
+                $base['replace'] = [$part];
+                break;
             } elseif (preg_match('~^(?<field>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*)$~', $part, $matches)) {
                 $base['field'] = $matches['field'];
             }
