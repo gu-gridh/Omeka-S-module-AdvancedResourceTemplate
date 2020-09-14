@@ -214,7 +214,6 @@ class Mapper extends AbstractPlugin
                         : $this->appendValueToTarget($node->nodeValue, $target);
                 }
             }
-
         }
 
         return $this->result->exchangeArray([]);
@@ -375,8 +374,30 @@ class Mapper extends AbstractPlugin
                 case 'url_encode':
                     $v =  rawurlencode($v);
                     break;
+                case preg_match('~date\s*\(\s*["|\'](?<format>[^"\']+?)["|\']\s*\)~', $filter, $matches) > 0:
+                    try {
+                        $v = @date($matches['format'], @strtotime($value));
+                    } catch (\Exception $e) {
+                        // Nothing.
+                    }
+                    break;
+                case preg_match('~format\s*\(\s*(?<args>.*?)\s*\)~', $filter, $matches) > 0:
+                    $args = $matches['args'];
+                    preg_match_all('~\s*(?<args>__value__|"[^"]*?"|\'[^\']*?\')\s*,?\s*~', $args, $matches);
+                    $args = array_map(function ($v) {
+                        return $v === '__value__' ? $v : mb_substr($v, 1, -1);
+                    }, $matches['args']);
+                    try {
+                        $v = @vsptintf($v, $args);
+                    } catch (\Exception $e) {
+                        // Nothing.
+                    }
+                    break;
                 case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
                     $v = mb_substr($value, $matches['start'], $matches['length']);
+                    break;
+                default:
+                    // Nothing.
                     break;
             }
             $output = $v;
