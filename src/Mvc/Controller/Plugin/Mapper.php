@@ -288,9 +288,14 @@ class Mapper extends AbstractPlugin
         unset($v['field'], $v['pattern'], $v['replace']);
 
         if (!empty($target['pattern'])) {
-            $target['replace']['{__value__}'] = $value;
-            $target['replace']['{__label__}'] = $value;
-            $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+            if (!empty($target['replace'])) {
+                $target['replace']['{__value__}'] = $value;
+                $target['replace']['{__label__}'] = $value;
+                $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+            }
+            if (!empty($target['twig'])) {
+                $value = $this->twig($value, $target);
+            }
         }
 
         switch ($v['type']) {
@@ -313,6 +318,37 @@ class Mapper extends AbstractPlugin
                 // resource.
                 break;
         }
+    }
+
+    /**
+     * Convert a value into another value via twig filters.
+     *
+     * Only some filters are managed basically on value.
+     *
+     * @param string $value
+     * @param array $target
+     * @return string
+     */
+    protected function twig($value, $target)
+    {
+        $matches = [];
+        $target['twig'] = array_fill_keys($target['twig'], '');
+        foreach ($target['twig'] as $query => &$output) {
+            $v = $value;
+            $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
+            unset($filters[0]);
+            foreach ($filters as $filter) switch ($filter) {
+                case 'trim':
+                    $v = trim($v);
+                    break;
+                case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
+                    $v = mb_substr($value, $matches['start'], $matches['length']);
+                    break;
+            }
+            $output = $v;
+        }
+        unset($output);
+        return str_replace(array_keys($target['twig']), array_values($target['twig']), $target['pattern']);
     }
 
     protected function normalizeMapping(array $mapping)
