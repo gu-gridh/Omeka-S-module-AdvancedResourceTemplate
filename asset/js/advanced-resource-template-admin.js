@@ -269,6 +269,7 @@ $(document).ready(function() {
      */
     function fillValue(value, term, dataType, valueObj) {
         // If defaultValue is undefined, it means that valueObj is filled.
+        var v;
         var defaultValue = valueObj.default;
         var isSpecific = typeof defaultValue !== 'undefined';
         // Manage specific data type "resource".
@@ -328,11 +329,35 @@ $(document).ready(function() {
         }
 
         // @see numeric-data-types.js
-        if (dataType === 'numeric:integer') {
-            var container = value;
-            var v = container.find('.numeric-integer-value');
-            var int = container.find('.numeric-integer-integer');
-            int.val(v.val());
+        if (NumericDataTypes) {
+            if (dataType === 'numeric:timestamp') {
+                v = value.find('.numeric-datetime-value');
+                // The class is used to init a field, but it doesn't have the value yet.
+                v.val(defaultValue);
+                v.closest('.numeric-timestamp').removeClass('numeric-enabled');
+                NumericDataTypes.enableTimestamp(value);
+            }
+            if (dataType === 'numeric:interval') {
+                v = value.find('.numeric-datetime-value');
+                // The class is used to init a field, but it doesn't have the value yet.
+                v.val(defaultValue);
+                v.closest('.numeric-interval').removeClass('numeric-enabled');
+                NumericDataTypes.enableInterval(value);
+            }
+            if (dataType === 'numeric:duration') {
+                v = value.find('.numeric-duration-value');
+                // The class is used to init a field, but it doesn't have the value yet.
+                v.val(defaultValue);
+                v.closest('.numeric-duration').removeClass('numeric-enabled');
+                NumericDataTypes.enableDuration(value);
+            }
+            if (dataType === 'numeric:integer') {
+                v = value.find('.numeric-integer-value');
+                // The class is used to init a field, but it doesn't have the value yet.
+                v.val(defaultValue);
+                v.closest('.numeric-integer').removeClass('numeric-enabled');
+                NumericDataTypes.enableInteger(value);
+            }
         }
 
         // Value Suggest is a lot more complex. Sub-trigger value?
@@ -607,6 +632,8 @@ $(document).ready(function() {
             // Custom vocab.
             || field.find('select.terms option').length > 0
             // Numeric data types.
+            || field.find('input.numeric-datetime-value').length > 0
+            || field.find('input.numeric-duration-value').length > 0
             || field.find('input.numeric-integer-value').length > 0
             // Value suggest.
             || field.find('input.valuesuggest-input').length > 0
