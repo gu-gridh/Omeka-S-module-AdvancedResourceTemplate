@@ -499,12 +499,13 @@ $(document).ready(function() {
 
     function autofill(values) {
         Object.keys(values).forEach(function(term) {
-            var fields = $('.resource-values.field[data-property-term="' + term + '"]');
             values[term].forEach(function(value) {
-                var field = fields.filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
+                var field = $('.resource-values.field[data-property-term="' + term + '"]').filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
                 if (!field.length) {
                     field = makeNewField(term);
                 }
+                // Check if the first field has an empty default value, so remove it.
+                field.first().find('.values .value.default-value').remove();
                 field.first().find('.values').append(makeNewValue(term, value.type, value));
             });
         });
