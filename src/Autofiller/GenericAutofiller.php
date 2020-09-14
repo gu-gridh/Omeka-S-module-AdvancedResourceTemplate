@@ -63,11 +63,14 @@ class GenericAutofiller extends AbstractAutofiller
             if (!$metadata) {
                 continue;
             }
-            $labelResult = empty($metadata['{__label__}'][0]['@value'])
-                || $metadata['{__label__}'][0]['@value'] === '{__label__}'
-                ? $defaultLabel
-                : $metadata['{__label__}'][0]['@value'];
-            unset($metadata['{__label__}']);
+            if (empty($metadata['{__label__}'][0]['@value']) || $metadata['{__label__}'][0]['@value'] === '{__label__}') {
+                unset($metadata['{__label__}']);
+                $first = reset($metadata);
+                $labelResult = $first[0]['@value'] ?? $defaultLabel;
+            } else {
+                $labelResult = $metadata['{__label__}'][0]['@value'];
+                unset($metadata['{__label__}']);
+            }
             $suggestions[] = [
                 'value' => $labelResult,
                 'data' => $metadata,
@@ -106,11 +109,14 @@ class GenericAutofiller extends AbstractAutofiller
             if (!$metadata) {
                 continue;
             }
-            $labelResult = empty($metadata['{__label__}'][0]['@value'])
-                || $metadata['{__label__}'][0]['@value'] === '{__label__}'
-                    ? $defaultLabel
-                    : $metadata['{__label__}'][0]['@value'];
-            unset($metadata['{__label__}']);
+            if (empty($metadata['{__label__}'][0]['@value']) || $metadata['{__label__}'][0]['@value'] === '{__label__}') {
+                unset($metadata['{__label__}']);
+                $first = reset($metadata);
+                $labelResult = $first[0]['@value'] ?? $defaultLabel;
+            } else {
+                $labelResult = $metadata['{__label__}'][0]['@value'];
+                unset($metadata['{__label__}']);
+            }
             $suggestions[] = [
                 'value' => $labelResult,
                 'data' => $metadata,
