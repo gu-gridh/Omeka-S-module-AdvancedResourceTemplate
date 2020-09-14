@@ -388,7 +388,7 @@ class Module extends AbstractModule
                 $mapping = $autofiller['mapping'];
                 foreach ($autofiller['mapping'] as $key => $map) {
                     if (isset($map['to']['pattern'])
-                        && in_array($map['to']['pattern'], ['{__label__}', '{__list__}'])
+                        && in_array($map['to']['pattern'], ['{__label__}', '{list}'])
                     ) {
                         unset($mapping[$key]);
                         unset($map['to']['pattern']);

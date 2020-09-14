@@ -10,14 +10,14 @@ class GenericAutofiller extends AbstractAutofiller
     {
         if (empty($this->options['sub']) || !in_array($this->options['sub'], ['json', 'xml'])
             || empty($this->options['url']) || !filter_var($this->options['url'], FILTER_VALIDATE_URL)
-            || empty($this->options['query']) || strpos($this->options['query'], '{__query__}') === false
+            || empty($this->options['query']) || strpos($this->options['query'], '{query}') === false
         ) {
             return null;
         }
 
         // TODO Manage language.
         $params = [];
-        parse_str(str_replace('{__query__}', rawurlencode($query), $this->options['query']), $params);
+        parse_str(str_replace('{query}', rawurlencode($query), $this->options['query']), $params);
 
         $response = $this->httpClient
             ->setUri($this->options['url'])
@@ -46,7 +46,7 @@ class GenericAutofiller extends AbstractAutofiller
 
         // Get the root if needed.
         foreach ($this->mapping as $key => $map) {
-            if (!empty($map['to']['field']) && $map['to']['field'] === '{__list__}') {
+            if (!empty($map['to']['field']) && $map['to']['field'] === '{list}') {
                 unset($this->mapping[$key]);
                 $results = $this->mapper->extractSubArray($results, $map['from']);
                 if (empty($results)) {
@@ -87,7 +87,7 @@ class GenericAutofiller extends AbstractAutofiller
         // Get the root if needed.
         $hasRoot = false;
         foreach ($this->mapping as $key => $map) {
-            if (!empty($map['to']['field']) && $map['to']['field'] === '{__list__}') {
+            if (!empty($map['to']['field']) && $map['to']['field'] === '{list}') {
                 $hasRoot = true;
                 unset($this->mapping[$key]);
                 $results = $this->mapper->extractSubArrayXml($content, $map['from']);
