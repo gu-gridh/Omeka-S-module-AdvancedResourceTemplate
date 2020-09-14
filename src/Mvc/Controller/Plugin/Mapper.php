@@ -338,8 +338,42 @@ class Mapper extends AbstractPlugin
             $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
             unset($filters[0]);
             foreach ($filters as $filter) switch ($filter) {
+                case 'abs':
+                    $v = is_numeric($v) ? abs($v) : $v;
+                    break;
+                case 'capitalize':
+                    $v = ucfirst($v);
+                    break;
+                case 'e':
+                case 'escape':
+                    $v =  htmlspecialchars($v);
+                    break;
+                case 'first':
+                    $v =  mb_substr($v, 0, 1);
+                    break;
+                case 'last':
+                    $v =  mb_substr($v, -1);
+                    break;
+                case 'length':
+                    $v =  mb_strlen($v);
+                    break;
+                case 'lower':
+                    $v =  mb_strtolower($v);
+                    break;
+                case 'striptags':
+                    $v =  strip_tags($v);
+                    break;
+                case 'title':
+                    $v = ucwords($v);
+                    break;
                 case 'trim':
                     $v = trim($v);
+                    break;
+                case 'upper':
+                    $v =  mb_strtoupper($v);
+                    break;
+                case 'url_encode':
+                    $v =  rawurlencode($v);
                     break;
                 case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
                     $v = mb_substr($value, $matches['start'], $matches['length']);
