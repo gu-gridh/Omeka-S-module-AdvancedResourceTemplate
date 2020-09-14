@@ -429,7 +429,7 @@ $(document).ready(function() {
                 })
                 .done(function(data) {
                     var autofiller = data.data.autofiller;
-                    var autofillerId = 'autofiller-' + autofillerName.replace(':', '-');
+                    var autofillerId = 'autofiller-' + autofillerName.replace(/[\W_]+/g,'-');
                     $('#resource-values .non-properties').append(`
 <div class="field autofiller">
     <div class="field-meta">

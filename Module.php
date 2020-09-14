@@ -375,7 +375,7 @@ class Module extends AbstractModule
 
         $result = '';
         foreach ($autofillers as $key => $autofiller) {
-            $label = isset($autofiller['label']) && $autofiller['label'] !== $key ? $autofiller['label'] : '';
+            $label = empty($autofiller['label']) ? '' : $autofiller['label'];
             $result .= $label ? "[$key] = $label\n" : "[$key]\n";
             if (!empty($autofiller['query'])) {
                 $result .= '?' . $autofiller['query'] . "\n";
@@ -437,7 +437,7 @@ class Module extends AbstractModule
                 $result[$autofillerKey] = [
                     'service' => $matches['service'],
                     'sub' => $matches['sub'],
-                    'label' => empty($matches['label']) ? $autofillerKey : $matches['label'],
+                    'label' => empty($matches['label']) ? null : $matches['label'],
                     'mapping' => [],
                 ];
             } elseif (!$autofillerKey) {
