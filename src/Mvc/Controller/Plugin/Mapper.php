@@ -345,22 +345,22 @@ class Mapper extends AbstractPlugin
                     break;
                 case 'e':
                 case 'escape':
-                    $v =  htmlspecialchars($v);
+                    $v = htmlspecialchars($v);
                     break;
                 case 'first':
-                    $v =  mb_substr($v, 0, 1);
+                    $v = mb_substr($v, 0, 1);
                     break;
                 case 'last':
-                    $v =  mb_substr($v, -1);
+                    $v = mb_substr($v, -1);
                     break;
                 case 'length':
-                    $v =  mb_strlen($v);
+                    $v = mb_strlen($v);
                     break;
                 case 'lower':
-                    $v =  mb_strtolower($v);
+                    $v = mb_strtolower($v);
                     break;
                 case 'striptags':
-                    $v =  strip_tags($v);
+                    $v = strip_tags($v);
                     break;
                 case 'title':
                     $v = ucwords($v);
@@ -369,10 +369,10 @@ class Mapper extends AbstractPlugin
                     $v = trim($v);
                     break;
                 case 'upper':
-                    $v =  mb_strtoupper($v);
+                    $v = mb_strtoupper($v);
                     break;
                 case 'url_encode':
-                    $v =  rawurlencode($v);
+                    $v = rawurlencode($v);
                     break;
                 case preg_match('~date\s*\(\s*["|\'](?<format>[^"\']+?)["|\']\s*\)~', $filter, $matches) > 0:
                     try {

@@ -21,7 +21,7 @@ class Module extends AbstractModule
 
     protected function postInstall()
     {
-        $filepath = __DIR__. '/data/mapping/mappings.ini';
+        $filepath = __DIR__ . '/data/mapping/mappings.ini';
         if (!file_exists($filepath) || is_file($filepath) || !is_readable($filepath)) {
             return;
         }
