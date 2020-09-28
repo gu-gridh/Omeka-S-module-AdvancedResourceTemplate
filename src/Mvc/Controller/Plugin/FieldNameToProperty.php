@@ -41,11 +41,13 @@ class FieldNameToProperty extends AbstractPlugin
                 $base['pattern'] = trim(mb_substr($field, mb_strpos($field, '~', 1) + 1));
                 // Use negative look behind/ahead to separate simple replace and
                 // twig commands.
-                if ($base['pattern'] && preg_match_all('~(?<![\{])\{([^{}]+)\}(?!\})~', $base['pattern'], $matches) !== false) {
-                    $base['replace'] = $matches[0] ?? [];
-                }
-                if ($base['pattern'] && preg_match_all('~\{{2} ([^{}]+) \}{2}~', $base['pattern'], $matches) !== false) {
-                    $base['twig'] = $matches[0] ?? [];
+                if ($base['pattern']) {
+                    if (preg_match_all('~(?<![\{])\{([^{}]+)\}(?!\})~', $base['pattern'], $matches) !== false) {
+                        $base['replace'] = empty($matches[0]) ? [] : array_values(array_unique($matches[0]));
+                    }
+                    if (preg_match_all('~\{{2} ([^{}]+) \}{2}~', $base['pattern'], $matches) !== false) {
+                        $base['twig'] = empty($matches[0]) ? [] : array_values(array_unique($matches[0]));
+                    }
                 }
                 break;
             } elseif ($first === '@') {
