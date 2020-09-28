@@ -1,7 +1,7 @@
 Advanced Resource Template (module for Omeka S)
 ===============================================
 
-> This module is based on th pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S and [backport](https://github.com/Daniel-KM/Omeka-S/tree/backport) for Omeka Classic.
+> This module is based on the pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S and [backport](https://github.com/Daniel-KM/Omeka-S/tree/backport) for Omeka Classic.
 
 
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
@@ -170,7 +170,7 @@ TODO
 
 - [ ] Replace `{__value__}` and `{__label__}` by `{value}` and `{label}`.
 - [ ] Include all suggesters from module [Value Suggest].
-- [ ] Limit autocompletion to selected resource.
+- [ ] Limit autocompletion to selected resources.
 - [ ] Fill autocompletion with resource, not value.
 - [x] Use twig for more complex format.
 - [x] Create a generic mapper.
@@ -238,6 +238,9 @@ Université des Antilles and Université de la Guyane, currently managed with
 [geonames]: https://www.geonames.org/export/geonames-search.html
 [Twig filters]: https://twig.symfony.com/doc/3.x
 [ISO 8601]: https://www.iso.org/iso-8601-date-and-time-format.html
+[Bulk Export]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkExport
+[Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
+[Bulk Import Files]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Value Suggest]: https://github.com/omeka-s-modules/ValueSuggest
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
