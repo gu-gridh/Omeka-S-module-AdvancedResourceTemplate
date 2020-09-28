@@ -73,7 +73,7 @@ class FieldNameToProperty extends AbstractPlugin
                 $base['pattern'] = $part;
                 $base['replace'] = [$part];
                 break;
-            } elseif (preg_match('~^(?<field>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*)$~', $part, $matches)) {
+            } elseif (preg_match('~^(?<field>[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+)$~', $part, $matches)) {
                 $base['field'] = $matches['field'];
             }
         }
