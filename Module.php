@@ -21,7 +21,7 @@ class Module extends AbstractModule
 
     protected function postInstall()
     {
-        $filepath = __DIR__. '/data/mapping/mappings.ini';
+        $filepath = __DIR__ . '/data/mapping/mappings.ini';
         if (!file_exists($filepath) || is_file($filepath) || !is_readable($filepath)) {
             return;
         }
@@ -197,7 +197,7 @@ class Module extends AbstractModule
 
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
-        $form->get('o:settings')
+        $form->get('o:data')
             ->add([
                 'name' => 'autocomplete',
                 'type' => Element\Radio::class,
@@ -267,7 +267,7 @@ class Module extends AbstractModule
     public function addResourceTemplateFormFilters(Event $event)
     {
         $event->getParam('inputFilter')
-            ->get('o:settings')
+            ->get('o:data')
             ->add([
                 'name' => 'autofillers',
                 'required' => false,
@@ -319,7 +319,7 @@ class Module extends AbstractModule
                     // 'id' => 'autocomplete',
                     'class' => 'setting',
                     'data-setting-key' => 'autocomplete',
-                    'value' => 'no',
+                    'value' => '',
                 ],
             ])
             ->add([
