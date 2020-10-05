@@ -4,8 +4,8 @@ $(document).ready(function() {
      * Prepare the lock for a original values of a property.
      */
     function prepareFieldLocked(field) {
-        var settings = field.data('settings') ? field.data('settings') : {};
-        if (settings.locked_value != true) {
+        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        if (rtpData.locked_value != true) {
             return;
         }
 
@@ -34,8 +34,8 @@ $(document).ready(function() {
      * Prepare the autocompletion for a property.
      */
     function prepareFieldAutocomplete(field) {
-        var templateSettings = $('#resource-values').data('template-settings') ;
-        var settings = field.data('settings') ? field.data('settings') : {};
+        var templateData = $('#resource-values').data('template-data') ;
+        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
 
         // Reset autocomplete for all properties.
         $('.inputs .values textarea.input-value').prop('autocomplete', 'off');
@@ -48,9 +48,9 @@ $(document).ready(function() {
         });
         field.find('.inputs .values textarea.input-value').prop('autocomplete', 'off').removeClass('autocomplete');
 
-        var autocomplete = templateSettings.autocomplete ? templateSettings.autocomplete : 'no';
-        autocomplete = settings.autocomplete && $.inArray(settings.autocomplete, ['no', 'sw', 'in']) 
-            ? settings.autocomplete
+        var autocomplete = templateData.autocomplete ? templateData.autocomplete : 'no';
+        autocomplete = rtpData.autocomplete && $.inArray(rtpData.autocomplete, ['no', 'sw', 'in'])
+            ? rtpData.autocomplete
             : autocomplete;
         if (autocomplete === 'sw' || autocomplete === 'in') {
             field.data('autocomplete', autocomplete);
@@ -64,8 +64,8 @@ $(document).ready(function() {
      */
     function prepareFieldLanguage(field) {
         // Add a specific datalist for the property. It replaces the previous one from another template.
-        var templateSettings = $('#resource-values').data('template-settings') ;
-        var settings = field.data('settings') ? field.data('settings') : {};
+        var templateData = $('#resource-values').data('template-data') ;
+        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
         var listName = 'value-languages';
         var term = field.data('property-term');
 
@@ -76,9 +76,9 @@ $(document).ready(function() {
             $('#value-languages').after('<datalist id="value-languages-template" class="value-languages"></datalist>');
             datalist = $('#value-languages-template');
         }
-        if (templateSettings.value_languages && !$.isEmptyObject(templateSettings.value_languages)) {
+        if (templateData.value_languages && !$.isEmptyObject(templateData.value_languages)) {
             listName = 'value-languages-template';
-            $.each(templateSettings.value_languages, function(code, label) {
+            $.each(templateData.value_languages, function(code, label) {
                 datalist.append($('<option>', { value: code, label: label.length ? label : code }));
             });
         }
@@ -91,9 +91,9 @@ $(document).ready(function() {
             datalist = field.find('.values ~ datalist.value-languages');
             datalist.attr('id', 'value-languages-' + term);
         }
-        if (settings.value_languages && !$.isEmptyObject(settings.value_languages)) {
+        if (rtpData.value_languages && !$.isEmptyObject(rtpData.value_languages)) {
             listName = 'value-languages-' + term;
-            $.each(settings.value_languages, function(code, label) {
+            $.each(rtpData.value_languages, function(code, label) {
                 datalist.append($('<option>', { value: code, label: label.length ? label : code }));
             });
         }
@@ -102,8 +102,8 @@ $(document).ready(function() {
         var inputLanguage = field.find('.values input.value-language');
         inputLanguage.attr('list', listName);
 
-        var noLanguage = !!(settings.use_language
-            && (settings.use_language === 'no' || (settings.use_language !== 'yes' && templateSettings.no_language)));
+        var noLanguage = !!(rtpData.use_language
+            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData.no_language)));
         field.data('no-language', noLanguage);
         field.find('.inputs .values input.value-language').each(function() {
             initValueLanguage($(this), field);
@@ -147,13 +147,13 @@ $(document).ready(function() {
             return;
         }
 
-        var templateSettings = $('#resource-values').data('template-settings');
-        var settings = field.data('settings') ? field.data('settings') : {};
-        var defaultLanguage = templateSettings.default_language && templateSettings.default_language.length
-            ? templateSettings.default_language
+        var templateData = $('#resource-values').data('template-data');
+        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        var defaultLanguage = templateData.default_language && templateData.default_language.length
+            ? templateData.default_language
             : '';
-        defaultLanguage = settings.default_language && settings.default_language.length
-            ? settings.default_language
+        defaultLanguage = rtpData.default_language && rtpData.default_language.length
+            ? rtpData.default_language
             : defaultLanguage;
         if (defaultLanguage.length) {
             value.find('input.value-language').val(defaultLanguage).addClass('active');
@@ -417,12 +417,12 @@ $(document).ready(function() {
     function prepareAutofiller() {
         $('#resource-values .non-properties .field.autofiller').remove();
 
-        var templateSettings = $('#resource-values').data('template-settings');
-        if (!templateSettings || !templateSettings.autofillers || !templateSettings.autofillers.length) {
+        var templateData = $('#resource-values').data('template-data');
+        if (!templateData || !templateData.autofillers || !templateData.autofillers.length) {
             return;
         }
 
-        templateSettings.autofillers.forEach(function(autofillerName) {
+        templateData.autofillers.forEach(function(autofillerName) {
             $.get(baseUrl + 'admin/autofiller/settings', {
                     service: autofillerName,
                     template: $('#resource-template-select').val(),
@@ -602,8 +602,8 @@ $(document).ready(function() {
                 return;
             }
         }
-        var settings = field.data('settings');
-        if (!settings) {
+        var rtpData = field.data('template-property-data');
+        if (!rtpData) {
             return;
         }
 
@@ -612,11 +612,11 @@ $(document).ready(function() {
             value.find('textarea.input-value.autocomplete').each(initAutocomplete);
         }
 
-        var templateSettings = $('#resource-values').data('template-settings');
-        var listName = templateSettings.value_languages && !$.isEmptyObject(templateSettings.value_languages)
+        var templateData = $('#resource-values').data('template-data');
+        var listName = templateData.value_languages && !$.isEmptyObject(templateData.value_languages)
             ? 'value-languages-template'
             : 'value-languages';
-        listName = settings.value_languages && !$.isEmptyObject(settings.value_languages)
+        listName = rtpData.value_languages && !$.isEmptyObject(rtpData.value_languages)
             ? 'value-languages-' + term
             : listName;
         value.find('input.value-language').attr('list', listName);
@@ -625,7 +625,7 @@ $(document).ready(function() {
 
         // Fill a new value with the setting specified in the template.
         // This is not the same than the default value in resource-form.js, that is an empty value.
-        if (!settings.default_value || !settings.default_value.trim().length
+        if (!rtpData.default_value || !rtpData.default_value.trim().length
             // The value from the object is already managed.
             || valueObj
             // Don't add a value if this is an edition.
@@ -645,8 +645,8 @@ $(document).ready(function() {
         ) {
             return;
         } else {
-            var defaultValue = jsonDecodeObject(settings.default_value);
-            fillValue(value, term, dataType, defaultValue === null ? {default: settings.default_value.trim()} : defaultValue);
+            var defaultValue = jsonDecodeObject(rtpData.default_value);
+            fillValue(value, term, dataType, defaultValue === null ? {default: rtpData.default_value.trim()} : defaultValue);
         }
     });
 

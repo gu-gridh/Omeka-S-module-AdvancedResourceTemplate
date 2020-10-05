@@ -188,7 +188,7 @@ class IndexController extends AbstractRestfulController
 
     protected function prepareServiceMapping(ResourceTemplateRepresentation $template, $service)
     {
-        $autofillers = $template->setting('autofillers');
+        $autofillers = $template->data('autofillers');
         if (empty($autofillers)) {
             return [];
         }
