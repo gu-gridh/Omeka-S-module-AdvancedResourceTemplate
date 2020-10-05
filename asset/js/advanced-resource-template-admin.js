@@ -256,10 +256,33 @@ $(document).ready(function() {
         value.find('textarea.input-value')
             .attr('aria-labelledby', valueLabelID);
         value.attr('aria-labelledby', valueLabelID);
+
+        valueObj = fixValueForDataType(valueObj, dataType);
+
         $(document).trigger('o:prepare-value', [dataType, value, valueObj]);
 
         return value;
     };
+
+    /**
+     * Fixes some values for some data types.
+     *
+     * Because resource-form.js listens event first, some fixes should be done
+     * for some data types, for example for a timestamp with an incomplete date,
+     * that can't' be managed by currently implemented twig features.
+     *
+     * @todo Implement missing twig features ("if empty", etc.).
+     */
+    function fixValueForDataType(valueObj, dataType) {
+        if (!valueObj || !Object.keys(valueObj).length) {
+            return valueObj;
+        }
+        if (dataType === 'numeric:timestamp') {
+            // Remove missing parts of the end of the date.
+            valueObj['@value'] = valueObj['@value'].replace(/[\s-]+$/g, '');
+        }
+        return valueObj;
+    }
 
     /**
      * Fill a new value, that can be empty.
