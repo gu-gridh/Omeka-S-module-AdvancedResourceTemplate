@@ -117,6 +117,16 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'data-placeholder' => 'Select data type…', // @translate
                     'data-property-key' => 'o:data_type',
                 ],
+            ])
+            // This fieldset is used only to simplify rendering.
+            // Elements inside this fieldset are not filtered and lost.
+            // TODO To be removed.
+            ->add([
+                'type' => Fieldset::class,
+                'name' => 'o:data',
+                'options' => [
+                    'label' => 'Advanced settings', // @translate
+                ],
             ]);
 
         $event = new Event('form.add_elements', $this);
