@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate\Controller\Admin;
 
@@ -152,7 +152,7 @@ class IndexController extends AbstractRestfulController
             return $this->returnError(['suggestions' => $this->translate('The template is empty.')]); // @translate
         }
 
-        /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
+        /* @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
         try {
             // Resource template does not support search by id, so use read().
             $template = $this->api()->read('resource_templates', ['id' => $query['template']])->getContent();

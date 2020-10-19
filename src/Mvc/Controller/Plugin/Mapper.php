@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 
@@ -272,7 +272,7 @@ class Mapper extends AbstractPlugin
         return $array;
     }
 
-    protected function simpleExtract($value, $target, $source)
+    protected function simpleExtract($value, $target, $source): void
     {
         $this->result[] = [
             'field' => $source,
@@ -281,7 +281,7 @@ class Mapper extends AbstractPlugin
         ];
     }
 
-    protected function appendValueToTarget($value, $target)
+    protected function appendValueToTarget($value, $target): void
     {
         $v = $target;
         unset($v['field'], $v['pattern'], $v['replace']);
@@ -336,7 +336,8 @@ class Mapper extends AbstractPlugin
             $v = $value;
             $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
             unset($filters[0]);
-            foreach ($filters as $filter) switch ($filter) {
+            foreach ($filters as $filter) {
+                switch ($filter) {
                 case 'abs':
                     $v = is_numeric($v) ? abs($v) : $v;
                     break;
@@ -400,6 +401,7 @@ class Mapper extends AbstractPlugin
                     // Nothing.
                     break;
             }
+            }
             $output = $v;
         }
         unset($output);
@@ -458,7 +460,7 @@ class Mapper extends AbstractPlugin
      * @param array $flatArray
      * @param string $keys
      */
-    private function _flatArray(array &$array, &$flatArray, $keys = null)
+    private function _flatArray(array &$array, &$flatArray, $keys = null): void
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {

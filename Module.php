@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate;
 
@@ -19,7 +19,7 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
-    protected function postInstall()
+    protected function postInstall(): void
     {
         $filepath = __DIR__ . '/data/mapping/mappings.ini';
         if (!file_exists($filepath) || is_file($filepath) || !is_readable($filepath)) {
@@ -30,7 +30,7 @@ class Module extends AbstractModule
         $settings->set('advancedresourcetemplate_autofillers', $mapping);
     }
 
-    public function onBootstrap(MvcEvent $event)
+    public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
@@ -41,7 +41,7 @@ class Module extends AbstractModule
             );
     }
 
-    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
@@ -97,7 +97,7 @@ class Module extends AbstractModule
         );
     }
 
-    public function fixResourceForm(Event $event)
+    public function fixResourceForm(Event $event): void
     {
         /** @var \Omeka\Form\ResourceForm $form */
         $form = $event->getTarget();
@@ -130,7 +130,7 @@ class Module extends AbstractModule
             ]);
     }
 
-    public function addAdminResourceHeaders(Event $event)
+    public function addAdminResourceHeaders(Event $event): void
     {
         $view = $event->getTarget();
 
@@ -152,7 +152,7 @@ class Module extends AbstractModule
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
     }
 
-    public function handleMainSettings(Event $event)
+    public function handleMainSettings(Event $event): void
     {
         parent::handleMainSettings($event);
 
@@ -169,7 +169,7 @@ class Module extends AbstractModule
             ->setValue($value);
     }
 
-    public function handleMainSettingsFilters(Event $event)
+    public function handleMainSettingsFilters(Event $event): void
     {
         $event->getParam('inputFilter')
             ->get('advancedresourcetemplate')
@@ -187,7 +187,7 @@ class Module extends AbstractModule
             ]);
     }
 
-    public function addResourceTemplateFormElements(Event $event)
+    public function addResourceTemplateFormElements(Event $event): void
     {
         $services = $this->getServiceLocator();
         $autofillers = [];
@@ -264,7 +264,7 @@ class Module extends AbstractModule
             ]);
     }
 
-    public function addResourceTemplateFormFilters(Event $event)
+    public function addResourceTemplateFormFilters(Event $event): void
     {
         $event->getParam('inputFilter')
             ->get('o:data')
@@ -274,7 +274,7 @@ class Module extends AbstractModule
             ]);
     }
 
-    public function addResourceTemplatePropertyFieldsetElements(Event $event)
+    public function addResourceTemplatePropertyFieldsetElements(Event $event): void
     {
         /** @var \Omeka\Form\ResourceTemplatePropertyFieldset $fieldset */
         $fieldset = $event->getTarget();

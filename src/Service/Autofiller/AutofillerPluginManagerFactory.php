@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate\Service\Autofiller;
 
 use AdvancedResourceTemplate\Autofiller\AutofillerPluginManager;
 use Interop\Container\ContainerInterface;
-use Omeka\Service\Exception;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Omeka\Service\Exception;
 
 class AutofillerPluginManagerFactory implements FactoryInterface
 {
