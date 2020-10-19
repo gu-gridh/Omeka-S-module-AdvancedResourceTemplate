@@ -28,9 +28,19 @@ return [
             dirname(__DIR__) . '/view',
         ],
     ],
+    'view_helpers' => [
+        'factories' => [
+            'dataType' => Service\ViewHelper\DataTypeFactory::class,
+        ],
+    ],
     'form_elements' => [
         'invokables' => [
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
+        ],
+        'factories' => [
+            'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
+            'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
+            'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
         ],
     ],
     'controllers' => [
