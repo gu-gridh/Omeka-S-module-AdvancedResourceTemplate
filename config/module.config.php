@@ -33,6 +33,7 @@ return [
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
         'factories' => [
+            'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
         ],
