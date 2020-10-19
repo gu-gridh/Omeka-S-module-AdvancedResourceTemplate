@@ -1,0 +1,16 @@
+CREATE TABLE `resource_template_data` (
+    `id` INT AUTO_INCREMENT NOT NULL,
+    `resource_template_id` INT NOT NULL,
+    `data` LONGTEXT NOT NULL COMMENT '(DC2Type:json_array)',
+    UNIQUE INDEX UNIQ_31D1FFC816131EA (`resource_template_id`),
+    PRIMARY KEY(`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
+CREATE TABLE `resource_template_property_data` (
+    `id` INT AUTO_INCREMENT NOT NULL,
+    `resource_template_property_id` INT NOT NULL,
+    `data` LONGTEXT NOT NULL COMMENT '(DC2Type:json_array)',
+    UNIQUE INDEX UNIQ_B133BBAA2A6B767B (`resource_template_property_id`),
+    PRIMARY KEY(`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
+ALTER TABLE resource_template_data ADD CONSTRAINT FK_31D1FFC816131EA FOREIGN KEY (resource_template_id) REFERENCES resource_template (id);
+ALTER TABLE resource_template_property_data ADD CONSTRAINT FK_B133BBAA2A6B767B FOREIGN KEY (resource_template_property_id) REFERENCES resource_template_property (id);
