@@ -19,7 +19,7 @@ class DataType extends \Omeka\View\Helper\DataType
      *   - Data types organized in option groups
      *
      * @param string $name
-     * @param string $value
+     * @param string|array $value
      * @param array $attributes
      */
     public function getSelect($name, $value = null, $attributes = [])
@@ -55,6 +55,9 @@ class DataType extends \Omeka\View\Helper\DataType
         $element->setEmptyOption('Default')
             ->setValueOptions($options)
             ->setAttributes($attributes);
+        if (!$element->getAttribute('multiple') && is_array($value)) {
+            $value = reset($value);
+        }
         $element->setValue($value);
         return $this->getView()->formSelect($element);
     }
