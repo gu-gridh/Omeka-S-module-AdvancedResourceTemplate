@@ -4,9 +4,6 @@ Advanced Resource Template (module for Omeka S)
 > __New versions of this module and support for Omeka S version 3.0 and above
 > are available on [GitLab], which seems to respect users and privacy better.__
 
-> This module is based on the pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S and [backport](https://gitlab.com/Daniel-KM/Omeka-S/-/tree/backport) for Omeka Classic.
-
-
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
 the resource templates in order to simplify and to improve the edition of
 resources:
