@@ -3,32 +3,12 @@
 namespace AdvancedResourceTemplate\View\Helper;
 
 use Laminas\Form\Element\Select;
-use Laminas\View\Helper\AbstractHelper;
-use Omeka\DataType\Manager as DataTypeManager;
 
 /**
  * View helper for rendering data types.
  */
-class DataType extends AbstractHelper
+class DataType extends \Omeka\View\Helper\DataType
 {
-    /**
-     * @var DataTypeManager
-     */
-    protected $manager;
-
-    protected $dataTypes;
-
-    /**
-     * Construct the helper.
-     *
-     * @param DataTypeManager $dataTypeManager
-     */
-    public function __construct(DataTypeManager $dataTypeManager)
-    {
-        $this->manager = $dataTypeManager;
-        $this->dataTypes = $this->manager->getRegisteredNames();
-    }
-
     /**
      * Get the data type select markup.
      *
@@ -83,10 +63,12 @@ class DataType extends AbstractHelper
     {
         $view = $this->getView();
         $templates = '';
+        $resource = isset($view->resource) ? $view->resource : null;
+        $partial = $view->plugin('partial');
         foreach ($this->dataTypes as $dataType) {
-            $templates .= $view->partial('common/data-type-wrapper', [
+            $templates .= $partial('common/data-type-wrapper', [
                 'dataType' => $dataType,
-                'resource' => isset($view->resource) ? $view->resource : null,
+                'resource' => $resource,
             ]);
         }
         return $templates;
