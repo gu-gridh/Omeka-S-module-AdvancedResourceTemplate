@@ -1,4 +1,11 @@
 <?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+ */
+
+// Copy of original file + resource template data and resource template properties data.
+
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
@@ -20,6 +27,21 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 </div>
 <?php endif; ?>
 
+<div>
+    <dl><?php foreach ($resourceTemplate->data() as $key => $value): ?>
+        <?php if (!$value) continue; ?>
+        <dt><?php echo str_replace('_', ' ', $key); ?></dt>
+        <?php if (is_array($value)): ?>
+            <?php foreach ($value as $k => $v): ?>
+        <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
+            <?php endforeach; ?>
+        <?php else: ?>
+        <dd><?php echo $escape($value); ?></dd>
+        <?php endif; ?>
+        <?php endforeach;
+    ?></dl>
+</div>
+
 <table id="properties" class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
     <thead>
     <tr>
@@ -29,6 +51,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
         <th><?php echo $translate('Alternate comment'); ?></th>
         <th><?php echo $translate('Required?'); ?></th>
         <th><?php echo $translate('Private?'); ?></th>
+        <th><?php echo $translate('Other settings'); ?></th>
     </tr>
     </thead>
     <tbody>
@@ -56,6 +79,18 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
             <td><?php echo $escape($resourceTemplateProperty->alternateComment()); ?></td>
             <td><?php echo $resourceTemplateProperty->isRequired() ? $translate('Yes') : $translate('No'); ?></td>
             <td><?php echo $resourceTemplateProperty->isPrivate() ? $translate('Yes') : $translate('No'); ?></td>
+            <td><dl><?php foreach ($resourceTemplateProperty->data() as $key => $value): ?>
+                <?php if (!$value) continue; ?>
+                <dt><?php echo str_replace('_', ' ', $key); ?></dt>
+                <?php if (is_array($value)): ?>
+                    <?php foreach ($value as $k => $v): ?>
+                <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                <dd><?php echo $escape($value); ?></dd>
+                <?php endif; ?>
+            <?php endforeach;
+            ?></dl></td>
         </tr>
     <?php endforeach; ?>
     </tbody>
