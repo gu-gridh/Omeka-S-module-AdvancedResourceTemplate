@@ -32,6 +32,10 @@ return [
         'invokables' => [
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
+        'factories' => [
+            'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
+            'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
+        ],
     ],
     'controllers' => [
         'factories' => [
