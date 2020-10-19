@@ -46,6 +46,7 @@ return [
     'controllers' => [
         'factories' => [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
+            'Omeka\Controller\Admin\ResourceTemplate' => Service\Controller\Admin\ResourceTemplateControllerFactory::class,
         ],
     ],
     'controller_plugins' => [
