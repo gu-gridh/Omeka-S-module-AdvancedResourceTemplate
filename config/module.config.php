@@ -28,6 +28,11 @@ return [
             dirname(__DIR__) . '/view',
         ],
     ],
+    'view_helpers' => [
+        'factories' => [
+            'dataType' => Service\ViewHelper\DataTypeFactory::class,
+        ],
+    ],
     'form_elements' => [
         'invokables' => [
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
