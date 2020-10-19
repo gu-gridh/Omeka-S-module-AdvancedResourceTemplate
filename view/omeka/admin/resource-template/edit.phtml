@@ -1,4 +1,13 @@
 <?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+ * @var \AdvancedResourceTemplate\Form\ResourceTemplateForm $form
+ * @var \AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset $propertyFieldset
+ */
+
+// Copy of original file + replace propertyRow by propertyFieldset.
+
 $translate = $this->plugin('translate');
 ?>
 <?php $this->htmlElement('body')->appendAttribute('class', 'edit resource-templates'); ?>
@@ -10,8 +19,8 @@ echo $this->partial(
     'omeka/admin/resource-template/form.phtml',
     [
         'form' => $form,
+        'propertyFieldset' => $propertyFieldset,
         'resourceTemplate' => $resourceTemplate,
-        'propertyRows' => $propertyRows,
         'submitLabel' => $translate('Save'),
         'action' => 'edit',
     ]
