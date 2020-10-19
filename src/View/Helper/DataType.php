@@ -74,18 +74,19 @@ class DataType extends \Omeka\View\Helper\DataType
         return $templates;
     }
 
-    public function getTemplate($dataType)
+    public function getLabel($dataType)
     {
-        return $this->manager->get($dataType)->form($this->getView());
+        return $this->manager->get($dataType)->getLabel();
     }
 
     /**
-     * Prepare the view to enable the data types.
+     * @param string $dataType
+     * @return \Omeka\DataType\DataTypeInterface|null
      */
-    public function prepareForm()
+    public function getDataType($dataType)
     {
-        foreach ($this->dataTypes as $dataType) {
-            $this->manager->get($dataType)->prepareForm($this->getView());
-        }
+        return $this->manager->has($dataType)
+            ? $this->manager->get($dataType)
+            : null;
     }
 }
