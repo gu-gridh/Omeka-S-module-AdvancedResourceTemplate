@@ -21,6 +21,10 @@ new Sortable(propertyList[0], {
 $('#property-selector .selector-child').click(function(e) {
     e.preventDefault();
     var propertyId = $(this).closest('li').data('property-id');
+    // Resource templates cannot be assigned duplicate properties.
+    if ($('#properties li[data-property-id="' + propertyId + '"]').length) {
+        return;
+    }
     $.get(propertyList.data('addNewPropertyRowUrl'), {property_id: propertyId})
         .done(function(data) {
             // Check if the property is the template title or description.
