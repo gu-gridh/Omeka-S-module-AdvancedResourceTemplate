@@ -52,7 +52,7 @@ return [
             'admin' => [
                 'child_routes' => [
                     'values' => [
-                        'type' => \Zend\Router\Http\Literal::class,
+                        'type' => \Laminas\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/values',
                             'defaults' => [
@@ -63,7 +63,7 @@ return [
                         ],
                     ],
                     'autofiller' => [
-                        'type' => \Zend\Router\Http\Literal::class,
+                        'type' => \Laminas\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/autofiller',
                             'defaults' => [
@@ -75,7 +75,7 @@ return [
                         'may_terminate' => true,
                         'child_routes' => [
                             'settings' => [
-                                'type' => \Zend\Router\Http\Literal::class,
+                                'type' => \Laminas\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/settings',
                                     'defaults' => [

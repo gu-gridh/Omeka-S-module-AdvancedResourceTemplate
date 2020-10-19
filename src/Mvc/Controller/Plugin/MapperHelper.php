@@ -30,7 +30,7 @@
 namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 
 use Doctrine\DBAL\Connection;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\DataType\Manager as DataTypeManager;
 
 class MapperHelper extends AbstractPlugin

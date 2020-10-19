@@ -2,7 +2,7 @@
 
 namespace AdvancedResourceTemplate\Autofiller;
 
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 abstract class AbstractAutofiller implements AutofillerInterface
 {
@@ -27,7 +27,7 @@ abstract class AbstractAutofiller implements AutofillerInterface
     protected $options;
 
     /**
-     * @var \Zend\Http\Client
+     * @var \Laminas\Http\Client
      */
     protected $httpClient;
 

@@ -4,7 +4,7 @@ namespace AdvancedResourceTemplate\Service\ControllerPlugin;
 
 use AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class MapperHelperFactory implements FactoryInterface
 {
