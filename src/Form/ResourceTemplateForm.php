@@ -5,6 +5,7 @@ namespace AdvancedResourceTemplate\Form;
 use Omeka\Form\Element\ResourceClassSelect;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
+use Laminas\Form\Fieldset;
 use Laminas\Form\Form;
 
 class ResourceTemplateForm extends Form
@@ -51,6 +52,17 @@ class ResourceTemplateForm extends Form
             'type' => 'hidden',
             'attributes' => [
                 'id' => 'description-property-id',
+            ],
+        ]);
+
+        $this->add([
+            'type' => Fieldset::class,
+            'name' => 'o:data',
+            'options' => [
+                'label' => 'Other settings', // @translate
+            ],
+            'attributes' => [
+                'class' => 'settings',
             ],
         ]);
 
