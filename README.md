@@ -1,6 +1,9 @@
 Advanced Resource Template (module for Omeka S)
 ===============================================
 
+> __New versions of this module and support for Omeka S version 3.0 and above
+> are available on [GitLab], which seems to respect users and privacy better.__
+
 > This module is based on the pull request [#1614](https://github.com/omeka/omeka-s/pull/1614) for Omeka S and [backport](https://github.com/Daniel-KM/Omeka-S/tree/backport) for Omeka Classic.
 
 
@@ -251,4 +254,5 @@ Université des Antilles and Université de la Guyane, currently managed with
 [jQuery-Autocomplete]: https://www.devbridge.com/sourcery/components/jquery-autocomplete/
 [Manioc]: http://www.manioc.org
 [Greenstone]: http://www.greenstone.org
+[GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
