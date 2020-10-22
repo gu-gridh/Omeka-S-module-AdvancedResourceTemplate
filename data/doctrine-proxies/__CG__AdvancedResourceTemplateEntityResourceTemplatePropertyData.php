@@ -66,10 +66,10 @@ class ResourceTemplatePropertyData extends \AdvancedResourceTemplate\Entity\Reso
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'id', 'resourceTemplateProperty', 'data'];
+            return ['__isInitialized__', 'id', 'resourceTemplate', 'resourceTemplateProperty', 'data'];
         }
 
-        return ['__isInitialized__', 'id', 'resourceTemplateProperty', 'data'];
+        return ['__isInitialized__', 'id', 'resourceTemplate', 'resourceTemplateProperty', 'data'];
     }
 
     /**
@@ -189,6 +189,17 @@ class ResourceTemplatePropertyData extends \AdvancedResourceTemplate\Entity\Reso
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getId', []);
 
         return parent::getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getResourceTemplate(): \Omeka\Entity\ResourceTemplate
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getResourceTemplate', []);
+
+        return parent::getResourceTemplate();
     }
 
     /**

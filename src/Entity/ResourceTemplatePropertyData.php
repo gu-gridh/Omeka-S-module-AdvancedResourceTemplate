@@ -3,6 +3,7 @@
 namespace AdvancedResourceTemplate\Entity;
 
 use Omeka\Entity\AbstractEntity;
+use Omeka\Entity\ResourceTemplate;
 use Omeka\Entity\ResourceTemplateProperty;
 
 /**
@@ -21,12 +22,30 @@ class ResourceTemplatePropertyData extends AbstractEntity
     protected $id;
 
     /**
+     * The template is not required but this denormalization simplifies search.
+     * Of course, the resource template must be the property one, so there is
+     * no setter.
+     *
+     * @var ResourceTemplate
+     * @ManyToOne(
+     *     targetEntity=\Omeka\Entity\ResourceTemplate::class,
+     *     fetch="EXTRA_LAZY"
+     * )
+     * @JoinColumn(
+     *     onDelete="CASCADE",
+     *     nullable=false
+     * )
+     */
+    protected $resourceTemplate;
+
+    /**
      * @var ResourceTemplateProperty
      * @OneToOne(
      *     targetEntity=\Omeka\Entity\ResourceTemplateProperty::class,
      *     fetch="EXTRA_LAZY"
      * )
      * @JoinColumn(
+     *     onDelete="CASCADE",
      *     nullable=false
      * )
      */
@@ -46,11 +65,20 @@ class ResourceTemplatePropertyData extends AbstractEntity
     }
 
     /**
+     * @return \Omeka\Entity\ResourceTemplate
+     */
+    public function getResourceTemplate(): ResourceTemplate
+    {
+        return $this->resourceTemplate;
+    }
+
+    /**
      * @param ResourceTemplateProperty $resourceTemplateProperty
      * @return self
      */
     public function setResourceTemplateProperty(ResourceTemplateProperty $resourceTemplateProperty)
     {
+        $this->resourceTemplate = $resourceTemplateProperty->getResourceTemplate();
         $this->resourceTemplateProperty = $resourceTemplateProperty;
         return $this;
     }
