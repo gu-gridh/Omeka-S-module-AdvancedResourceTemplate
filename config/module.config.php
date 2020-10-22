@@ -23,6 +23,16 @@ return [
             'Autofiller\Manager' => Autofiller\AutofillerPluginManager::class,
         ],
     ],
+    'api_adapters' => [
+        'invokables' => [
+            'resource_templates' => Api\Adapter\ResourceTemplateAdapter::class,
+        ],
+    ],
+    'permissions' => [
+        'acl_resources' => [
+            'Omeka\Api\Adapter\ResourceTemplateAdapter',
+        ],
+    ],
     'view_manager' => [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
