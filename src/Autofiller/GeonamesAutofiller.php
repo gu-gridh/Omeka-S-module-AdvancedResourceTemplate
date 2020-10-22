@@ -30,6 +30,8 @@ class GeonamesAutofiller extends AbstractAutofiller
             return null;
         }
 
+        // "http" is used to avoid issues with certificates on the server.
+        // @see \ValueSuggest\Suggester\Geonames\GeonamesSuggest::getSuggestions()
         $response = $this->httpClient
             ->setUri('http://api.geonames.org/searchJSON')
             ->setParameterGet($params)
@@ -42,6 +44,9 @@ class GeonamesAutofiller extends AbstractAutofiller
 
         // Parse the JSON response.
         $results = json_decode($response->getBody(), true);
+        if (empty($results['geonames'])) {
+            return null;
+        }
 
         // Prepare mapper one time.
         $this->mapper->setMapping($this->mapping);
