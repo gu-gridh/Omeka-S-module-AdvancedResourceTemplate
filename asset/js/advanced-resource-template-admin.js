@@ -191,7 +191,7 @@ $(document).ready(function() {
     var makeNewField = function(property, dataTypes) {
         // Prepare data type name of the field.
         if (!dataTypes || dataTypes.length < 1) {
-            dataTypes = $('#properties').data('default-data-types').split(',');
+            dataTypes = $('div#properties').data('default-data-types');
         }
 
         // Sort out whether property is the LI that holds data, or the id.

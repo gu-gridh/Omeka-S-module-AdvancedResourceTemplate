@@ -2,6 +2,13 @@
 
     $(document).ready( function() {
 
+        // Store the default data types as array.
+        if ($('div#properties').data('default-data-types') && $('div#properties').data('default-data-types').split(',').length) {
+            $('div#properties').data('default-data-types', $('div#properties').data('default-data-types').split(','));
+        } else {
+            $('div#properties').data('default-data-types', ['literal', 'resource', 'uri']);
+        }
+
         // Select property
         $('#property-selector li.selector-child').on('click', function(e) {
             e.stopPropagation();
@@ -325,7 +332,7 @@
     var makeNewField = function(property, dataTypes) {
         // Prepare data type name of the field.
         if (!dataTypes || dataTypes.length < 1) {
-            dataTypes = ['literal', 'resource', 'uri'];
+            dataTypes = $('div#properties').data('default-data-types');
         }
 
         // Sort out whether property is the LI that holds data, or the id.
@@ -386,7 +393,7 @@
         var propertyId = templateProperty['o:property']['o:id'];
         var dataTypes = templateProperty['o:data_type'] && templateProperty['o:data_type'].length
             ? templateProperty['o:data_type']
-            : ['literal', 'resource', 'uri'];
+            : $('div#properties').data('default-data-types');
 
         var field = properties.find('[data-property-id="' + propertyId + '"]');
         if (field.length == 0) {
