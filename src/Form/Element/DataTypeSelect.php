@@ -2,8 +2,8 @@
 
 namespace AdvancedResourceTemplate\Form\Element;
 
-use Omeka\DataType\Manager as DataTypeManager;
 use Laminas\Form\Element\Select;
+use Omeka\DataType\Manager as DataTypeManager;
 
 class DataTypeSelect extends Select
 {
@@ -22,6 +22,20 @@ class DataTypeSelect extends Select
      * @var array
      */
     protected $dataTypes = [];
+
+    /**
+     * @see https://github.com/zendframework/zendframework/issues/2761#issuecomment-14488216
+     *
+     * {@inheritDoc}
+     * @see \Laminas\Form\Element\Select::getInputSpecification()
+     */
+    public function getInputSpecification()
+    {
+        $inputSpecification = parent::getInputSpecification();
+        $inputSpecification['required'] = isset($this->attributes['required'])
+            && $this->attributes['required'];
+        return $inputSpecification;
+    }
 
     public function getValueOptions()
     {
