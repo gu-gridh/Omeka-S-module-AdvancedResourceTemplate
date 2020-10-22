@@ -2,7 +2,8 @@
 
 namespace AdvancedResourceTemplate\View\Helper;
 
-use Laminas\Form\Element\Select;
+use Laminas\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
+use Omeka\DataType\Manager as DataTypeManager;
 
 /**
  * View helper for rendering data types.
@@ -10,55 +11,32 @@ use Laminas\Form\Element\Select;
 class DataType extends \Omeka\View\Helper\DataType
 {
     /**
-     * Get the data type select markup.
-     *
-     * By default, options are listed in this order:
-     *
-     *   - Native data types (literal, uri, resource)
-     *   - Data types not organized in option groups
-     *   - Data types organized in option groups
-     *
-     * @param string $name
-     * @param string|array $value
-     * @param array $attributes
+     * @param FormElementManager
      */
+    protected $formElementManager;
+
+    public function __construct(DataTypeManager $dataTypeManager, FormElementManager $formElementManager)
+    {
+        $this->manager = $dataTypeManager;
+        $this->dataTypes = $this->manager->getRegisteredNames();
+        $this->formElementManager = $formElementManager;
+    }
+
     public function getSelect($name, $value = null, $attributes = [])
     {
-        $options = [];
-        $optgroupOptions = [];
-        foreach ($this->dataTypes as $dataTypeName) {
-            $dataType = $this->manager->get($dataTypeName);
-            $label = $dataType->getLabel();
-            if ($optgroupLabel = $dataType->getOptgroupLabel()) {
-                // Hash the optgroup key to avoid collisions when merging with
-                // data types without an optgroup.
-                $optgroupKey = md5($optgroupLabel);
-                // Put resource data types before ones added by modules.
-                $optionsVal = in_array($dataTypeName, ['resource', 'resource:item', 'resource:itemset', 'resource:media'])
-                    ? 'options' : 'optgroupOptions';
-                if (!isset(${$optionsVal}[$optgroupKey])) {
-                    ${$optionsVal}[$optgroupKey] = [
-                        'label' => $optgroupLabel,
-                        'options' => [],
-                    ];
-                }
-                ${$optionsVal}[$optgroupKey]['options'][$dataTypeName] = $label;
-            } else {
-                $options[$dataTypeName] = $label;
-            }
-        }
-        // Always put data types not organized in option groups before data
-        // types organized within option groups.
-        $options = array_merge($options, $optgroupOptions);
-
-        $element = new Select($name);
-        $element->setEmptyOption('Default')
-            ->setValueOptions($options)
+        $element = $this->formElementManager->get(\AdvancedResourceTemplate\Form\Element\DataTypeSelect::class);
+        $element
+            ->setName($name)
+            ->setEmptyOption('Default')
             ->setAttributes($attributes);
         if (!$element->getAttribute('multiple') && is_array($value)) {
             $value = reset($value);
         }
         $element->setValue($value);
+        // Fix an issue with chosen select.
+        if (isset($attributes['class']) && strpos($attributes['class'], 'chosen-select') !== false) {
+            $element->setEmptyOption('');
+        }
         return $this->getView()->formSelect($element);
     }
 
@@ -75,21 +53,5 @@ class DataType extends \Omeka\View\Helper\DataType
             ]);
         }
         return $templates;
-    }
-
-    public function getLabel($dataType)
-    {
-        return $this->manager->get($dataType)->getLabel();
-    }
-
-    /**
-     * @param string $dataType
-     * @return \Omeka\DataType\DataTypeInterface|null
-     */
-    public function getDataType($dataType)
-    {
-        return $this->manager->has($dataType)
-            ? $this->manager->get($dataType)
-            : null;
     }
 }

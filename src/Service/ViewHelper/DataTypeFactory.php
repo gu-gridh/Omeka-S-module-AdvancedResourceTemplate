@@ -18,6 +18,9 @@ class DataTypeFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        return new DataType($services->get('Omeka\DataTypeManager'));
+        return new DataType(
+            $services->get('Omeka\DataTypeManager'),
+            $services->get('FormElementManager')
+        );
     }
 }
