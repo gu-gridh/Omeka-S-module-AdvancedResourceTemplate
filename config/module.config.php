@@ -46,6 +46,8 @@ return [
     ],
     'view_helpers' => [
         'factories' => [
+            // TODO To be removed with #omeka/omeka-s/1623.
+            'assetUrl' => Service\ViewHelper\AssetUrlFactory::class,
             'dataType' => Service\ViewHelper\DataTypeFactory::class,
         ],
     ],
