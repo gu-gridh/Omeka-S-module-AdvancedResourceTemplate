@@ -33,8 +33,48 @@ class Module extends AbstractModule
     public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
+        // Copy or rights of the main Resource Template.
+        /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
         $acl
+            ->allow(
+                null,
+                [\AdvancedResourceTemplate\Api\Adapter\ResourceTemplateAdapter::class],
+                ['search', 'read']
+            )
+            ->allow(
+                ['author', 'editor'],
+                [\AdvancedResourceTemplate\Api\Adapter\ResourceTemplateAdapter::class],
+                ['create', 'update', 'delete']
+            )
+            ->allow(
+                null,
+                [
+                    \AdvancedResourceTemplate\Entity\ResourceTemplateData::class,
+                    \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class,
+                ],
+                ['read']
+            )
+            // The controller is only an alias.
+            // ->allow(
+            //     ['researcher', 'author', 'reviewer', 'editor'],
+            //     ['AdvancedResourceTemplate\Controller\Admin\ResourceTemplate'],
+            //     ['index', 'browse', 'show', 'show-details']
+            // )
+            // ->allow(
+            //     ['author', 'editor'],
+            //     ['AdvancedResourceTemplate\Controller\Admin\ResourceTemplate'],
+            //     ['add-new-property-row', 'import', 'add', 'edit', 'delete', 'delete-confirm']
+            // )
+            ->allow(
+                ['author', 'editor'],
+                [
+                    \AdvancedResourceTemplate\Entity\ResourceTemplateData::class,
+                    \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class,
+                ],
+                ['create', 'update', 'delete']
+            )
+            // Specific rights for the controller.
             ->allow(
                 $acl->getRoles(),
                 ['AdvancedResourceTemplate\Controller\Admin\Index']

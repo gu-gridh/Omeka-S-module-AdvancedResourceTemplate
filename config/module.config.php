@@ -30,6 +30,8 @@ return [
     ],
     'permissions' => [
         'acl_resources' => [
+            \AdvancedResourceTemplate\Entity\ResourceTemplateData::class,
+            \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class,
             'Omeka\Api\Adapter\ResourceTemplateAdapter',
         ],
     ],
