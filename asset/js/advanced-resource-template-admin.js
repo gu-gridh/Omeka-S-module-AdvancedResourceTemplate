@@ -164,7 +164,7 @@ $(document).ready(function() {
     /**
      * Make a new property field with data stored in the property selector.
      *
-     * Copy of resource-form.js, not available here.
+     * Copy of resource-form.js, not available here, except the trigger.
      * @see resource-form.js makeNewField()
      */
     var makeNewField = function(property, dataTypes) {
@@ -211,6 +211,13 @@ $(document).ready(function() {
         field.attr('data-data-types', dataTypes.join(','));
         field.attr('aria-labelledby', 'property-' + propertyId + '-label');
         $('div#properties').append(field);
+
+        new Sortable(field.find('.values')[0], {
+            draggable: '.value',
+            handle: '.sortable-handle'
+        });
+
+        // field.trigger('o:property-added');
         return field;
     };
 
@@ -680,7 +687,7 @@ $(document).ready(function() {
         if (sidebar.find('.quick-add-resource').length || !sidebar.find('#sidebar-resource-search').length) {
             return;
         }
-        // TODO Determine the resource type in a cleaner way.
+        // TODO Determine the resource type in a cleaner way (cf. fix #omeka/omeka-s/1655).
         var resourceType = sidebar.find('#sidebar-resource-search').data('search-url');
         resourceType = resourceType.substring(resourceType.lastIndexOf('/admin/') + 7, resourceType.lastIndexOf('/sidebar-select'));
         if (!resourceType || resourceType === 'media') {

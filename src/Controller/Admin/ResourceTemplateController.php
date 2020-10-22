@@ -2,11 +2,12 @@
 
 namespace AdvancedResourceTemplate\Controller\Admin;
 
+use AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset;
 use Omeka\DataType\Manager as DataTypeManager;
 use Omeka\Form\ConfirmForm;
 use Omeka\Form\ResourceTemplateForm;
 use Omeka\Form\ResourceTemplateImportForm;
-use Omeka\Form\ResourceTemplatePropertyFieldset;
+// use Omeka\Form\ResourceTemplatePropertyFieldset;
 use Omeka\Form\ResourceTemplateReviewImportForm;
 use Omeka\Mvc\Exception\NotFoundException;
 use Omeka\Stdlib\Message;
@@ -480,7 +481,8 @@ class ResourceTemplateController extends AbstractActionController
     {
         /**
          * @var \Omeka\Form\ResourceTemplateForm$form
-         * @var \Omeka\Form\ResourceTemplatePropertyFieldset $rowSettingsFieldset
+         * // @var \Omeka\Form\ResourceTemplatePropertyFieldset $propertyFieldset
+         * @var \AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset $propertyFieldset
          */
         $form = $this->getForm(ResourceTemplateForm::class);
         $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
@@ -504,10 +506,12 @@ class ResourceTemplateController extends AbstractActionController
 
         if ($isPost) {
             $post = $this->params()->fromPost();
-            // For an undetermined reason, the fieldset "o:settings" inside the
+            // For an undetermined reason, the fieldset "o:data" inside the
             // collection is not validated. So elements should be attached to
             // the property fieldset with attribute "data-setting-key", so then
-            // can be moved in "o:settings" after automatic filter and validation.
+            // can be moved in "o:data" after automatic filter and validation.
+            // Anyway, the values with a nested key like o:property[o:id] should
+            // be cleaned.
             $post = $this->fixPostArray($post);
             $post = $this->fixDataArray($post);
             $form->setData($post);
@@ -557,11 +561,15 @@ class ResourceTemplateController extends AbstractActionController
         if (!empty($data['o:description_property'])) {
             $data['o:description_property[o:id]'] = $data['o:description_property']['o:id'];
         }
+        if (empty($data['o:resource_template_property'])) {
+            $data['o:resource_template_property'] = [];
+        }
         foreach ($data['o:resource_template_property'] as $key => $value) {
             $data['o:resource_template_property'][$key]['o:property[o:id]'] = $value['o:property']['o:id'];
             unset($data['o:resource_template_property'][$key]['o:property[o:id']);
-            if (!empty($value['o:settings'])) {
-                $data['o:resource_template_property'][$key] = array_merge($data['o:resource_template_property'][$key], $value['o:settings']);
+            $data['o:resource_template_property'][$key]['o:data_type'] = empty($value['o:data_type']) ? [] : array_filter($value['o:data_type']);
+            if (!empty($value['o:data'])) {
+                $data['o:resource_template_property'][$key] = array_merge($data['o:resource_template_property'][$key], $value['o:data']);
             }
         }
         return $data;
@@ -569,6 +577,9 @@ class ResourceTemplateController extends AbstractActionController
 
     protected function fixPostArray(array $post)
     {
+        if (empty($post['o:resource_template_property'])) {
+            $post['o:resource_template_property'] = [];
+        }
         $post['o:resource_template_property'] = array_values($post['o:resource_template_property']);
         foreach ($post['o:resource_template_property'] as $key => $value) {
             if (empty($value['o:property[o:id'])) {
@@ -579,8 +590,8 @@ class ResourceTemplateController extends AbstractActionController
             // Kept to manage issues.
             $post['o:resource_template_property'][$key]['o:property[o:id]'] = $value['o:property[o:id'];
             unset($post['o:resource_template_property'][$key]['o:property[o:id']);
-            if (!empty($value['o:settings'])) {
-                $post['o:resource_template_property'][$key] = array_merge($post['o:resource_template_property'][$key], $value['o:settings']);
+            if (!empty($value['o:data'])) {
+                $post['o:resource_template_property'][$key] = array_merge($post['o:resource_template_property'][$key], $value['o:data']);
             }
         }
         return $post;
@@ -596,7 +607,7 @@ class ResourceTemplateController extends AbstractActionController
                 $settingKeys[$element->getName()] = $settingKey;
             }
         }
-        // Move settings into o:settings and remove empty settings.
+        // Move settings into o:data and remove empty settings.
         $data += [
             'o:resource_class' => empty($data['o:resource_class[o:id]']) ? null : ['o:id' => (int) $data['o:resource_class[o:id]']],
             'o:title_property' => empty($data['o:title_property[o:id]']) ? null : ['o:id' => (int) $data['o:title_property[o:id]']],
@@ -606,7 +617,7 @@ class ResourceTemplateController extends AbstractActionController
         foreach ($data['o:resource_template_property'] as $key => $value) {
             $data['o:resource_template_property'][$key]['o:property']['o:id'] = $data['o:resource_template_property'][$key]['o:property[o:id]'];
             unset($data['o:resource_template_property'][$key]['o:property[o:id]']);
-            $data['o:resource_template_property'][$key]['o:settings'] = array_filter(array_intersect_key($value, $settingKeys), function ($v) {
+            $data['o:resource_template_property'][$key]['o:data'] = array_filter(array_intersect_key($value, $settingKeys), function ($v) {
                 return is_string($v) ? strlen(trim($v)) : !empty($v);
             });
             $data['o:resource_template_property'][$key] = array_diff_key($data['o:resource_template_property'][$key], $settingKeys);
@@ -627,7 +638,7 @@ class ResourceTemplateController extends AbstractActionController
             'o:resource_class' => null,
             'o:title_property' => null,
             'o:description_property' => null,
-            'o:settings' => [],
+            'o:data' => [],
             'o:resource_template_property' => [],
         ];
 
@@ -641,10 +652,10 @@ class ResourceTemplateController extends AbstractActionController
                 'o:property' => ['o:id' => $property->id()],
                 'o:alternate_label' => '',
                 'o:alternate_comment' => '',
-                'o:data_type' => '',
+                'o:data_type' => [],
                 'o:is_required' => 0,
                 'o:is_private' => 0,
-                'o:settings' => [],
+                'o:data' => [],
             ];
         }
 
@@ -664,10 +675,10 @@ class ResourceTemplateController extends AbstractActionController
             ->read('properties', $this->params()->fromQuery('property_id'))
             ->getContent();
 
-        $propertyFieldset = $this->getForm(\Omeka\Form\ResourceTemplatePropertyFieldset::class);
+        $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
         $propertyFieldset->get('o:property[o:id]')->setValue($property->id());
 
-        $namePrefix = 'o:resource_template_property[' . rand(PHP_INT_MAX / 1000000, PHP_INT_MAX) . ']';
+        $namePrefix = 'o:resource_template_property[' . rand((int) (PHP_INT_MAX / 1000000), PHP_INT_MAX) . ']';
         $propertyFieldset->setName($namePrefix);
         foreach ($propertyFieldset->getElements()  as $element) {
             $element->setName($namePrefix . '[' . $element->getName() . ']');

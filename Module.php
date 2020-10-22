@@ -11,9 +11,7 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 use Generic\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\Form\Element;
 use Laminas\Mvc\MvcEvent;
-use Omeka\Form\Element\ArrayTextarea;
 
 class Module extends AbstractModule
 {
@@ -116,17 +114,14 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
-            \Omeka\Form\ResourceTemplateForm::class,
+            // \Omeka\Form\ResourceTemplateForm::class,
+            \AdvancedResourceTemplate\Form\ResourceTemplateForm::class,
             'form.add_elements',
             [$this, 'addResourceTemplateFormElements']
         );
         $sharedEventManager->attach(
-            \Omeka\Form\ResourceTemplateForm::class,
-            'form.add_input_filters',
-            [$this, 'addResourceTemplateFormFilters']
-        );
-        $sharedEventManager->attach(
-            \Omeka\Form\ResourceTemplatePropertyFieldset::class,
+            // \Omeka\Form\ResourceTemplatePropertyFieldset::class,
+            \AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset::class,
             'form.add_elements',
             [$this, 'addResourceTemplatePropertyFieldsetElements']
         );
@@ -191,182 +186,37 @@ class Module extends AbstractModule
 
     public function addResourceTemplateFormElements(Event $event): void
     {
-        $services = $this->getServiceLocator();
-        $autofillers = [];
-        foreach ($services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []) as $key => $value) {
-            $autofillers[$key] = $value['label'] ?: $key;
-        }
-
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
-        $form->get('o:data')
-            ->add([
-                'name' => 'autocomplete',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Autocomplete with existing values', // @translate
-                    'value_options' => [
-                        'no' => 'No', // @translate
-                        'sw' => 'Starts with', // @translate
-                        'in' => 'Contains', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    'id' => 'autocomplete',
-                    'value' => 'no',
-                ],
-            ])
-            ->add([
-                'name' => 'value_languages',
-                'type' => ArrayTextarea::class,
-                'options' => [
-                    'label' => 'Value languages for properties', // @translate
-                    'as_key_value' => true,
-                ],
-                'attributes' => [
-                    'id' => 'value_languages',
-                ],
-            ])
-            ->add([
-                'name' => 'default_language',
-                'type' => Element\Text::class,
-                'options' => [
-                    'label' => 'Default language', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'default_language',
-                ],
-            ])
-            ->add([
-                'name' => 'no_language',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'No language', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'no_language',
-                ],
-            ])
-            ->add([
-                'name' => 'autofillers',
-                'type' => Element\Select::class,
-                'options' => [
-                    'label' => 'Autofillers', // @translate
-                    'value_options' => $autofillers,
-                    'empty_option' => count($autofillers)
-                        ? ''
-                        : $services->get('MvcTranslator')->translate('No configured autofiller.'), // @translate
-                ],
-                'attributes' => [
-                    'id' => 'autofillers',
-                    'multiple' => true,
-                    'class' => 'chosen-select',
-                    'data-placeholder' => 'Select autofillers…', // @translate
-                ],
-            ]);
-    }
-
-    public function addResourceTemplateFormFilters(Event $event): void
-    {
-        $event->getParam('inputFilter')
-            ->get('o:data')
-            ->add([
-                'name' => 'autofillers',
-                'required' => false,
-            ]);
+        $advancedFieldset = $this->getServiceLocator()->get('FormElementManager')
+            ->get(\AdvancedResourceTemplate\Form\ResourceTemplateDataFieldset::class)
+            ->setName('advancedresourcetemplate');
+        // To simplify saved data, the elements are added directly to fieldset.
+        $fieldset = $form->get('o:data');
+        foreach ($advancedFieldset->getElements() as $element) {
+            $fieldset->add($element);
+        }
     }
 
     public function addResourceTemplatePropertyFieldsetElements(Event $event): void
     {
-        /** @var \Omeka\Form\ResourceTemplatePropertyFieldset $fieldset */
+        /**
+         * // @var \Omeka\Form\ResourceTemplatePropertyFieldset $fieldset
+         * @var \AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset $fieldset
+         * @var \AdvancedResourceTemplate\Form\ResourceTemplatePropertyDataFieldset $advancedFieldset
+         */
         $fieldset = $event->getTarget();
-        $fieldset
-            ->add([
-                'name' => 'default_value',
-                'type' => Element\Textarea::class,
-                'options' => [
-                    'label' => 'Default value', // @translate
-                ],
-                'attributes' => [
-                    // 'id' => 'default_value',
-                    'class' => 'setting',
-                    'data-setting-key' => 'default_value',
-                ],
-            ])
-            ->add([
-                'name' => 'locked_value',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'Locked value once saved', // @translate
-                ],
-                'attributes' => [
-                    // 'id' => 'locked_value',
-                    'class' => 'setting',
-                    'data-setting-key' => 'locked_value',
-                ],
-            ])
-            ->add([
-                'name' => 'autocomplete',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Autocomplete with existing values', // @translate
-                    'value_options' => [
-                        '' => 'Use template setting', // @translate
-                        'no' => 'No', // @translate
-                        'sw' => 'Starts with', // @translate
-                        'in' => 'Contains', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    // 'id' => 'autocomplete',
-                    'class' => 'setting',
-                    'data-setting-key' => 'autocomplete',
-                    'value' => '',
-                ],
-            ])
-            ->add([
-                'name' => 'value_languages',
-                'type' => ArrayTextarea::class,
-                'options' => [
-                    'label' => 'Suggested languages', // @translate
-                    'as_key_value' => true,
-                ],
-                'attributes' => [
-                    // 'id' => 'value_languages',
-                    'class' => 'setting',
-                    'data-setting-key' => 'value_languages',
-                ],
-            ])
-            ->add([
-                'name' => 'default_language',
-                'type' => Element\Text::class,
-                'options' => [
-                    'label' => 'Default language', // @translate
-                ],
-                'attributes' => [
-                    // 'id' => 'default_language',
-                    'class' => 'setting',
-                    'data-setting-key' => 'default_language',
-                ],
-            ])
-            ->add([
-                'name' => 'use_language',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Use language', // @translate
-                    'value_options' => [
-                        '' => 'Use template setting', // @translate
-                        'yes' => 'Yes', // @translate
-                        'no' => 'No', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    // 'id' => 'use_language',
-                    'class' => 'setting',
-                    'data-setting-key' => 'use_language',
-                    'value' => 'template',
-                ],
-            ]);
+        $advancedFieldset = $this->getServiceLocator()->get('FormElementManager')
+            ->get(\AdvancedResourceTemplate\Form\ResourceTemplatePropertyDataFieldset::class)
+            ->setName('advancedresourcetemplate_property');
+        // The bug inside the fieldset for o:data implies to set elements at the root.
+        // Anyway, it simplify saved data.
+        // $fieldset
+        //     ->get('o:data')
+        //     ->add($advancedFieldset);
+        foreach ($advancedFieldset->getElements() as $element) {
+            $fieldset->add($element);
+        }
     }
 
     protected function autofillersToString($autofillers)

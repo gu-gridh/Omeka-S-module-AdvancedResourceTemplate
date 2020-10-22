@@ -2,6 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
+use AdvancedResourceTemplate\Form\Element\DataTypeSelect;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
@@ -105,22 +106,20 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
             ])
             ->add([
                 'name' => 'o:data_type',
-                'type' => Element\Select::class,
+                'type' => DataTypeSelect::class,
                 'options' => [
                     'label' => 'Data types', // @translate
-                    'value_options' => $this->listDataTypesForSelect(),
-                    'empty_option' => 'Default', // @translate
                 ],
                 'attributes' => [
                     // 'id' => 'data-type',
                     'multiple' => true,
+                    'class' => '',
                     'data-placeholder' => 'Select data types…', // @translate
                     'data-property-key' => 'o:data_type',
                 ],
             ])
-            // This fieldset is used only to simplify rendering.
-            // Elements inside this fieldset are not filtered and lost.
-            // TODO To be removed.
+            // This fieldset is used to add elements.
+            // FIXME Elements inside this fieldset are not filtered and lost. Currently, add elements at the root of the fieldset.
             ->add([
                 'type' => Fieldset::class,
                 'name' => 'o:data',

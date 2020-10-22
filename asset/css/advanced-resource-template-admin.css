@@ -72,7 +72,7 @@ a.value-language.no-language {
     padding-right: 60%;
 }
 .autocomplete-suggestion .suggest-info.autofill dl dt + dt + dd {
-    margin-top: -1.625em; /* own height including padding * /
+    margin-top: -1.625em; /* own height including padding */
     padding-left: calc(30% + 1em);
 }
 

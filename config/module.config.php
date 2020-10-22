@@ -51,9 +51,12 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            'OptionalSelect' => Form\Element\OptionalSelect::class,
+            Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
         'factories' => [
+            Form\ResourceTemplateDataFieldset::class => Service\Form\ResourceTemplateDataFieldsetFactory::class,
             'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
