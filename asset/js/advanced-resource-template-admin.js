@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     /**
-     * Prepare the lock for a original values of a property.
+     * Prepare the lock for original values of a property.
      */
     function prepareFieldLocked(field) {
         var rtpData = field.data('template-data') ? field.data('template-data') : {};
@@ -10,6 +10,27 @@ $(document).ready(function() {
         }
 
         // Some weird selectors are needed to manage all cases.
+        // Check if a value is filled: don't lock an empty value.
+        var isEmpty = true;
+        field.find('.inputs .values .value:not(.default-value) .input-body').find('input, select, textarea').filter('[data-value-key]').each(function () {
+            var input = $(this);
+            // Check real value only, often hidden.
+            if ($.inArray(input.data('value-key'), ['@value', 'value_resource_id', '@id', 'o:label']) === -1) {
+                return;
+            }
+            // TODO Find a way to to lock a checkbox value.
+            if (input.closest('.value').data('data-type') === 'boolean') {
+                return;
+            }
+            if (input.val().trim() === '') {
+                return;
+            }
+            isEmpty = false;
+        });
+        if (isEmpty) {
+            return;
+        }
+
         field.find('.inputs .values .value:not(.default-value) .input-body').find('input, select, textarea').addClass('original-value');
         var originalValues = field.find('.input-body .original-value');
         originalValues
@@ -600,17 +621,17 @@ $(document).ready(function() {
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
         var fields = $('#properties .resource-values.field');
-        fields.each(function(index, field) {
-            prepareFieldAutocomplete($(field));
-            prepareFieldLanguage($(field));
-        });
-
         if (!$('#resource-values').data('locked-ready')) {
             fields.each(function(index, field) {
                 prepareFieldLocked($(field));
             });
             $('#resource-values').data('locked-ready', true);
         }
+
+        fields.each(function(index, field) {
+            prepareFieldAutocomplete($(field));
+            prepareFieldLanguage($(field));
+        });
 
         if (typeof $('#resource-values').data('is-loaded') !== 'undefined') {
             prepareAutofiller();
