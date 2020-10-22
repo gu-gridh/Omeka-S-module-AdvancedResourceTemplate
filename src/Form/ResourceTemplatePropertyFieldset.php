@@ -107,14 +107,14 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                 'name' => 'o:data_type',
                 'type' => Element\Select::class,
                 'options' => [
-                    'label' => 'Data type', // @translate
+                    'label' => 'Data types', // @translate
                     'value_options' => $this->listDataTypesForSelect(),
                     'empty_option' => 'Default', // @translate
                 ],
                 'attributes' => [
                     // 'id' => 'data-type',
-                    'multiple' => false,
-                    'data-placeholder' => 'Select data type…', // @translate
+                    'multiple' => true,
+                    'data-placeholder' => 'Select data types…', // @translate
                     'data-property-key' => 'o:data_type',
                 ],
             ])
