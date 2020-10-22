@@ -4,7 +4,7 @@ $(document).ready(function() {
      * Prepare the lock for a original values of a property.
      */
     function prepareFieldLocked(field) {
-        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        var rtpData = field.data('template-data') ? field.data('template-data') : {};
         if (rtpData.locked_value != true) {
             return;
         }
@@ -35,7 +35,7 @@ $(document).ready(function() {
      */
     function prepareFieldAutocomplete(field) {
         var templateData = $('#resource-values').data('template-data') ;
-        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        var rtpData = field.data('template-data') ? field.data('template-data') : {};
 
         // Reset autocomplete for all properties.
         $('.inputs .values textarea.input-value').prop('autocomplete', 'off');
@@ -65,7 +65,7 @@ $(document).ready(function() {
     function prepareFieldLanguage(field) {
         // Add a specific datalist for the property. It replaces the previous one from another template.
         var templateData = $('#resource-values').data('template-data') ;
-        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        var rtpData = field.data('template-data') ? field.data('template-data') : {};
         var listName = 'value-languages';
         var term = field.data('property-term');
 
@@ -148,7 +148,7 @@ $(document).ready(function() {
         }
 
         var templateData = $('#resource-values').data('template-data');
-        var rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
+        var rtpData = field.data('template-data') ? field.data('template-data') : {};
         var defaultLanguage = templateData.default_language && templateData.default_language.length
             ? templateData.default_language
             : '';
@@ -632,7 +632,7 @@ $(document).ready(function() {
                 return;
             }
         }
-        var rtpData = field.data('template-property-data');
+        var rtpData = field.data('template-data');
         if (!rtpData) {
             return;
         }
