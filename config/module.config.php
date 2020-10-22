@@ -27,6 +27,10 @@ return [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
         ],
+        'controller_map' => [
+            // Manage the view like the core.
+            Controller\Admin\ResourceTemplateController::class => 'omeka/admin/resource-template',
+        ],
     ],
     'view_helpers' => [
         'factories' => [
@@ -41,6 +45,12 @@ return [
             'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
+        ],
+        // Use aliases to keep core keys.
+        'aliases' => [
+            Form\Element\DataTypeSelect::class => 'Omeka\Form\Element\DataTypeSelect',
+            Form\ResourceTemplateForm::class => 'Omeka\Form\ResourceTemplateForm',
+            Form\ResourceTemplatePropertyFieldset::class => 'Omeka\Form\ResourceTemplatePropertyFieldset',
         ],
     ],
     'controllers' => [
