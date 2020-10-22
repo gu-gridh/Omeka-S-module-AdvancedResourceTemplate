@@ -295,6 +295,11 @@ class ResourceTemplateController extends AbstractActionController
             }
         }
 
+        // Validate data.
+        if (array_key_exists('o:data', $import) && !is_array($import['o:data'])) {
+            return false;
+        }
+
         // Validate properties.
         if (!isset($import['o:resource_template_property']) || !is_array($import['o:resource_template_property'])) {
             // missing or invalid o:resource_template_property
@@ -350,6 +355,11 @@ class ResourceTemplateController extends AbstractActionController
             } elseif (!is_array($property['data_types']) && !is_null($property['data_types'])) {
                 return false;
             }
+
+            // Validate data.
+            if (array_key_exists('o:data', $property) && !is_array($property['o:data'])) {
+                return false;
+            }
         }
         return true;
     }
@@ -361,6 +371,7 @@ class ResourceTemplateController extends AbstractActionController
         $templateClass = $template->resourceClass();
         $templateTitle = $template->titleProperty();
         $templateDescription = $template->descriptionProperty();
+        $templateData = $template->data();
         $templateProperties = $template->resourceTemplateProperties();
 
         $export = [
@@ -398,6 +409,10 @@ class ResourceTemplateController extends AbstractActionController
             ];
         }
 
+        if ($templateData) {
+            $export['o:data'] = $templateData;
+        }
+
         foreach ($templateProperties as $templateProperty) {
             $property = $templateProperty->property();
             $vocab = $property->vocabulary();
@@ -408,6 +423,7 @@ class ResourceTemplateController extends AbstractActionController
                 'o:alternate_comment' => $templateProperty->alternateComment(),
                 'o:is_required' => $templateProperty->isRequired(),
                 'o:is_private' => $templateProperty->isPrivate(),
+                'o:data' => $templateProperty->data(),
                 'data_types' => $templateProperty->dataTypeLabels(),
                 'vocabulary_namespace_uri' => $vocab->namespaceUri(),
                 'vocabulary_label' => $vocab->label(),
