@@ -63,8 +63,9 @@ return [
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
         ],
-        // Use aliases to keep core keys.
         'aliases' => [
+            Form\Element\OptionalSelect::class => 'OptionalSelect',
+            // Use aliases to keep core keys.
             Form\Element\DataTypeSelect::class => 'Omeka\Form\Element\DataTypeSelect',
             Form\ResourceTemplateForm::class => 'Omeka\Form\ResourceTemplateForm',
             Form\ResourceTemplatePropertyFieldset::class => 'Omeka\Form\ResourceTemplatePropertyFieldset',

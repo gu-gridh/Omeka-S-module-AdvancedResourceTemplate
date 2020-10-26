@@ -2,6 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
+use AdvancedResourceTemplate\Form\Element\OptionalSelect;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Laminas\I18n\Translator\TranslatorAwareTrait;
@@ -68,10 +69,11 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'autofillers',
-                'type' => 'OptionalSelect',
+                'type' => OptionalSelect::class,
                 'options' => [
                     'label' => 'Autofillers', // @translate
                     'value_options' => $this->autofillers,
+                    'use_hidden_element' => true,
                     'empty_option' => count($this->autofillers)
                         ? ''
                         : $this->getTranslator()->translate('No configured autofiller.'), // @translate
