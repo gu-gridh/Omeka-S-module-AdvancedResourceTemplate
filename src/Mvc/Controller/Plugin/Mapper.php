@@ -395,7 +395,7 @@ class Mapper extends AbstractPlugin
                     }
                     break;
                 case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
-                    $v = mb_substr($value, $matches['start'], $matches['length']);
+                    $v = mb_substr($value, $matches['start'], (int) $matches['length']);
                     break;
                 default:
                     // Nothing.
