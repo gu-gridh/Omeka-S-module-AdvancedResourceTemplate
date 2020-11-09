@@ -2,11 +2,9 @@
 
     $(document).ready( function() {
 
-        // Store the default data types as array.
-        if ($('div#properties').data('default-data-types') && $('div#properties').data('default-data-types').split(',').length) {
-            $('div#properties').data('default-data-types', $('div#properties').data('default-data-types').split(','));
-        } else {
-            $('div#properties').data('default-data-types', ['literal', 'resource', 'uri']);
+        // Store the default data types.
+        if (!$('div#properties').data('default-data-types') || !$('div#properties').data('default-data-types').length) {
+            $('div#properties').data('default-data-types', 'literal,resource,uri');
         }
 
         // Select property
@@ -229,7 +227,9 @@
                 propertyValues.push(valueData);
             });
             if (propertyValues.length) {
-                values[propertyTerm] = propertyValues;
+                values[propertyTerm] = values.hasOwnProperty(propertyTerm)
+                    ? values[propertyTerm].concat(propertyValues)
+                    : propertyValues;
             }
         });
         return values;
@@ -332,7 +332,7 @@
     var makeNewField = function(property, dataTypes) {
         // Prepare data type name of the field.
         if (!dataTypes || dataTypes.length < 1) {
-            dataTypes = $('div#properties').data('default-data-types');
+            dataTypes = $('div#properties').data('default-data-types').split(',');
         }
 
         // Sort out whether property is the LI that holds data, or the id.
@@ -393,10 +393,14 @@
         var propertyId = templateProperty['o:property']['o:id'];
         var dataTypes = templateProperty['o:data_type'] && templateProperty['o:data_type'].length
             ? templateProperty['o:data_type']
-            : $('div#properties').data('default-data-types');
+            : $('div#properties').data('default-data-types').split(',');
 
-        var field = properties.find('[data-property-id="' + propertyId + '"]');
-        if (field.length == 0) {
+        // Check if an existing field exists in order to update it and to avoid duplication.
+        // Since fields can have the same property but only different data types, a filter is used.
+        var field = properties.find('[data-property-id="' + propertyId + '"]')
+            .filter(function() { return dataTypes.sort().join(',') === $(this).data('data-types').split(',').sort().join(','); })
+            .first().data('data-types', dataTypes.join(','));
+        if (!field.length) {
             field = makeNewField(propertyId, dataTypes);
         }
 
@@ -456,19 +460,17 @@
             defaultSelector.show();
         }
 
-        // Add an empty value if none already exist in the property.
-        if (!field.find('.value').length) {
-            field.find('.values').append(makeNewValue(field.data('property-term'), templateProperty['o:data_type'][0]));
-        }
+        // The empty first value is added during template preparation.
 
         properties.prepend(field);
     };
 
     var makeDefaultTemplate = function() {
+        var defaultDataType = $('div#properties').data('default-data-types').substring(0, ($('div#properties').data('default-data-types') + ',').indexOf(','));
         makeNewField('dcterms:title').find('.values')
-            .append(makeDefaultValue('dcterms:title', 'literal'));
+            .append(makeDefaultValue('dcterms:title', defaultDataType));
         makeNewField('dcterms:description').find('.values')
-            .append(makeDefaultValue('dcterms:description', 'literal'));
+            .append(makeDefaultValue('dcterms:description', defaultDataType));
     };
 
     /**
@@ -514,6 +516,26 @@
         fields.find('div.single-selector').hide();
         fields.find('div.default-selector').show();
 
+        // All properties should uses the default data types.
+        fields.data('data-types', $('div#properties').data('default-data-types'));
+        fields.attr('data-data-types', $('div#properties').data('default-data-types'));
+
+        // Merge all duplicate properties, keeping order of values when possible.
+        fields.each(function() {
+            var propertyId = $(this).attr('data-property-id');
+            // Deduplicate only first properties, that are not already processed.
+            if ($(this).prevAll('[data-property-id="' + propertyId + '"]').length < 1) {
+                var duplicatedFields = $('div#properties').find('[data-property-id="' + propertyId + '"]');
+                var duplicatedFieldFirst = duplicatedFields.first();
+                duplicatedFields.each(function(index) {
+                    if (index > 0) {
+                        duplicatedFieldFirst.find('.inputs .values').append($(this).find('.inputs .values > .value'));
+                        $(this).remove();
+                    }
+                });
+            }
+        });
+
         if (templateId) {
             var url = templateSelect.data('api-base-url') + '/' + templateId;
             $.get(url)
@@ -530,6 +552,8 @@
                     // Store global data of the template.
                     $('#resource-values').data('template-data', data['o:data'] ? data['o:data'] : {});
 
+                    data = prepareTemplateDataBefore(data);
+
                     // Rewrite every property field defined by the template. We
                     // reverse the order so property fields on page that are not
                     // defined by the template are ultimately appended.
@@ -537,6 +561,8 @@
                         .reverse().map(function(templateProperty) {
                             rewritePropertyField(templateProperty);
                         });
+
+                    prepareFieldsAfter();
                 })
                 .fail(function() {
                     console.log('Failed loading resource template from API');
@@ -606,5 +632,113 @@
                 $('#properties').closest('form').trigger('o:form-loaded');
             });
     };
+
+    var prepareTemplateDataBefore = function(data) {
+        // Divide all template properties with the same property according to data,
+        // and do some cleaning.
+        // @see view/omeka/admin/resource-template/show.phtml in the module.
+        var rtps = [];
+
+        // But first, manage an exception: remove the data types of the default template
+        // property that are used in other fields. When all its data types are already
+        // managed by other fields, the default field is removed.
+        data['o:resource_template_property'].forEach(function(rtp, index) {
+            var dataTypesForProperty = [];
+            // First, list all specified data types (skip properties with only one data).
+            (rtp['o:data'] && rtp['o:data'].length > 1 ? rtp['o:data'] : []).forEach(function(rtpData) {
+                var isDefaultField = !rtpData['o:data_type'] || !rtpData['o:data_type'].length;
+                if (!isDefaultField) {
+                    dataTypesForProperty = dataTypesForProperty.concat(rtpData['o:data_type']);
+                }
+            });
+            // Second, remove data types in the default field.
+            (rtp['o:data'] && rtp['o:data'].length > 1 ? rtp['o:data'] : []).forEach(function(rtpData, indexData) {
+                var isDefaultField = !rtpData['o:data_type'] || !rtpData['o:data_type'].length;
+                if (isDefaultField) {
+                    var dataTypes = $('div#properties').data('default-data-types').split(',').filter(function(value) {
+                        return dataTypesForProperty.indexOf(value) < 0;
+                    });
+                    if (dataTypes.length) {
+                        data['o:resource_template_property'][index]['o:data'][indexData]['o:data_type'] = dataTypes;
+                    } else {
+                        delete data['o:resource_template_property'][index]['o:data'][indexData];
+                    }
+                }
+            });
+        });
+
+        data['o:resource_template_property'].forEach(function(rtp) {
+            (rtp['o:data'] && rtp['o:data'].length > 0 ? rtp['o:data'] : [{}]).forEach(function(rtpData) {
+                // Use only core template property keys.
+                var rtpd = {}
+                rtpd['o:property'] = rtp['o:property'];
+                rtpd['o:alternate_label'] = rtpData['o:alternate_label'] == '' ? null : rtpData['o:alternate_label'];
+                rtpd['o:alternate_comment'] = rtpData['o:alternate_comment'] == '' ? null : rtpData['o:alternate_comment'];
+                rtpd['o:is_private'] = rtpData['o:is_private'] === true || rtpData['o:is_private'] == '1';
+                rtpd['o:is_required'] = rtpData['o:is_required'] === true || rtpData['o:is_required'] == '1';
+                rtpd['o:data_type'] = rtpData['o:data_type'] ? rtpData['o:data_type'] : [];
+                // Remove core property keys in data.
+                Object.keys(rtp).forEach(function (key) {
+                    delete rtpData[key];
+                });
+                rtpd['o:data'] = rtpData;
+                rtps.push(rtpd);
+            });
+        });
+        data['o:resource_template_property'] = rtps;
+        return data;
+    }
+
+    var prepareFieldsAfter = function() {
+        // Furthermore, the values are moved to the property row according to their
+        // data type when there are template properties with the same property.
+        fields = $('#properties .resource-values');
+        if (fields.length > 0) {
+            // Prepare the list of data types one time and make easier to fill specific rows first.
+            var dataTypesByProperty = {};
+            var checkDefaultDataType = $('div#properties').data('default-data-types').split(',').sort().join(',');
+            fields.each(function() {
+                var fieldTemplateId = $(this).data('template-id');
+                var propertyId = $(this).data('property-id');
+                var dataTypes = $(this).data('data-types');
+                if (!dataTypesByProperty.hasOwnProperty(propertyId)) {
+                    dataTypesByProperty[propertyId] = {};
+                }
+                // Skip field with default data types.
+                var isDefaultField = dataTypes.split(',').sort().join(',') === checkDefaultDataType;
+                if (!isDefaultField && fieldTemplateId && dataTypes.split(',').length) {
+                    dataTypes.split(',').forEach(function(dataType) {
+                        // Manage exception for resource values.
+                        if (dataType === 'resource') {
+                            dataTypesByProperty[propertyId]['resource'] = dataTypes;
+                            dataTypesByProperty[propertyId]['resource:item'] = dataTypes;
+                            dataTypesByProperty[propertyId]['resource:itemset'] = dataTypes;
+                            dataTypesByProperty[propertyId]['resource:media'] = dataTypes;
+                        } else {
+                            dataTypesByProperty[propertyId][dataType] = dataTypes;
+                        }
+                    });
+                } else {
+                    dataTypesByProperty[propertyId]['default'] = $('div#properties').data('default-data-types');
+                }
+            });
+            fields.each(function() {
+                var propertyId = $(this).data('property-id');
+                $(this).find('.inputs .values > .value').each(function() {
+                    var valueDataType = $(this).data('data-type');
+                    if (!dataTypesByProperty[propertyId].hasOwnProperty(valueDataType)) {
+                        if (!dataTypesByProperty[propertyId].hasOwnProperty('default')) {
+                            return;
+                        }
+                        valueDataType = 'default';
+                    }
+                    fields
+                        .filter('[data-property-id="' + propertyId + '"][data-data-types="' + dataTypesByProperty[propertyId][valueDataType] + '"]')
+                        .find('.inputs .values')
+                        .append($(this));
+                });
+            });
+        }
+    }
 
 })(jQuery);

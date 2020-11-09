@@ -191,7 +191,7 @@ $(document).ready(function() {
     var makeNewField = function(property, dataTypes) {
         // Prepare data type name of the field.
         if (!dataTypes || dataTypes.length < 1) {
-            dataTypes = $('div#properties').data('default-data-types');
+            dataTypes = $('div#properties').data('default-data-types').split(',');
         }
 
         // Sort out whether property is the LI that holds data, or the id.
@@ -258,7 +258,7 @@ $(document).ready(function() {
         field = fieldForDataType.length ? fieldForDataType.first() : field.first();
         var value = $('.value.template[data-data-type="' + dataType + '"]').clone(true);
         value.removeClass('template');
-        value.data('term', term);
+        value.attr('data-term', term);
 
         // Get and display the value's visibility.
         var isPublic = true; // values are public by default
@@ -275,6 +275,7 @@ $(document).ready(function() {
             valueVisibilityButton.attr('aria-label', Omeka.jsTranslate('Make public'));
             valueVisibilityButton.attr('title', Omeka.jsTranslate('Make public'));
         }
+
         // Prepare the value node.
         var valueLabelID = 'property-' + field.data('property-id') + '-label';
         value.find('input.is_public')
@@ -323,6 +324,7 @@ $(document).ready(function() {
         var v;
         var defaultValue = valueObj.default;
         var isSpecific = typeof defaultValue !== 'undefined';
+
         // Manage specific data type "resource".
         if (dataType.startsWith('resource')) {
             if (isSpecific && /^\d+$/.test(defaultValue)) {
@@ -364,7 +366,8 @@ $(document).ready(function() {
         // Prepare simple single-value form inputs using data-value-key.
         value.find(':input').each(function () {
             var valueKey = $(this).data('valueKey');
-            if (!valueKey) {
+            // Default language is managed separately.
+            if (!valueKey || valueKey === '@language') {
                 return;
             }
             $(this).removeAttr('name')
@@ -380,7 +383,7 @@ $(document).ready(function() {
         }
 
         // @see numeric-data-types.js
-        if (NumericDataTypes) {
+        if (NumericDataTypes && dataType.startsWith('numeric:')) {
             if (dataType === 'numeric:timestamp') {
                 v = value.find('.numeric-datetime-value');
                 // The class is used to init a field, but it doesn't have the value yet.
@@ -648,7 +651,8 @@ $(document).ready(function() {
         var field = value.closest('.resource-values.field');
         var term = value.data('term');
         if (!field.length) {
-            field = $('#properties [data-property-term="' + term + '"].field');
+            field = $('#properties [data-property-term="' + term + '"].field')
+                .filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; }).first();
             if (!field.length) {
                 return;
             }
