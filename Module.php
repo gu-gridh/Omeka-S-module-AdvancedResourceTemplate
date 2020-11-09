@@ -53,17 +53,6 @@ class Module extends AbstractModule
                 ],
                 ['read']
             )
-            // The controller is only an alias.
-            // ->allow(
-            //     ['researcher', 'author', 'reviewer', 'editor'],
-            //     ['AdvancedResourceTemplate\Controller\Admin\ResourceTemplate'],
-            //     ['index', 'browse', 'show', 'show-details']
-            // )
-            // ->allow(
-            //     ['author', 'editor'],
-            //     ['AdvancedResourceTemplate\Controller\Admin\ResourceTemplate'],
-            //     ['add-new-property-row', 'import', 'add', 'edit', 'delete', 'delete-confirm']
-            // )
             ->allow(
                 ['author', 'editor'],
                 [
@@ -71,11 +60,6 @@ class Module extends AbstractModule
                     \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class,
                 ],
                 ['create', 'update', 'delete']
-            )
-            // Specific rights for the controller.
-            ->allow(
-                $acl->getRoles(),
-                ['AdvancedResourceTemplate\Controller\Admin\Index']
             );
     }
 

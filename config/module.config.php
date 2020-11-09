@@ -41,7 +41,7 @@ return [
         ],
         'controller_map' => [
             // Manage the view like the core.
-            Controller\Admin\ResourceTemplateController::class => 'omeka/admin/resource-template',
+            Controller\Admin\ResourceTemplateControllerDelegator::class => 'omeka/admin/resource-template',
         ],
     ],
     'view_helpers' => [
@@ -73,7 +73,9 @@ return [
     'controllers' => [
         'factories' => [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
-            'Omeka\Controller\Admin\ResourceTemplate' => Service\Controller\Admin\ResourceTemplateControllerFactory::class,
+        ],
+        'delegators' => [
+            'Omeka\Controller\Admin\ResourceTemplate' => [Service\Controller\Admin\ResourceTemplateControllerDelegatorFactory::class]
         ],
     ],
     'controller_plugins' => [
