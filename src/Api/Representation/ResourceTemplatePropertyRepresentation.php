@@ -14,24 +14,20 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
     }
 
     /**
-     * @return array
+     * A template property may have multiple data according to data types.
+     *
+     * @return ResourceTemplatePropertyDataRepresentation[]
      */
-    public function data()
+    public function data(): array
     {
-        $data = $this->getServiceLocator()->get('Omeka\EntityManager')
+        $list = [];
+        $services = $this->getServiceLocator();
+        $rtpDatas = $services->get('Omeka\EntityManager')
             ->getRepository(ResourceTemplatePropertyData::class)
-            ->findOneBy(['resourceTemplateProperty' => $this->templateProperty->getId()]);
-        return $data ? $data->getData() : [];
-    }
-
-    /**
-     * @param string $name
-     * @param mixed $default
-     * @return mixed
-     */
-    public function dataValue($name, $default = null)
-    {
-        $data = $this->templateProperty->getData();
-        return $data[$name] ?? $default;
+            ->findBy(['resourceTemplateProperty' => $this->templateProperty]);
+        foreach ($rtpDatas as $rtpData) {
+            $list[] = new ResourceTemplatePropertyDataRepresentation($rtpData, $services);
+        }
+        return $list;
     }
 }

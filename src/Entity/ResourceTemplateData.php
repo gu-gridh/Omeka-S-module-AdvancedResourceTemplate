@@ -27,8 +27,8 @@ class ResourceTemplateData extends AbstractEntity
      *     fetch="EXTRA_LAZY"
      * )
      * @JoinColumn(
-     *     onDelete="CASCADE",
-     *     nullable=false
+     *     nullable=false,
+     *     onDelete="CASCADE"
      * )
      */
     protected $resourceTemplate;

@@ -37,7 +37,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
     /**
      * @return array
      */
-    public function data()
+    public function data(): array
     {
         $data = $this->getServiceLocator()->get('Omeka\EntityManager')
             ->getRepository(ResourceTemplateData::class)

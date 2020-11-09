@@ -22,7 +22,7 @@ class ResourceTemplatePropertyData extends AbstractEntity
     protected $id;
 
     /**
-     * The template is not required but this denormalization simplifies search.
+     * The template is not required but this denormalization simplifies select.
      * Of course, the resource template must be the property one, so there is
      * no setter.
      *
@@ -32,21 +32,27 @@ class ResourceTemplatePropertyData extends AbstractEntity
      *     fetch="EXTRA_LAZY"
      * )
      * @JoinColumn(
-     *     onDelete="CASCADE",
-     *     nullable=false
+     *     nullable=false,
+     *     onDelete="CASCADE"
      * )
      */
     protected $resourceTemplate;
 
     /**
+     * In order to keep single properties in resource templates (the template
+     * properties should be unique for a specific property), a resource template
+     * property can manage multiple data, according to its data type.
+     * In all cases, a data type can have only one specific resource template
+     * property data, like a value has only one data type.
+     *
      * @var ResourceTemplateProperty
-     * @OneToOne(
+     * @ManyToOne(
      *     targetEntity=\Omeka\Entity\ResourceTemplateProperty::class,
      *     fetch="EXTRA_LAZY"
      * )
      * @JoinColumn(
-     *     onDelete="CASCADE",
-     *     nullable=false
+     *     nullable=false,
+     *     onDelete="CASCADE"
      * )
      */
     protected $resourceTemplateProperty;

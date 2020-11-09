@@ -10,14 +10,14 @@ use Omeka\Entity\ResourceTemplate;
 class ResourceTemplatePropertyDataHydrator
 {
     /**
+     * Associative array by property id.
+     *
      * @var \Omeka\Entity\ResourceTemplateProperty[]
      */
     protected $resourceTemplateProperties;
 
     /**
-     * Hydrate data of a resource template in a request.
-     *
-     * @todo Simplify.
+     * Hydrate data of a resource template property in a request.
      *
      * @param Request $request
      * @param ResourceTemplate $entity
@@ -26,7 +26,14 @@ class ResourceTemplatePropertyDataHydrator
     public function hydrate(Request $request, ResourceTemplate $entity, ResourceTemplateAdapter $adapter)
     {
         if (is_null($this->resourceTemplateProperties)) {
-            $this->resourceTemplateProperties = $entity->getResourceTemplateProperties()->toArray();
+            // To avoid a flush and issues with remove/persist, get templates
+            // properties by property, that are unique.
+            $list = [];
+            foreach ($entity->getResourceTemplateProperties()->toArray() as $rtp) {
+                $list[$rtp->getProperty()->getId()] = $rtp;
+            }
+            $this->resourceTemplateProperties = $list;
+            unset($list);
         }
 
         $entityManager = $adapter->getEntityManager();
@@ -39,42 +46,23 @@ class ResourceTemplatePropertyDataHydrator
 
         // See \Omeka\Api\Adapter\ResourceTemplateAdapter
         if (count($this->resourceTemplateProperties)) {
-            // To avoid a flush and issues with remove/persist, get templates
-            // properties by propertiies, that are unique.
-            $list = [];
-            foreach ($this->resourceTemplateProperties as $rtp) {
-                $list[$rtp->getProperty()->getId()] = $rtp;
-            }
-            $this->resourceTemplateProperties = $list;
-            $list = [];
-            foreach ($existings as $rtpData) {
-                $list[$rtpData->getResourceTemplateProperty()->getProperty()->getId()] = $rtpData;
-            }
-            $existings = $list;
-            unset($list);
-
             $data = $request->getContent();
             foreach ($data['o:resource_template_property'] as $resTemPropData) {
+                // Skip when no property ID.
                 if (empty($resTemPropData['o:property']['o:id'])) {
-                    // Skip when no property ID.
                     continue;
                 }
-                $propertyId = $resTemPropData['o:property']['o:id'];
-                if (!isset($this->resourceTemplateProperties[$propertyId])) {
-                    // The existing template property data will be removed.
-                    continue;
+                foreach ($resTemPropData['o:data'] ?? [] as $rtpSpecificData) {
+                    // Skip empty data.
+                    if (empty($rtpSpecificData)) {
+                        continue;
+                    }
+                    $rtpData = count($existings) ? array_shift($existings) : new ResourceTemplatePropertyData();
+                    $rtpData
+                        ->setResourceTemplateProperty($this->resourceTemplateProperties[$resTemPropData['o:property']['o:id']])
+                        ->setData($rtpSpecificData);
+                    $entityManager->persist($rtpData);
                 }
-
-                if (isset($existings[$propertyId])) {
-                    $rtpData = $existings[$propertyId];
-                    unset($existings[$propertyId]);
-                } else {
-                    $rtpData = new ResourceTemplatePropertyData();
-                }
-                $rtpData
-                    ->setResourceTemplateProperty($this->resourceTemplateProperties[$propertyId])
-                    ->setData($resTemPropData['o:data'] ?? []);
-                $entityManager->persist($rtpData);
             }
         }
 

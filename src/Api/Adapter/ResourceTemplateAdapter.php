@@ -76,8 +76,11 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
                 if (empty($resTemPropData['o:property']['o:id'])) {
                     continue; // skip when no property ID
                 }
-
                 $propertyId = (int) $resTemPropData['o:property']['o:id'];
+                if (isset($resTemPropsToRetain[$propertyId])) {
+                    continue;
+                }
+
                 $altLabel = null;
                 if (isset($resTemPropData['o:alternate_label'])
                     && '' !== trim($resTemPropData['o:alternate_label'])
@@ -124,7 +127,7 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
                 // Set the position of the property to its intrinsic order
                 // within the passed array.
                 $resTemProp->setPosition($position++);
-                $resTemPropsToRetain[] = $resTemProp;
+                $resTemPropsToRetain[$propertyId] = $resTemProp;
             }
 
             // Remove resource template properties that were not included in the

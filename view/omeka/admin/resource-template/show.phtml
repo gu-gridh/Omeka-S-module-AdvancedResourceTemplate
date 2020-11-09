@@ -55,8 +55,9 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
     </tr>
     </thead>
     <tbody>
-    <?php foreach ($resourceTemplate->resourceTemplateProperties() as $resourceTemplateProperty): ?>
+    <?php foreach ($resourceTemplate->resourceTemplateProperties() as $resourceTemplateProperty) foreach ($resourceTemplateProperty->data() ?: [$resourceTemplateProperty] as $rtpData): ?>
         <?php $property = $resourceTemplateProperty->property(); ?>
+        <?php $resourceTemplateProperty = $rtpData; ?>
         <tr data-property-id="<?php echo $escape($property->id()); ?>">
             <td>
                 <?php echo $escape($translate($property->label())); ?>
@@ -80,7 +81,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
             <td><?php echo $resourceTemplateProperty->isRequired() ? $translate('Yes') : $translate('No'); ?></td>
             <td><?php echo $resourceTemplateProperty->isPrivate() ? $translate('Yes') : $translate('No'); ?></td>
             <td><dl><?php foreach ($resourceTemplateProperty->data() as $key => $value): ?>
-                <?php if (!$value) continue; ?>
+                <?php if (!$value || mb_substr($key, 0, 2) === 'o:' || in_array($key, ['is-title-property', 'is-description-property'])) continue; ?>
                 <dt><?php echo str_replace('_', ' ', $key); ?></dt>
                 <?php if (is_array($value)): ?>
                     <?php foreach ($value as $k => $v): ?>
