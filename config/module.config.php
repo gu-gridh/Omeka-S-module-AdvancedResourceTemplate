@@ -53,7 +53,7 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
-            'OptionalSelect' => Form\Element\OptionalSelect::class,
+            Form\Element\OptionalSelect::class => Form\Element\OptionalSelect::class,
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
@@ -64,7 +64,6 @@ return [
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
         ],
         'aliases' => [
-            Form\Element\OptionalSelect::class => 'OptionalSelect',
             // Use aliases to keep core keys.
             Form\Element\DataTypeSelect::class => 'Omeka\Form\Element\DataTypeSelect',
             Form\ResourceTemplateForm::class => 'Omeka\Form\ResourceTemplateForm',
