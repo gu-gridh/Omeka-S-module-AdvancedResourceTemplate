@@ -1,19 +1,19 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate\Form;
 
-use Omeka\Form\Element\ResourceClassSelect;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Laminas\Form\Form;
+use Omeka\Form\Element\ResourceClassSelect;
 
 class ResourceTemplateForm extends Form
 {
     use EventManagerAwareTrait;
 
-    public function init()
+    public function init(): void
     {
         $this->add([
             'name' => 'o:label',

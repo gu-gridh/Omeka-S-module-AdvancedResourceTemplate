@@ -3,8 +3,8 @@
 namespace AdvancedResourceTemplate\Service\ViewHelper;
 
 use AdvancedResourceTemplate\View\Helper\DataType;
-use Laminas\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Service factory for the dataType view helper.

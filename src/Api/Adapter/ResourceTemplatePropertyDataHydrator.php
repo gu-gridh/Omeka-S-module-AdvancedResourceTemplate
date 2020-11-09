@@ -23,7 +23,7 @@ class ResourceTemplatePropertyDataHydrator
      * @param ResourceTemplate $entity
      * @param ResourceTemplateAdapter $adapter
      */
-    public function hydrate(Request $request, ResourceTemplate $entity, ResourceTemplateAdapter $adapter)
+    public function hydrate(Request $request, ResourceTemplate $entity, ResourceTemplateAdapter $adapter): void
     {
         if (is_null($this->resourceTemplateProperties)) {
             // To avoid a flush and issues with remove/persist, get templates

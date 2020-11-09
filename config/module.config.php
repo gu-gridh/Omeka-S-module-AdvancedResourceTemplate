@@ -75,7 +75,7 @@ return [
             'AdvancedResourceTemplate\Controller\Admin\Index' => Service\Controller\Admin\IndexControllerFactory::class,
         ],
         'delegators' => [
-            'Omeka\Controller\Admin\ResourceTemplate' => [Service\Controller\Admin\ResourceTemplateControllerDelegatorFactory::class]
+            'Omeka\Controller\Admin\ResourceTemplate' => [Service\Controller\Admin\ResourceTemplateControllerDelegatorFactory::class],
         ],
     ],
     'controller_plugins' => [

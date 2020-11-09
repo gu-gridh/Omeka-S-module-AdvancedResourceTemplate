@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AdvancedResourceTemplate\Service\ViewHelper;
 
+use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Omeka\Module\Manager as ModuleManager;
 use Omeka\View\Helper\AssetUrl;
-use Laminas\ServiceManager\Factory\FactoryInterface;
-use Interop\Container\ContainerInterface;
 
 /**
  * Service factory for the assetUrl view helper.

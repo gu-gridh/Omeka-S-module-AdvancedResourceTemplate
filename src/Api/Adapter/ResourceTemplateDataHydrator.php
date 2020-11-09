@@ -16,7 +16,7 @@ class ResourceTemplateDataHydrator
      * @param ResourceTemplate $entity
      * @param ResourceTemplateAdapter $adapter
      */
-    public function hydrate(Request $request, ResourceTemplate $entity, ResourceTemplateAdapter $adapter)
+    public function hydrate(Request $request, ResourceTemplate $entity, ResourceTemplateAdapter $adapter): void
     {
         $entityManager = $adapter->getEntityManager();
         $id = $entity->getId();

@@ -14,7 +14,7 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
         return \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation::class;
     }
 
-    public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore)
+    public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore): void
     {
         // It's not possible to use parent::hydrate(), because the template
         // properties are not available.

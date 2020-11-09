@@ -13,7 +13,7 @@ class Messenger extends \Omeka\Mvc\Controller\Plugin\Messenger
      * {@inheritDoc}
      * @see \Omeka\Mvc\Controller\Plugin\Messenger::addFormErrors()
      */
-    public function addFormErrors(Fieldset $formOrFieldset)
+    public function addFormErrors(Fieldset $formOrFieldset): void
     {
         foreach ($formOrFieldset->getIterator() as $elementOrFieldset) {
             if ($elementOrFieldset instanceof Fieldset) {

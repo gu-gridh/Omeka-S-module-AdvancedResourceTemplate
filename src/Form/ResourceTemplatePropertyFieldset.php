@@ -19,7 +19,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
      */
     protected $dataTypeManager;
 
-    public function init()
+    public function init(): void
     {
         // Fieldset displayed in the sidebar of the resource template form and
         // as hidden collection in main part. Values are copied hiddenly in main

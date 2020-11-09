@@ -3,10 +3,10 @@
 namespace AdvancedResourceTemplate\Controller\Admin;
 
 use AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset;
+use Laminas\View\Model\ViewModel;
 use Omeka\Form\ResourceTemplateForm;
 use Omeka\Mvc\Exception\NotFoundException;
 use Omeka\Stdlib\Message;
-use Laminas\View\Model\ViewModel;
 
 class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\ResourceTemplateController
 {
@@ -542,7 +542,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
         $propertyFieldset->get('o:property')->setValue($property->id());
 
-        $namePrefix = 'o:resource_template_property[' . rand((int) (PHP_INT_MAX / 1000000), PHP_INT_MAX) . ']';
+        $namePrefix = 'o:resource_template_property[' . random_int((int) (PHP_INT_MAX / 1000000), PHP_INT_MAX) . ']';
         $propertyFieldset->setName($namePrefix);
         foreach ($propertyFieldset->getElements()  as $element) {
             $element->setName($namePrefix . '[' . $element->getName() . ']');
