@@ -528,32 +528,43 @@ class ResourceTemplateController extends AbstractActionController
             // can be moved in "o:data" after automatic filter and validation.
             // Anyway, the values with a nested key like o:property[o:id] should
             // be cleaned.
-            $post = $this->fixPostArray($post);
-            $post = $this->fixDataArray($post);
-            $form->setData($post);
+            $postData = $this->fixPostArray($post);
+            $postData = $this->fixDataArray($postData);
+            if (!empty($postData['_has_empty'])) {
+                $this->messenger()->addError('When multiple fields use the same property, only one field can be without data type.'); // @translate
+            }
+            if (!empty($postData['_has_removed'])) {
+                $this->messenger()->addError('When multiple fields use the same property, the data types must be unique among them.'); // @translate
+            }
+
+            $form->setData($postData);
             if ($form->isValid()) {
-                $data = $this->fixDataPostArray($form->getData());
-                $response = $isUpdate
-                    ? $this->api($form)->update('resource_templates', $resourceTemplate->id(), $data)
-                    : $this->api($form)->create('resource_templates', $data);
-                if ($response) {
-                    if ($isUpdate) {
-                        $successMessage = 'Resource template successfully updated'; // @translate
-                    } else {
-                        $successMessage = new Message(
-                            'Resource template successfully created. %s', // @translate
-                            sprintf(
-                                '<a href="%s">%s</a>',
-                                htmlspecialchars($this->url()->fromRoute(null, [], true)),
-                                $this->translate('Add another resource template?')
-                            )
-                        );
-                        $successMessage->setEscapeHtml(false);
+                $data = $form->getData();
+                $data = $this->fixPostArray($data);
+                $data = $this->fixDataPostArray($data);
+                if (empty($data['_has_empty']) && empty($data['_has_removed'])) {
+                    $response = $isUpdate
+                        ? $this->api($form)->update('resource_templates', $resourceTemplate->id(), $data)
+                        : $this->api($form)->create('resource_templates', $data);
+                    if ($response) {
+                        if ($isUpdate) {
+                            $successMessage = 'Resource template successfully updated'; // @translate
+                        } else {
+                            $successMessage = new Message(
+                                'Resource template successfully created. %s', // @translate
+                                sprintf(
+                                    '<a href="%s">%s</a>',
+                                    htmlspecialchars($this->url()->fromRoute(null, [], true)),
+                                    $this->translate('Add another resource template?')
+                                    )
+                                );
+                            $successMessage->setEscapeHtml(false);
+                        }
+                        $this->messenger()->addSuccess($successMessage);
+                        return $this->redirect()->toUrl($response->getContent()->url());
                     }
-                    $this->messenger()->addSuccess($successMessage);
-                    return $this->redirect()->toUrl($response->getContent()->url());
+                    $this->messenger()->addFormErrors($form);
                 }
-                $this->messenger()->addFormErrors($form);
             } else {
                 $this->messenger()->addFormErrors($form);
             }
@@ -566,78 +577,164 @@ class ResourceTemplateController extends AbstractActionController
         ]);
     }
 
-    protected function fixDataArray(array $data)
+    /**
+     * Adapt the resource json to the form (avoid nesting).
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function fixDataArray(array $data): array
     {
-        if (!empty($data['o:resource_class'])) {
-            $data['o:resource_class[o:id]'] = $data['o:resource_class']['o:id'];
-        }
-        if (!empty($data['o:title_property'])) {
-            $data['o:title_property[o:id]'] = $data['o:title_property']['o:id'];
-        }
-        if (!empty($data['o:description_property'])) {
-            $data['o:description_property[o:id]'] = $data['o:description_property']['o:id'];
-        }
+        $data['o:resource_class'] = empty($data['o:resource_class']) ? null : $data['o:resource_class']['o:id'];
+        $data['o:title_property'] = empty($data['o:title_property']) ? null : $data['o:title_property']['o:id'];
+        $data['o:description_property'] = empty($data['o:description_property']) ? null : $data['o:description_property']['o:id'];
         if (empty($data['o:resource_template_property'])) {
             $data['o:resource_template_property'] = [];
         }
         foreach ($data['o:resource_template_property'] as $key => $value) {
-            $data['o:resource_template_property'][$key]['o:property[o:id]'] = $value['o:property']['o:id'];
-            unset($data['o:resource_template_property'][$key]['o:property[o:id']);
+            $data['o:resource_template_property'][$key]['o:property'] = $value['o:property']['o:id'];
             $data['o:resource_template_property'][$key]['o:data_type'] = empty($value['o:data_type']) ? [] : array_filter($value['o:data_type']);
-            if (!empty($value['o:data'])) {
-                $data['o:resource_template_property'][$key] = array_merge($data['o:resource_template_property'][$key], $value['o:data']);
+            if (empty($value['o:data'])) {
+                $data['o:resource_template_property'][$key]['o:data'] = [];
             }
         }
-        return $data;
+        return $this->explodePropertyTemplateData($data);
     }
 
-    protected function fixPostArray(array $post)
+    /**
+     * Adapt the post to resource json.
+     *
+     * @param array $post
+     * @return array
+     */
+    protected function fixPostArray(array $post): array
     {
-        if (empty($post['o:resource_template_property'])) {
-            $post['o:resource_template_property'] = [];
-        }
-        $post['o:resource_template_property'] = array_values($post['o:resource_template_property']);
+        $post['o:resource_class'] = empty($post['o:resource_class']) ? null : ['o:id' => (int) $post['o:resource_class']];
+        $post['o:title_property'] = empty($post['o:title_property']) ? null : ['o:id' => (int) $post['o:title_property']];
+        $post['o:description_property'] = empty($post['o:description_property']) ? null : ['o:id' => (int) $post['o:description_property']];
+        $post['o:resource_template_property'] = empty($post['o:resource_template_property']) ? [] : array_values($post['o:resource_template_property']);
         foreach ($post['o:resource_template_property'] as $key => $value) {
-            if (empty($value['o:property[o:id'])) {
+            if (empty($value['o:property'])) {
                 unset($post['o:resource_template_property'][$key]);
                 continue;
             }
-            $post['o:resource_template_property'][$key]['o:property']['o:id'] = $value['o:property[o:id'];
-            // Kept to manage issues.
-            $post['o:resource_template_property'][$key]['o:property[o:id]'] = $value['o:property[o:id'];
-            unset($post['o:resource_template_property'][$key]['o:property[o:id']);
-            if (!empty($value['o:data'])) {
-                $post['o:resource_template_property'][$key] = array_merge($post['o:resource_template_property'][$key], $value['o:data']);
+            $post['o:resource_template_property'][$key]['o:property'] = ['o:id' => $value['o:property']];
+            if (empty($post['o:resource_template_property'][$key]['o:data_type'])) {
+                $post['o:resource_template_property'][$key]['o:data_type'] = [];
+            }
+            if (empty($value['o:data'])) {
+                $post['o:resource_template_property'][$key]['o:data'] = [];
+            }
+        }
+        return $this->mergePropertyTemplateData($post);
+    }
+
+    protected function fixDataPostArray(array $post): array
+    {
+        // Clean useless keys (anyway skipped in adapter).
+        foreach ($post['o:resource_template_property'] as &$rtp) {
+            foreach (array_keys($rtp) as $key) {
+                if (mb_substr($key, 0, 2) !== 'o:' && !in_array($key, ['is-title-property', 'is-description-property'])) {
+                    unset($rtp[$key]);
+                }
             }
         }
         return $post;
     }
 
-    protected function fixDataPostArray(array $data)
+    /**
+     * Convert template property data array from the form into full template
+     * property data content like the resource template json.
+     *
+     * In order to support multiple template properties with the same property
+     * with a simple form similar to the core one, the template properties from
+     * the form are attached to a single template property according to the data
+     * type, like in the model.
+     *
+     * The template properties order is kept, but they are gathered by property.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function mergePropertyTemplateData(array $post): array
     {
-        $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
-        $settingKeys = [];
-        foreach ($propertyFieldset->getElements() as $element) {
-            $settingKey = $element->getAttribute('data-setting-key');
-            if ($settingKey) {
-                $settingKeys[$element->getName()] = $settingKey;
+        $rtps = [];
+        foreach ($post['o:resource_template_property'] as $rtp) {
+            $propertyId = $rtp['o:property']['o:id'];
+            $rtpd = $rtp;
+            unset($rtpd['o:property'], $rtpd['o:data']);
+            if (empty($rtps[$propertyId])) {
+                $rtp['o:data'] = [$rtpd];
+                $rtps[$propertyId] = $rtp;
+            } else {
+                $rtps[$propertyId]['o:data_type'] = array_filter(array_unique(array_merge(
+                    $rtps[$propertyId]['o:data_type'],
+                    $rtpd['o:data_type']
+                )));
+                $rtps[$propertyId]['o:data'][] = $rtpd;
             }
         }
-        // Move settings into o:data and remove empty settings.
-        $data += [
-            'o:resource_class' => empty($data['o:resource_class[o:id]']) ? null : ['o:id' => (int) $data['o:resource_class[o:id]']],
-            'o:title_property' => empty($data['o:title_property[o:id]']) ? null : ['o:id' => (int) $data['o:title_property[o:id]']],
-            'o:description_property' => empty($data['o:description_property[o:id]']) ? null : ['o:id' => (int) $data['o:description_property[o:id]']],
-        ];
-        unset($data['o:resource_class[o:id]'], $data['o:title_property[o:id]'], $data['o:description_property[o:id]'], $data['csrf']);
-        foreach ($data['o:resource_template_property'] as $key => $value) {
-            $data['o:resource_template_property'][$key]['o:property']['o:id'] = $data['o:resource_template_property'][$key]['o:property[o:id]'];
-            unset($data['o:resource_template_property'][$key]['o:property[o:id]']);
-            $data['o:resource_template_property'][$key]['o:data'] = array_filter(array_intersect_key($value, $settingKeys), function ($v) {
-                return is_string($v) ? strlen(trim($v)) : !empty($v);
-            });
-            $data['o:resource_template_property'][$key] = array_diff_key($data['o:resource_template_property'][$key], $settingKeys);
+
+        // TODO Move this check somewhere in the form and in the adapter.
+        foreach ($rtps as &$rtp) {
+            // The data types must be unique for each property.
+            if (count($rtp['o:data']) <= 1) {
+                continue;
+            }
+            $usedDatatypes = [];
+            $hasEmpty = false;
+            foreach ($rtp['o:data'] as $k => &$rtpData) {
+                if (empty($rtpData['o:data_type'])) {
+                    if ($hasEmpty) {
+                        $post['_has_empty'] = true;
+                        unset($rtp['o:data'][$k]);
+                    } else {
+                        $hasEmpty = true;
+                    }
+                    continue;
+                }
+                $before = count($rtpData['o:data_type']);
+                $rtpData['o:data_type'] = array_diff($rtpData['o:data_type'], $usedDatatypes);
+                if (count($rtpData['o:data_type']) !== $before) {
+                    $post['_has_removed'] = true;
+                }
+                if (empty($rtpData['o:data_type'])) {
+                    unset($rtp['o:data'][$k]);
+                    continue;
+                }
+                $usedDatatypes = array_merge($rtpData['o:data_type'], $usedDatatypes);
+            }
         }
+        $post['o:resource_template_property'] = $rtps;
+        return $post;
+    }
+
+    /**
+     * Convert template property data content into template property data array.
+
+     * In order to support multiple template properties with the same property
+     * with a simple form similar to the core one, the template properties are
+     * duplicated for each data for the form.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function explodePropertyTemplateData(array $data): array
+    {
+        $rtps = [];
+        foreach ($data['o:resource_template_property'] as $rtp) {
+            if (empty($rtp['o:data'])) {
+                $rtp['o:data'] = [];
+                $rtps[] = $rtp;
+                continue;
+            }
+            foreach ($rtp['o:data'] as $rtpData) {
+                $rtpd = $rtpData + $rtp;
+                unset($rtpd['o:data']);
+                $rtps[] = $rtpd;
+            }
+        }
+        $data['o:resource_template_property'] = $rtps;
         return $data;
     }
 
@@ -692,7 +789,7 @@ class ResourceTemplateController extends AbstractActionController
             ->getContent();
 
         $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
-        $propertyFieldset->get('o:property[o:id]')->setValue($property->id());
+        $propertyFieldset->get('o:property')->setValue($property->id());
 
         $namePrefix = 'o:resource_template_property[' . rand((int) (PHP_INT_MAX / 1000000), PHP_INT_MAX) . ']';
         $propertyFieldset->setName($namePrefix);

@@ -43,7 +43,7 @@ $this->headScript()
 
 <ul id="properties" data-add-new-property-row-url="<?php echo $escape($this->url(null, ['action' => 'add-new-property-row'], true)); ?>">
     <?php foreach ($form->get('o:resource_template_property') as $propertyFieldset): ?>
-    <?php $property = $propertyFieldset->get('o:property[o:id]')->getValue(); ?>
+    <?php $property = $propertyFieldset->get('o:property')->getValue(); ?>
     <?php $property = $api->read('properties', $property)->getContent();
     echo $this->partial(
         'omeka/admin/resource-template/show-property-row',

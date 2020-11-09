@@ -29,11 +29,11 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
         $this
             ->setLabel('Property') // @translate
             ->add([
-                'name' => 'o:property[o:id]',
+                'name' => 'o:property',
                 'type' => Element\Hidden::class,
                 'attributes' => [
-                    // 'id' => 'property-id',
-                    'data-property-key' => 'o:property[o:id]',
+                    // 'id' => 'o-property-id',
+                    'data-property-key' => 'o:property',
                 ],
             ])
             ->add([
@@ -43,7 +43,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'label' => 'Alternate', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'alternate-label',
+                    // 'id' => 'o-alternate-label',
                     'data-property-key' => 'o:alternate_label',
                 ],
             ])
@@ -54,7 +54,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'label' => 'Alternate', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'alternate-comment',
+                    // 'id' => 'o-alternate-comment',
                     'data-property-key' => 'o:alternate_comment',
                 ],
             ])
@@ -89,7 +89,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'label' => 'Required', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'is-required',
+                    // 'id' => 'o-is-required',
                     'data-property-key' => 'o:is_required',
                 ],
             ])
@@ -100,7 +100,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'label' => 'Private', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'is-private',
+                    // 'id' => 'o-is-private',
                     'data-property-key' => 'o:is_private',
                 ],
             ])
@@ -111,7 +111,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                     'label' => 'Data types', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'data-type',
+                    // 'id' => 'o-data-type',
                     'multiple' => true,
                     'class' => '',
                     'data-placeholder' => 'Select data types…', // @translate

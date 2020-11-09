@@ -74,15 +74,14 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'label' => 'Autofillers', // @translate
                     'value_options' => $this->autofillers,
                     'use_hidden_element' => true,
-                    'empty_option' => count($this->autofillers)
-                        ? ''
-                        : $this->getTranslator()->translate('No configured autofiller.'), // @translate
                 ],
                 'attributes' => [
                     'id' => 'autofillers',
                     'multiple' => true,
                     'class' => 'chosen-select',
-                    'data-placeholder' => 'Select autofillers…', // @translate
+                    'data-placeholder' => count($this->autofillers)
+                        ? 'Select autofillers…' // @translate
+                        : $this->getTranslator()->translate('No configured autofiller.'), // @translate
                 ],
             ]);
     }

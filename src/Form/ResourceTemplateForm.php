@@ -22,37 +22,37 @@ class ResourceTemplateForm extends Form
                 'label' => 'Label', // @translate
             ],
             'attributes' => [
+                'id' => 'o-label',
                 'required' => true,
-                'id' => 'o:label',
             ],
         ]);
 
         $this->add([
-            'name' => 'o:resource_class[o:id]',
+            'name' => 'o:resource_class',
             'type' => ResourceClassSelect::class,
             'options' => [
                 'label' => 'Suggested class', // @translate
                 'empty_option' => '',
             ],
             'attributes' => [
-                'id' => 'o:resource_class[o:id]',
+                'id' => 'o-resource_class-id',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select a class',
             ],
         ]);
 
         $this->add([
-            'name' => 'o:title_property[o:id]',
+            'name' => 'o:title_property',
             'type' => 'hidden',
             'attributes' => [
-                'id' => 'title-property-id',
+                'id' => 'o-title-property-id',
             ],
         ]);
         $this->add([
-            'name' => 'o:description_property[o:id]',
+            'name' => 'o:description_property',
             'type' => 'hidden',
             'attributes' => [
-                'id' => 'description-property-id',
+                'id' => 'o-description-property-id',
             ],
         ]);
 
@@ -99,7 +99,7 @@ class ResourceTemplateForm extends Form
             'required' => true,
         ]);
         $inputFilter->add([
-            'name' => 'o:resource_class[o:id]',
+            'name' => 'o:resource_class',
             'allow_empty' => true,
         ]);
 
