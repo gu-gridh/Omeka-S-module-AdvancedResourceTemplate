@@ -17,7 +17,7 @@ class GenericAutofiller extends AbstractAutofiller
 
         // TODO Manage language.
         $params = [];
-        parse_str(str_replace('{query}', rawurlencode($query), $this->options['query']), $params);
+        parse_str(str_replace('{query}', rawurlencode($query), (string) $this->options['query']), $params);
 
         $response = $this->httpClient
             ->setUri($this->options['url'])
