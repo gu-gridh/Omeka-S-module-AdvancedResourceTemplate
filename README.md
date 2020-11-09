@@ -10,7 +10,8 @@ resources:
 
 - auto-completion with existing values,
 - locked values,
-- language selection and pre-selection,
+- multiple fields with the same property,
+- language selection and pre-selection by template,
 - creation of a new resource during edition of a resource,
 - autofill multiple fields with external data ([IdRef], and [Geonames] and generic
   json or xml services).
@@ -118,7 +119,7 @@ two `}`. it works only with the current `value`.
 
 If you want to include a service that is not supported currently, you can choose
 the autofiller `generic:json` or `generic:xml`. Two required and two optional
-params sjhould be added on four separate lines:
+params should be added on four separate lines:
 - the full url of the service,
   Note that the protocol may need to be `http`, not `https` on some servers (the
   server where Omeka is installed), because the request is done by Omeka itself,
@@ -128,7 +129,7 @@ params sjhould be added on four separate lines:
 - the path to the list of results, when it is not root, in order to loop them,
   indicated with `{list}`,
 - the path to the value to use as a label for each result, indicated with
-  `{__label__}`. If absent, the first field will be used).
+  `{__label__}`. If absent, the first field will be used.
 
 
 For exemple, you can query another Omeka S service (try with "archives"), or the
