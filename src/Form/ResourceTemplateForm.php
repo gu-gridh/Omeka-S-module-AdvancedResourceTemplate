@@ -45,14 +45,14 @@ class ResourceTemplateForm extends Form
             'name' => 'o:title_property',
             'type' => 'hidden',
             'attributes' => [
-                'id' => 'o-title-property-id',
+                'id' => 'title-property-id',
             ],
         ]);
         $this->add([
             'name' => 'o:description_property',
             'type' => 'hidden',
             'attributes' => [
-                'id' => 'o-description-property-id',
+                'id' => 'description-property-id',
             ],
         ]);
 
