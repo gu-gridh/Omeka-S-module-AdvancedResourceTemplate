@@ -7,6 +7,10 @@ var descriptionProperty = $('#description-property-id');
 var titlePropertyTemplate = $('<span class="title-property-cell">' + Omeka.jsTranslate('Title') + '</span>');
 var descriptionPropertyTemplate = $('<span class="description-property-cell">' + Omeka.jsTranslate('Description') + '</span>');
 
+// Improve the display of the main advanced settings.
+$('.resource-templates.edit fieldset.settings > div.field').wrapAll('<div class="collapsible" style="overflow: inherit;"/>');
+$('.resource-templates.edit fieldset.settings legend').after(`<a href="#" class="expand" aria-label="${Omeka.jsTranslate('Expand')}"></a>`);
+
 // Mark the title and description properties.
 $('#properties li[data-property-id="' + titleProperty.val() + '"] .actions').before(titlePropertyTemplate);
 $('#properties li[data-property-id="' + descriptionProperty.val() + '"] .actions').before(descriptionPropertyTemplate);

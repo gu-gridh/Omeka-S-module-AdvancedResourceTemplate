@@ -57,17 +57,6 @@ class ResourceTemplateForm extends Form
         ]);
 
         $this->add([
-            'type' => Fieldset::class,
-            'name' => 'o:data',
-            'options' => [
-                'label' => 'Other settings', // @translate
-            ],
-            'attributes' => [
-                'class' => 'settings',
-            ],
-        ]);
-
-        $this->add([
             'type' => Element\Collection::class,
             'name' => 'o:resource_template_property',
             'options' => [
@@ -84,6 +73,17 @@ class ResourceTemplateForm extends Form
             ],
             'attributes' => [
                 'id' => 'properties',
+            ],
+            'attributes' => [
+                'class' => 'settings',
+            ],
+        ]);
+
+        $this->add([
+            'type' => Fieldset::class,
+            'name' => 'o:data',
+            'options' => [
+                'label' => 'Other settings', // @translate
             ],
             'attributes' => [
                 'class' => 'settings',

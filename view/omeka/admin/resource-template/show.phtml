@@ -93,7 +93,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 <?php if (array_filter($resourceTemplate->data())): ?>
 <hr style="margin-top: 24px; opacity: 0.1;">
 <div>
-    <span class="label"><?php echo $translate('Advanced settings'); ?></span>
+    <span class="label" style="font-weight: bold;"><?php echo $translate('Advanced settings'); ?></span>
     <dl><?php foreach ($resourceTemplate->data() as $key => $value): ?>
         <?php if (!$value) continue; ?>
         <dt><?php echo str_replace('_', ' ', $key); ?></dt>
