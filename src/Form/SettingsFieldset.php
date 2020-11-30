@@ -13,6 +13,22 @@ class SettingsFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'advancedresourcetemplate_closed_property_list',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Append properties to resource form', // @translate
+                    'info' => 'When no template is selected in resource form, the property selector may be available or not to force to select a template.
+Warning: you may have to set each resource template as open/close to addition according to this setting.', // @translate
+                    'value_options' => [
+                        '0' => 'Allow', // @translate
+                        '1' => 'Forbid', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_closed_property_list',
+                ],
+            ])
+            ->add([
                 'name' => 'advancedresourcetemplate_autofillers',
                 'type' => Element\Textarea::class,
                 'options' => [

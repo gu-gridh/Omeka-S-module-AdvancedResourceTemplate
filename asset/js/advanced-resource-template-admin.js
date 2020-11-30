@@ -1,5 +1,14 @@
 $(document).ready(function() {
 
+    // Initialize the sidebar according to the main option.
+    var sidebar = $('#property-selector');
+    if ($('form.resource-form').hasClass('closed-property-list on-load')) {
+        // Once loaded, the param is managed dynamically via event "o:template-applied".
+        $('form.resource-form').removeClass('on-load');
+        sidebar.removeClass('always-open');
+        Omeka.closeSidebar(sidebar);
+    }
+
     /**
      * Prepare the lock for original values of a property.
      */
@@ -625,12 +634,19 @@ $(document).ready(function() {
     $(document).on('o:template-applied', 'form.resource-form', function() {
         var sidebar = $('#property-selector');
         var templateData = $('#resource-values').data('template-data');
-        if (templateData.closed_property_list == '1') {
+        var hasTemplate = $('#resource-template-select').val() != '';
+        if ((hasTemplate && templateData.closed_property_list == '1')
+            || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
+        ) {
             sidebar.removeClass('always-open');
             Omeka.closeSidebar(sidebar);
         } else {
             Omeka.openSidebar(sidebar);
             sidebar.addClass('always-open');
+        }
+
+        if (!hasTemplate) {
+            return;
         }
 
         var fields = $('#properties .resource-values.field');

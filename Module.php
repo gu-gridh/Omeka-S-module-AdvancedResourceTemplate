@@ -87,6 +87,12 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
+            \Omeka\Form\ResourceForm::class,
+            'form.add_elements',
+            [$this, 'handleResourceForm']
+        );
+
+        $sharedEventManager->attach(
             \Omeka\Form\SettingForm::class,
             'form.add_elements',
             [$this, 'handleMainSettings']
@@ -131,6 +137,26 @@ class Module extends AbstractModule
             ->appendScript(sprintf('var baseUrl = %s;', json_encode($view->basePath('/'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
             ->appendFile($assetUrl('vendor/jquery-autocomplete/jquery.autocomplete.min.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer'])
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
+    }
+
+    public function handleResourceForm(Event $event): void
+    {
+        /** @var \Omeka\Mvc\Status $status */
+        $services = $this->getServiceLocator();
+        $status = $services->get('Omeka\Status');
+        if (!$status->isAdminRequest()) {
+            return;
+        }
+
+        $settings = $services->get('Omeka\Settings');
+        $closedResourceId = (bool) (int) $settings->get('advancedresourcetemplate_closed_property_list');
+        if (!$closedResourceId) {
+            return;
+        }
+
+        /** @var \Omeka\Form\ResourceForm $form */
+        $form = $event->getTarget();
+        $form->setAttribute('class', trim($form->getAttribute('class') . ' closed-property-list on-load'));
     }
 
     public function handleMainSettings(Event $event): void

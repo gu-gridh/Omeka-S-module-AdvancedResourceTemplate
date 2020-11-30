@@ -148,6 +148,7 @@ return [
     'advancedresourcetemplate' => [
         'settings' => [
             // The default autofillers are in /data/mapping/mappings.ini.
+            'advancedresourcetemplate_closed_property_list' => '0',
             'advancedresourcetemplate_autofillers' => [],
         ],
     ],

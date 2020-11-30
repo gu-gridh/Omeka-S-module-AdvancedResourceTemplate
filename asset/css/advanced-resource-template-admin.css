@@ -1,3 +1,7 @@
+form.resource-form.closed-property-list.on-load #property-selector {
+    display: none;
+}
+
 a.value-language.no-language {
      display: none;
  }
