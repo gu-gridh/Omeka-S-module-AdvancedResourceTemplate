@@ -2,12 +2,14 @@ Advanced Resource Template (module for Omeka S)
 ===============================================
 
 > __New versions of this module and support for Omeka S version 3.0 and above
-> are available on [GitLab], which seems to respect users and privacy better.__
+> are available on [GitLab], which seems to respect users and privacy better
+> than the previous repository.__
 
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
 the resource templates in order to simplify and to improve the edition of
 resources:
 
+- limit to the closed list of properties specified in the template,
 - auto-completion with existing values,
 - locked values,
 - multiple fields with the same property,
