@@ -55,7 +55,7 @@ $(document).ready(function() {
      * Prepare the autocompletion for a property.
      */
     function prepareFieldAutocomplete(field) {
-        var templateData = $('#resource-values').data('template-data') ;
+        var templateData = $('#resource-values').data('template-data');
         var rtpData = field.data('template-data') ? field.data('template-data') : {};
 
         // Reset autocomplete for all properties.
@@ -85,7 +85,7 @@ $(document).ready(function() {
      */
     function prepareFieldLanguage(field) {
         // Add a specific datalist for the property. It replaces the previous one from another template.
-        var templateData = $('#resource-values').data('template-data') ;
+        var templateData = $('#resource-values').data('template-data');
         var rtpData = field.data('template-data') ? field.data('template-data') : {};
         var listName = 'value-languages';
         var term = field.data('property-term');
@@ -623,6 +623,16 @@ $(document).ready(function() {
     });
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
+        var sidebar = $('#property-selector');
+        var templateData = $('#resource-values').data('template-data');
+        if (templateData.closed_property_list == '1') {
+            sidebar.removeClass('always-open');
+            Omeka.closeSidebar(sidebar);
+        } else {
+            Omeka.openSidebar(sidebar);
+            sidebar.addClass('always-open');
+        }
+
         var fields = $('#properties .resource-values.field');
         if (!$('#resource-values').data('locked-ready')) {
             fields.each(function(index, field) {

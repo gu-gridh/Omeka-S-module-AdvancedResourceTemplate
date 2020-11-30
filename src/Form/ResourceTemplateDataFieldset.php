@@ -21,6 +21,16 @@ class ResourceTemplateDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'closed_property_list',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Limit to specified properties', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'closed_property_list',
+                ],
+            ])
+            ->add([
                 'name' => 'value_languages',
                 'type' => ArrayTextarea::class,
                 'options' => [
