@@ -27,21 +27,6 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 </div>
 <?php endif; ?>
 
-<div>
-    <dl><?php foreach ($resourceTemplate->data() as $key => $value): ?>
-        <?php if (!$value) continue; ?>
-        <dt><?php echo str_replace('_', ' ', $key); ?></dt>
-        <?php if (is_array($value)): ?>
-            <?php foreach ($value as $k => $v): ?>
-        <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
-            <?php endforeach; ?>
-        <?php else: ?>
-        <dd><?php echo $escape($value); ?></dd>
-        <?php endif; ?>
-        <?php endforeach;
-    ?></dl>
-</div>
-
 <table id="properties" class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
     <thead>
     <tr>
@@ -104,5 +89,24 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
     ]); ?>
     <div class="sidebar-content"></div>
 </div>
+
+<?php if (array_filter($resourceTemplate->data())): ?>
+<hr style="margin-top: 24px; opacity: 0.1;">
+<div>
+    <span class="label"><?php echo $translate('Advanced settings'); ?></span>
+    <dl><?php foreach ($resourceTemplate->data() as $key => $value): ?>
+        <?php if (!$value) continue; ?>
+        <dt><?php echo str_replace('_', ' ', $key); ?></dt>
+        <?php if (is_array($value)): ?>
+            <?php foreach ($value as $k => $v): ?>
+        <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
+            <?php endforeach; ?>
+        <?php else: ?>
+        <dd><?php echo $escape($value); ?></dd>
+        <?php endif; ?>
+        <?php endforeach;
+    ?></dl>
+</div>
+<?php endif; ?>
 
 <?php $this->trigger('view.show.after'); ?>
