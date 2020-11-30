@@ -59,7 +59,7 @@ class ResourceTemplatePropertyData extends AbstractEntity
 
     /**
      * @Column(
-     *     type="json_array",
+     *     type="json",
      *     nullable=false
      * )
      */
