@@ -70,6 +70,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
                 <dt><?php echo str_replace('_', ' ', $key); ?></dt>
                 <?php if (is_array($value)): ?>
                     <?php foreach ($value as $k => $v): ?>
+                        <?php if (is_array($v)) $v = json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>
                 <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -99,6 +100,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
         <dt><?php echo str_replace('_', ' ', $key); ?></dt>
         <?php if (is_array($value)): ?>
             <?php foreach ($value as $k => $v): ?>
+                <?php if (is_array($v)) $v = json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>
         <dd><?php echo $escape((is_numeric($k) ? '' : $k . ' = ') . $v); ?></dd>
             <?php endforeach; ?>
         <?php else: ?>
