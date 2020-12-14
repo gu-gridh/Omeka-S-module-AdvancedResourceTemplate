@@ -443,7 +443,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         }
 
         $filename = preg_replace('/[^a-zA-Z0-9]+/', '_', $template->label());
-        $export = json_encode($export, JSON_PRETTY_PRINT);
+        $export = json_encode($export, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         $response = $this->getResponse();
         $headers = $response->getHeaders();
