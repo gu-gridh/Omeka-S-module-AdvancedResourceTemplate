@@ -197,6 +197,23 @@ class IndexController extends AbstractRestfulController
     }
 
     /**
+     * Check if the request contains an identifier.
+     *
+     * This method overrides parent in order to allow to query on one or
+     * multiple ids.
+     *
+     * @see \Omeka\Controller\ApiController::getIdentifier()
+     *
+     * {@inheritDoc}
+     * @see \Laminas\Mvc\Controller\AbstractRestfulController::getIdentifier()
+     */
+    protected function getIdentifier($routeMatch, $request)
+    {
+        $identifier = $this->getIdentifierName();
+        return $routeMatch->getParam($identifier, false);
+    }
+
+    /**
      * Return a jSend message of error.
      *
      * @link https://github.com/omniti-labs/jsend
