@@ -392,7 +392,7 @@ $(document).ready(function() {
         }
 
         // @see numeric-data-types.js
-        if (NumericDataTypes && dataType.startsWith('numeric:')) {
+        if (typeof NumericDataTypes !== 'undefined' && dataType.startsWith('numeric:')) {
             if (dataType === 'numeric:timestamp') {
                 v = value.find('.numeric-datetime-value');
                 // The class is used to init a field, but it doesn't have the value yet.
