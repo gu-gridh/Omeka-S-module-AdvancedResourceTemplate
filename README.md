@@ -11,6 +11,7 @@ resources:
 
 - limit to the closed list of properties specified in the template,
 - auto-completion with existing values,
+- default values,
 - locked values,
 - multiple fields with the same property,
 - language selection and pre-selection by template,
@@ -52,6 +53,39 @@ Usage
 
 Simply update your resource templates with the new options and use them in the
 resource forms.
+
+### Default value
+
+By default, simply set the string to use a default value. For a resource, this
+is the resource id and for uri this is the uri.
+
+For a uri with a label, just separate the uri and the label with a space:
+```
+https://example.com/my-id Label of the value
+```
+
+For other data types that may be not managed, the default value can be set as a
+json with all hidden sub-data that are in the Omeka resource form.
+
+For a uri with a label and a language (for value suggest):
+```json
+{
+    "@id": "https://example.com/my-id",
+    "o:label": "Label of the value",
+    "@value": "Value of the value (let empty)",
+    "@language": "fr"
+}
+```
+
+For a linked resource, that is useful only for a better display:
+```json
+{
+    "display_title": "Title of my object",
+    "value_resource_id": "xxx",
+    "value_resource_name": "items",
+    "url": "/admin/item/xxx",
+}
+```
 
 ### Autofilling
 
