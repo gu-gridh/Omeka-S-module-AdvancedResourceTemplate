@@ -128,3 +128,7 @@ body.modal.sidebar-open #content {
          width: 100%;
     }
 }
+
+#o_resource_class_id_chosen.chosen-container-multi .chosen-choices li.search-choice {
+    min-width: 100%;
+}

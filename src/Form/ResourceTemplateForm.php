@@ -31,13 +31,14 @@ class ResourceTemplateForm extends Form
             'name' => 'o:resource_class',
             'type' => ResourceClassSelect::class,
             'options' => [
-                'label' => 'Suggested class', // @translate
+                'label' => 'Suggested classes', // @translate
                 'empty_option' => '',
             ],
             'attributes' => [
                 'id' => 'o-resource_class-id',
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select a class',
+                'multiple' => 'multiple',
+                'data-placeholder' => 'Select classes', // @translate
             ],
         ]);
 

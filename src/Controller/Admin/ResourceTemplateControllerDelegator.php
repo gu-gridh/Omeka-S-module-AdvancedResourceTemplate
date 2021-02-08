@@ -587,6 +587,14 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 $data['o:resource_template_property'][$key]['o:data'] = [];
             }
         }
+
+        // Allow to select multiple resource classes, so use the data option.
+        if (empty($data['o:data']['suggested_resource_class_ids'])) {
+            $data['o:resource_class'] = empty($data['o:resource_class']) ? [] : [$data['o:resource_class']];
+        } else {
+            $data['o:resource_class'] = $data['o:data']['suggested_resource_class_ids'];
+        }
+
         return $this->explodePropertyTemplateData($data);
     }
 
@@ -598,6 +606,19 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
      */
     protected function fixPostArray(array $post): array
     {
+        // Allow to select multiples classes, but only the first one can be
+        // saved directly in template.
+        // Check compatibility with standard form too.
+        if (empty($post['o:resource_class'])) {
+            $post['o:data']['suggested_resource_class_ids'] = [];
+        } elseif (is_array($post['o:resource_class'])) {
+            $post['o:data']['suggested_resource_class_ids'] = array_map('intval', $post['o:resource_class']);
+        } else {
+            $post['o:data']['suggested_resource_class_ids'] = [(int) $post['o:resource_class']];
+        }
+        $post['o:data']['suggested_resource_class_ids'] = array_filter($post['o:data']['suggested_resource_class_ids']);
+        $post['o:resource_class'] = reset($post['o:data']['suggested_resource_class_ids']) ?: null;
+
         $post['o:resource_class'] = empty($post['o:resource_class']) ? null : ['o:id' => (int) $post['o:resource_class']];
         $post['o:title_property'] = empty($post['o:title_property']) ? null : ['o:id' => (int) $post['o:title_property']];
         $post['o:description_property'] = empty($post['o:description_property']) ? null : ['o:id' => (int) $post['o:description_property']];

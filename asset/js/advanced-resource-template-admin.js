@@ -477,6 +477,44 @@ $(document).ready(function() {
         }
     }
 
+    /**
+     * Manage the options for the resource class select.
+     */
+    function prepareResourceClassSelect() {
+        var templateData = $('#resource-values').data('template-data');
+        var hasTemplate = $('#resource-template-select').val() != '';
+        var resourceClassSelect = $('#resource-values #resource-class-select');
+        var resourceClassId = resourceClassSelect.val();
+
+        // Reset or store the default full list of resource classes.
+        var areResourceClassesStored = typeof $('#resource-values').data('resource_class_select') !== 'undefined';
+        if (areResourceClassesStored) {
+            resourceClassSelect.html($('#resource-values').data('resource_class_select'));
+        } else {
+            $('#resource-values').data('resource_class_select', $('#resource-values #resource-class-select').html());
+        }
+        resourceClassSelect.val(resourceClassId);
+
+        if (hasTemplate
+            && templateData.suggested_resource_class_ids
+            && templateData.suggested_resource_class_ids.length
+        ) {
+            templateData.suggested_resource_class_ids.map(Number);
+            resourceClassSelect.find('option').each(function() {
+                var resClassId = Number($(this).val());
+                if (resClassId && !templateData.suggested_resource_class_ids.includes(resClassId)) {
+                    $(this).remove();
+                }
+            });
+        }
+        // Manage no template and bad template options.
+        if (!hasTemplate || !resourceClassSelect.find('option').length) {
+            resourceClassSelect.html($('#resource-values').data('resource_class_select'));
+        }
+        resourceClassSelect.val(resourceClassId);
+        resourceClassSelect.trigger('chosen:updated');
+    }
+
     function prepareAutofiller() {
         $('#resource-values .non-properties .field.autofiller').remove();
 
@@ -644,6 +682,8 @@ $(document).ready(function() {
             Omeka.openSidebar(sidebar);
             sidebar.addClass('always-open');
         }
+
+        prepareResourceClassSelect();
 
         if (!hasTemplate) {
             return;
