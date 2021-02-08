@@ -21,6 +21,16 @@ class ResourceTemplateDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'require_resource_class',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Require a class', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'require_resource_class',
+                ],
+            ])
+            ->add([
                 'name' => 'closed_property_list',
                 'type' => Element\Checkbox::class,
                 'options' => [

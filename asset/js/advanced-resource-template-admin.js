@@ -512,6 +512,15 @@ $(document).ready(function() {
             resourceClassSelect.html($('#resource-values').data('resource_class_select'));
         }
         resourceClassSelect.val(resourceClassId);
+
+        if (templateData.require_resource_class) {
+            resourceClassSelect.attr('require', 'require')
+                .closest('.field').addClass('required');
+        } else {
+            resourceClassSelect.removeAttr('require')
+                .closest('.field').removeClass('required');
+        }
+
         resourceClassSelect.trigger('chosen:updated');
     }
 

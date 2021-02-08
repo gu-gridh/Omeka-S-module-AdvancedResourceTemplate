@@ -146,11 +146,18 @@
             }
         });
 
-        // Handle validation for required properties.
+        // Handle validation for required metadata, included properties.
         $('form.resource-form').on('submit', function(e) {
 
             var thisForm = $(this);
             var errors = [];
+
+            // Check for a required resource class.
+            var resourceClassSelect = $('#resource-values #resource-class-select');
+            var resourceClassId = Number(resourceClassSelect.val());
+            if (!resourceClassId && resourceClassSelect.attr('require')) {
+                errors.push('The template requires a resource class.');
+            }
 
             // Iterate all required properties.
             var requiredProps = thisForm.find('.resource-values.required');
