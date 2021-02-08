@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-09 00:00+0000\n"
+"POT-Creation-Date: 2021-02-01 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,97 +19,105 @@ msgstr ""
 
 #: src/Autofiller/GenericAutofiller.php:59
 #: src/Autofiller/GenericAutofiller.php:105
-#: src/Autofiller/GenericAutofiller.php:59
-#: src/Autofiller/GenericAutofiller.php:105
 msgid "[Result]"
 msgstr ""
 
-#: src/Controller/Admin/IndexController.php:45
-#: src/Controller/Admin/IndexController.php:88
 #: src/Controller/Admin/IndexController.php:45
 #: src/Controller/Admin/IndexController.php:88
 msgid "The query is empty."
 msgstr ""
 
 #: src/Controller/Admin/IndexController.php:148
-#: src/Controller/Admin/IndexController.php:148
 msgid "The service is empty."
 msgstr ""
 
 #: src/Controller/Admin/IndexController.php:152
-#: src/Controller/Admin/IndexController.php:152
 msgid "The template is empty."
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:84
-#: src/Form/ResourceTemplateDataFieldset.php:84
+#: src/Form/ResourceTemplateDataFieldset.php:104
 msgid "No configured autofiller."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:66 src/Generic/AbstractModule.php:66
+#: src/Generic/AbstractModule.php:66
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:73 src/Generic/AbstractModule.php:73
+#: src/Generic/AbstractModule.php:73
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:80 src/Generic/AbstractModule.php:80
+#: src/Generic/AbstractModule.php:80
 msgid "This module has resources that connot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:709 src/Generic/AbstractModule.php:709
+#: src/Generic/AbstractModule.php:707
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
 "unavailable."
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:54
-#: view/omeka/admin/resource-template/show.phtml:54
+#: view/omeka/admin/resource-template/show.phtml:39
 msgid "Other settings"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyFieldset.php:127
+#: view/omeka/admin/resource-template/show.phtml:97
 msgid "Advanced settings"
 msgstr ""
 
+#: src/Form/ResourceTemplateForm.php:34
+msgid "Suggested classes"
+msgstr ""
+
+#: src/Form/ResourceTemplateForm.php:41
+msgid "Select classes"
+msgstr ""
+
 #: src/Form/ResourceTemplateDataFieldset.php:27
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:42
-msgid "Autocomplete with existing values"
+msgid "Require a class"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:30
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:46
-msgid "Starts with"
+#: src/Form/ResourceTemplateDataFieldset.php:37
+msgid "Limit to specified properties"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:31
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
-msgid "Contains"
+#: src/Form/ResourceTemplateDataFieldset.php:47
+msgid "Languages for values"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:43
-msgid "Value languages for properties"
-msgstr ""
-
-#: src/Form/ResourceTemplateDataFieldset.php:54
+#: src/Form/ResourceTemplateDataFieldset.php:58
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:74
 msgid "Default language"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:64
+#: src/Form/ResourceTemplateDataFieldset.php:68
 msgid "No language"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:74
-#: src/Form/SettingsFieldset.php:19
+#: src/Form/ResourceTemplateDataFieldset.php:78
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:42
+msgid "Autocomplete with existing values"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:81
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:46
+msgid "Starts with"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:82
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
+msgid "Contains"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:94
+#: src/Form/SettingsFieldset.php:35
 msgid "Autofillers"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:83
+#: src/Form/ResourceTemplateDataFieldset.php:103
 msgid "Select autofillers…"
 msgstr ""
 
@@ -117,7 +125,27 @@ msgstr ""
 msgid "Advanced Resource Template"
 msgstr ""
 
+#: src/Form/SettingsFieldset.php:19
+msgid "Append properties to resource form"
+msgstr ""
+
 #: src/Form/SettingsFieldset.php:20
+msgid ""
+"When no template is selected in resource form, the property selector may be "
+"available or not to force to select a template.\n"
+"Warning: you may have to set each resource template as open/close to "
+"addition according to this setting."
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:23
+msgid "Allow"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:24
+msgid "Forbid"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:36
 msgid "List of autofillers to use for this template."
 msgstr ""
 
@@ -161,13 +189,13 @@ msgstr ""
 msgid "The service \"%s\" is not available."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:285
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:523
 msgid ""
 "When multiple fields use the same property, only one field can be without "
 "data type."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:288
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:526
 msgid ""
 "When multiple fields use the same property, the data types must be unique "
 "among them."
@@ -246,148 +274,6 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:147
+#: config/module.config.php:146
 msgid "No results"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:14
-#: view/omeka/admin/resource-template/edit.phtml:15
-#: view/omeka/admin/resource-template/add.phtml:14
-msgid "Resource templates"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:17
-msgid "Export"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:19
-msgid "Edit resource template"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:25
-msgid "Class"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:48
-msgid "Original label"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:49
-#: view/omeka/admin/resource-template/form.phtml:121
-msgid "Data types"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:50
-msgid "Alternate label"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:51
-msgid "Alternate comment"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:52
-msgid "Required?"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:53
-msgid "Private?"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:68
-#: view/omeka/admin/resource-template/show-property-row.phtml:37
-msgid "Details"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:81
-#: view/omeka/admin/resource-template/show.phtml:82
-msgid "Yes"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:81
-#: view/omeka/admin/resource-template/show.phtml:82
-msgid "No"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show.phtml:103
-#: view/omeka/admin/resource-template/form.phtml:69
-#: view/omeka/admin/resource-template/form.phtml:78
-msgid "Close"
-msgstr ""
-
-#: view/omeka/admin/resource-template/edit.phtml:24
-msgid "Save"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:29
-msgid "Delete"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:59
-msgid "Add property"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:81
-msgid "Label"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:82
-#: view/omeka/admin/resource-template/form.phtml:89
-msgid "Original"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:84
-#: view/omeka/admin/resource-template/form.phtml:91
-msgid "Alternate"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:88
-msgid "Comment"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:95
-msgid "Other options"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:98
-msgid "Use for resource title"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:104
-msgid "Use for resource description"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:110
-msgid "Required"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:116
-msgid "Private"
-msgstr ""
-
-#: view/omeka/admin/resource-template/form.phtml:139
-msgid "Set changes"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show-property-row.phtml:43
-msgid "Edit property"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show-property-row.phtml:47
-msgid "Remove property"
-msgstr ""
-
-#: view/omeka/admin/resource-template/show-property-row.phtml:51
-msgid "Restore value"
-msgstr ""
-
-#: view/omeka/admin/resource-template/add.phtml:14
-msgid "New resource template"
-msgstr ""
-
-#: view/omeka/admin/resource-template/add.phtml:24
-msgid "Add"
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:309
-msgid "Add another resource template?"
 msgstr ""
