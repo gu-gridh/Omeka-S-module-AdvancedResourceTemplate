@@ -9,7 +9,9 @@ Advanced Resource Template (module for Omeka S)
 the resource templates in order to simplify and to improve the edition of
 resources:
 
-- limit to the closed list of properties specified in the template,
+- limit to a closed list of resource classes,
+- require a resource class,
+- limit to a closed list of properties,
 - auto-completion with existing values,
 - default values,
 - locked values,
@@ -259,9 +261,9 @@ Copyright
 * Copyright Daniel Berthereau, 2020-2021 (see [Daniel-KM] on GitLab)
 * Library [jQuery-Autocomplete]: Copyright 2012 DevBridge and other contributors
 
-These features are built for the future digital library [Manioc] of the
+These features were built for the future digital library [Manioc] of the
 Université des Antilles and Université de la Guyane, currently managed with
-[Greenstone].
+[Greenstone]. Some other ones were built for the future digital library [Le Menestrel].
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
@@ -288,5 +290,6 @@ Université des Antilles and Université de la Guyane, currently managed with
 [jQuery-Autocomplete]: https://www.devbridge.com/sourcery/components/jquery-autocomplete/
 [Manioc]: http://www.manioc.org
 [Greenstone]: http://www.greenstone.org
+[Le Menestrel]: http://www.menestrel.fr
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"

@@ -226,8 +226,8 @@ utilisateurs sont donc encouragés à charger et à tester l’adéquation du lo
 systèmes et/ou de leurs données et, plus généralement, à l’utiliser et à
 l’exploiter dans les mêmes conditions en matière de sécurité.
 
-Le fait que vous lisez actuellement ce document signifie que vous avez eu des
-connaissances de la licence CeCILL et que vous en acceptez les termes.
+Le fait que vous lisez actuellement ce document signifie que vous avez pris
+connaissance de la licence CeCILL et que vous en acceptez les termes.
 
 * La bibliothèque [jQuery-Autocomplete] est publiée sous licence [MIT].
 
