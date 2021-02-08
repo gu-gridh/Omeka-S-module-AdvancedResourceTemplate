@@ -176,7 +176,7 @@ class MapperHelper extends AbstractPlugin
         $stmt = $this->connection->executeQuery($qb);
         // Fetch by key pair is not supported by doctrine 2.0.
         $this->properties = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->properties = array_column($this->properties, 'id', 'term');
+        $this->properties = array_map('intval', array_column($this->properties, 'id', 'term'));
         return $this->properties;
     }
 
@@ -310,7 +310,7 @@ class MapperHelper extends AbstractPlugin
         $stmt = $this->connection->executeQuery($qb);
         // Fetch by key pair is not supported by doctrine 2.0.
         $this->resourceClasses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->resourceClasses = array_column($this->resourceClasses, 'id', 'term');
+        $this->resourceClasses = array_map('intval', array_column($this->resourceClasses, 'id', 'term'));
         return $this->resourceClasses;
     }
 
@@ -423,7 +423,7 @@ class MapperHelper extends AbstractPlugin
         $stmt = $this->connection->executeQuery($qb);
         // Fetch by key pair is not supported by doctrine 2.0.
         $this->resourceTemplates = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->resourceTemplates = array_column($this->resourceTemplates, 'id', 'label');
+        $this->resourceTemplates = array_map('intval', array_column($this->resourceTemplates, 'id', 'label'));
         return $this->resourceTemplates;
     }
 
