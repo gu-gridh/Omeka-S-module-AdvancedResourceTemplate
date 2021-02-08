@@ -14,6 +14,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
     /**
      * Remove useless keys "data_types" from o:data before final step.
      *
+     * Add keys data_type_name and data_type_label to avoid notice in core view.
+     *
      * {@inheritDoc}
      * @see \Omeka\Controller\Admin\ResourceTemplateController::importAction()
      */
@@ -220,6 +222,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                         }
                         $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'] = array_unique($import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type']);
                     }
+                }
+            }
+            // TODO Remove this fix, that avoids a notice in core, waiting for fix merge (3.1?).
+            if (empty($import['o:resource_template_property'][$key]['data_type_label'])) {
+                if (empty($import['o:resource_template_property'][$key]['data_types'])) {
+                    $import['o:resource_template_property'][$key]['data_type_label'] = '';
+                } else {
+                    $label = reset($import['o:resource_template_property'][$key]['data_types']);
+                    $import['o:resource_template_property'][$key]['data_type_label'] = empty($label['label']) ? '' : $label['label'];
                 }
             }
         }
