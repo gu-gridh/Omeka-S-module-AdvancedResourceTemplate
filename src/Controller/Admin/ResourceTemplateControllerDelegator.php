@@ -489,6 +489,12 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $this->api()->read('resource_templates', $this->params('id'))->getContent();
 
+        $isFlatArray = function (array $v) {
+            return !array_filter($v, function ($vv) {
+                return !is_scalar($vv);
+            });
+        };
+
         $templateHeaders = [
             'Type',
             'Template label',
@@ -510,19 +516,39 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $templateProperties = $template->resourceTemplateProperties();
 
         // Prepare the headers, so loop all datas.
-        $templateDataHeaders = array_keys($template->data());
 
-        $templateDataHeaders = array_map(function ($v) {
-            return 'Template data: ' . $v;
-        }, $templateDataHeaders);
+        // Prepare the headers for the template data.
+        // Manage flat arrays (multiselect) as list to allow to separate them
+        // from scalar values during import.
+        $templateDataHeaders = $template->data();
+        array_walk($templateDataHeaders, function(&$v, $k) use ($isFlatArray) {
+            $v = is_array($v) && count($v) && $isFlatArray($v) && json_encode($v) === json_encode(array_values($v))
+                ? 'Template data list: ' . $k
+                : 'Template data: ' . $k;
+        });
+        // If a key is a list and a scalar, keep list only.
+        foreach ($templateDataHeaders as $k => $v) {
+            if (mb_substr($v, 0, 14) === 'Template data:' && in_array('Template data list: ' . $k, $templateDataHeaders)) {
+                unset($templateDataHeaders[$k]);
+            }
+        }
         $templateDataHeaders = array_combine($templateDataHeaders, $templateDataHeaders);
 
+        // Prepare the headers for the properties data.
         $templatePropertyDataHeaders = [];
         foreach ($templateProperties as $templateProperty) foreach ($templateProperty->data() as $rtpData) {
-            $keys = array_map(function ($v) {
-                return 'Property data: ' . $v;
-            }, array_keys($rtpData->data()));
-            $templatePropertyDataHeaders = array_replace($templatePropertyDataHeaders, array_combine($keys, $keys));
+            $rtpDataVal = $rtpData->data();
+            array_walk($rtpDataVal, function(&$v, $k) use ($isFlatArray) {
+                $v = is_array($v) && count($v) && $isFlatArray($v) && json_encode($v) === json_encode(array_values($v))
+                    ? 'Property data list: ' . $k
+                    : 'Property data: ' . $k;
+            });
+            $templatePropertyDataHeaders = array_replace($templatePropertyDataHeaders, array_combine($rtpDataVal, $rtpDataVal));
+        }
+        foreach ($templatePropertyDataHeaders as $k => $v) {
+            if (mb_substr($v, 0, 14) === 'Property data:' && in_array('Property data list: ' . $k, $templatePropertyDataHeaders)) {
+                unset($templatePropertyDataHeaders[$k]);
+            }
         }
         $skips = [
             'Property data: o:alternate_label',
@@ -541,12 +567,6 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             $templatePropertyHeaders,
             $templatePropertyDataHeaders
         );
-
-        $isFlat = function (array $v) {
-            return (bool) array_filter($v, function ($vv) {
-                return !is_scalar($vv);
-            });
-        };
 
         // Because the output is always small, create it in memory in realtime.
         $stream = fopen('php://temp', 'w+');
@@ -567,12 +587,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $row['Title property'] = $templateTitle ? $templateTitle->term() : null;
         $row['Description property'] = $templateDescription ? $templateDescription->term() : null;
         foreach ($template->data() as $key => $value) {
-            if (is_array($value)) {
-                $row['Template data: ' . $key] = empty($value) || $isFlat($value)
-                    ? implode(' | ', $value)
-                    : json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            if ($value === '' || $value === null || $value === []) {
+                continue;
+            }
+            if (isset($templateDataHeaders['Template data list: ' . $key])) {
+                // For flat array, use a string separated by "|".
+                $row['Template data list: ' . $key] = implode(' | ', $value);
             } else {
-                $row['Template data: ' . $key] = $value;
+                // In all other cases (scalar, objects), json encode value.
+                $row['Template data: ' . $key] = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
         }
 
@@ -595,12 +618,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                     if (in_array('Property data: ' . $key, $skips)) {
                         continue;
                     }
-                    if (is_array($value)) {
-                        $row['Property data: ' . $key] = empty($value) || $isFlat($value)
-                            ? implode(' | ', $value)
-                            : json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    if ($value === '' || $value === null || $value === []) {
+                        continue;
+                    }
+                    if (isset($templateDataHeaders['Property data list: ' . $key])) {
+                        // For flat array, use a string separated by "|".
+                        $row['Property data list: ' . $key] = implode(' | ', $value);
                     } else {
-                        $row['Property data: ' . $key] = $value;
+                        // In all other cases (scalar, objects), json encode value.
+                        $row['Property data: ' . $key] = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                     }
                 }
                 $this->appendCsvRow($stream, $row, $type);
@@ -622,13 +648,6 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $response->setHeaders($headers);
         $response->setContent($export);
         return $response;
-    }
-
-    protected function appendCsvRow($stream, array $fields, string $type = 'csv'): void
-    {
-        $type ==='tsv'
-            ? fputcsv($stream, $fields, "\t", chr(0), chr(0))
-            : fputcsv($stream, $fields);
     }
 
     public function addAction()
@@ -983,5 +1002,12 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         return $view
             ->setTerminal(true)
             ->setTemplate('omeka/admin/resource-template/show-property-row');
+    }
+
+    protected function appendCsvRow($stream, array $fields, string $type = 'csv'): void
+    {
+        $type ==='tsv'
+            ? fputcsv($stream, $fields, "\t", chr(0), chr(0))
+            : fputcsv($stream, $fields);
     }
 }
