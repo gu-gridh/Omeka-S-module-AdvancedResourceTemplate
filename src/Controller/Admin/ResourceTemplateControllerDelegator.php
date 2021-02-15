@@ -5,6 +5,7 @@ namespace AdvancedResourceTemplate\Controller\Admin;
 use AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset;
 use Laminas\View\Model\ViewModel;
 use Omeka\Form\ResourceTemplateForm;
+use Omeka\Form\ResourceTemplateImportForm;
 use Omeka\Form\ResourceTemplateReviewImportForm;
 use Omeka\Mvc\Exception\NotFoundException;
 use Omeka\Stdlib\Message;
@@ -26,7 +27,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         }
         $file = $this->params()->fromFiles('file');
         if ($file) {
-            return parent::importAction();
+            // To avoid duplication of code, the csv/tsv file is converted into
+            // a json input.
+            $result = $this->prepareImportFile($file);
+            if ($result) {
+                return parent::importAction();
+            }
+            return new ViewModel([
+                'form' => $this->getForm(ResourceTemplateImportForm::class),
+            ]);
         }
         $form = $this->getForm(ResourceTemplateReviewImportForm::class);
         $data = $this->params()->fromPost();
@@ -198,7 +207,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                     $import['o:resource_template_property'][$key]['o:data_type'] = array_unique($import['o:resource_template_property'][$key]['o:data_type']);
                     // Prepare the list of standard data types for duplicated
                     // properties (only one most of the time, that is the main).
-                    $import['o:resource_template_property'][$key]['o:data'] = array_values($import['o:resource_template_property'][$key]['o:data']);
+                    $import['o:resource_template_property'][$key]['o:data'] = array_values($import['o:resource_template_property'][$key]['o:data'] ?? []);
                     $import['o:resource_template_property'][$key]['o:data'][0]['data_types'] = $import['o:resource_template_property'][$key]['data_types'];
                     $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'];
                     $first = true;
@@ -236,6 +245,213 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         }
 
         return $import;
+    }
+
+    /**
+     * Convert a csv/tsv import into a json template.
+     *
+     * @todo Instead of a conversion into json, redirect data into the standard form?
+     */
+    protected function prepareImportFile(array $fileData): bool
+    {
+        // In such a case, return to the parent check.
+        if ($fileData['type'] === 'application/json' || !$fileData['size'] || $fileData['error']) {
+            return true;
+        }
+        $fileData = $this->checkFile($fileData);
+        if ($fileData === false) {
+            $this->messenger()->addError(new Message(
+                'Wrong media type ("%s") for file.', // @translate
+                $fileData['type']
+            ));
+            return false;
+        }
+
+        if ($fileData['type'] === 'text/tab-separated-values') {
+            $options = [
+                'type' => $fileData['type'],
+                'delimiter' => "\t",
+                'enclosure' => chr(0),
+            ];
+        } else {
+            $options = [
+                'type' => $fileData['type'],
+                'delimiter' => ',',
+                'enclosure' => '"',
+            ];
+        }
+        $rows = $this->extractRows($fileData['tmp_name'], $options);
+        if (empty($rows)) {
+            $this->messenger()->addError(
+                'The file does not contain any row.' // @translate
+            );
+            return false;
+        }
+
+        // Define some specific functions.
+
+        $stringToArray = function ($v) {
+            $v = (string) $v;
+            return strlen(trim($v))
+                ? array_map('trim', explode('|', $v))
+                : [];
+        };
+        $cellValue = function ($v, $k) {
+            // A standard option manageable in form is never a null value.
+            if (trim((string) $v) === 'null') {
+                return 'null';
+            }
+            if (mb_substr($k, 0, 19) === 'Template data list:' || mb_substr($k, 0, 19) === 'Template data list:' ) {
+                return array_filter(array_map('trim', explode('|', $v)), 'strlen') ?: [];
+            }
+            if ($v === '' || $v === null || $v === []) {
+                return null;
+            }
+            // Note: some values are json encoded in the form (autofiller), but
+            // in that case, there is a double encoding.
+            return json_decode($v, true);
+        };
+        $templateData = function ($v, $k) use ($cellValue) {
+            // Don't check ":" because some spreadsheets add a space before it.
+            return mb_substr((string) $k, 0, 13) === 'Template data'
+                && $cellValue($v, $k) !== null;
+        };
+        $propertyData = function ($v, $k) use ($cellValue) {
+            // Don't check ":" because some spreadsheets add a space before it.
+            return mb_substr((string) $k, 0, 13) === 'Property data'
+                && $cellValue($v, $k) !== null;
+        };
+        // Is empty except values like "0".
+        $isEmpty = function ($v) {
+            return is_array($v) ? !count($v) : !strlen((string) $v);
+        };
+
+        // Convert to json.
+        $json = [];
+        $rtpTerms = [];
+        foreach ($rows as $row) {
+            switch ($row['Type']) {
+                case 'Template':
+                    $json['o:label'] = @$row['Template label'] ?: '[Untitled]';
+                    $json['o:resource_class'] = $this->fillTerm(@$row['Resource class'], 'resource_classes');
+                    $json['o:title_property'] = $this->fillTerm(@$row['Title property']);
+                    $json['o:description_property'] = $this->fillTerm(@$row['Description property']);
+                    foreach (array_filter($row, $templateData, ARRAY_FILTER_USE_BOTH) as $header => $cell) {
+                        $cell = $cellValue($cell, $header);
+                        if ($isEmpty($cell)) {
+                            continue;
+                        }
+                        $json['o:data'][trim(mb_substr($header, mb_strpos($header, ':') + 1))] = $cell;
+                    }
+                    break;
+                case 'Property':
+                    $rtp = $this->fillTerm(@$row['Property']);
+                    if (!$rtp) {
+                        break;
+                    }
+                    $rtp['o:alternate_label'] = @$row['Alternate label'] ?: '';
+                    $rtp['o:alternate_comment'] = @$row['Alternate comment'] ?: '';
+                    $rtp['data_types'] = array_filter(array_map(function ($v) {
+                        return $v ? ['name' => $v, 'label' => $v] : null;
+                    }, $stringToArray(@$row['Data types'])));
+                    $rtp['o:is_required'] = (bool) @row['Required'];
+                    $rtp['o:is_private'] = (bool) @row['Private'];
+                    $rtpOData = [];
+                    foreach (array_filter($row, $propertyData, ARRAY_FILTER_USE_BOTH) as $header => $cell) {
+                        $cell = $cellValue($cell, $header);
+                        if ($isEmpty($cell)) {
+                            continue;
+                        }
+                        $rtpOData[trim(mb_substr($header, mb_strpos($header, ':') + 1))] = $cell;
+                    }
+                    $rtp['o:data'] = [$rtpOData];
+                    unset($rtp['data_type_label']);
+                    $json['o:resource_template_property'][] = $rtp;
+                    $rtpTerms[$rtp['term']] = isset($rtpTerms[$rtp['term']]) ? ++$rtpTerms[$rtp['term']] : 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (empty($json['o:resource_template_property'])) {
+            $this->messenger()->addError(
+                'There is no valid template properties.' // @translate
+            );
+            return false;
+        }
+
+        $skips = [
+            'vocabulary_namespace_uri' => null,
+            'vocabulary_label' => null,
+            'local_name' => null,
+            'label' => null,
+            'vocabulary_prefix' => null,
+            'is-title-property' => null,
+            'is-description-property' => null,
+            'o:property' => null,
+            'o:data_type' => null,
+            'o:data' => null,
+            'data_type_label' => null,
+        ];
+
+        // TODO Improve review form for duplicate properties (don't mix them here, but after the form or before or during hydration).
+        // Merge duplicate properties according to this module that allows them.
+        $hasDuplicate = false;
+        foreach ($rtpTerms as $term => $count) {
+            if ($count <= 1) {
+                continue;
+            }
+            $hasDuplicate = true;
+            $first = true;
+            $firstRtp = null;
+            foreach ($json['o:resource_template_property'] as $key => $rtp) {
+                if ($rtp['term'] !== $term) {
+                    continue;
+                }
+                if ($first) {
+                    $first = false;
+                    $firstKey = $key;
+                    $firstRtp = $rtp;
+                    $firstRtp['o:data'] = [];
+                } else {
+                    // No duplicate label in case of a duplicate property.
+                    // TODO Check with all duplicates.
+                    if (@$firstRtp['o:alternate_label'] === @$rtp['o:alternate_label']) {
+                        $this->messenger()->addError(sprintf(
+                            'The alternative label for a duplicate property (%s) should be unique.', // @translate
+                            $term
+                        ));
+                        return false;
+                    }
+                    unset($json['o:resource_template_property'][$key]);
+                }
+                $data = array_diff_key($rtp, $skips);
+                $data['o:data'] = reset($rtp['o:data']) ? array_diff_key(reset($rtp['o:data']), $skips) : [];
+                $firstRtp['o:data'][] = $data;
+            }
+            $json['o:resource_template_property'][$firstKey] = $firstRtp;
+        }
+        $json['o:resource_template_property'] = array_values($json['o:resource_template_property']);
+
+        $fileData['name'] .= '.json';
+        $fileData['type'] = 'application/json';
+        $fileData['size'] = file_put_contents($fileData['tmp_name'], json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        if (!$fileData['size']) {
+            $fileData['error'] = 1;
+            $this->messenger()->addError(
+                'File cannot be checked or saved.' // @translate
+            );
+            return false;
+        }
+
+        if ($hasDuplicate) {
+            $this->messenger()->addWarning(
+                'The template has duplicate properties. They are mixed in the form, but will be imported separately.' // @translate
+            );
+        }
+
+        return true;
     }
 
     /**
@@ -1009,5 +1225,134 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $type ==='tsv'
             ? fputcsv($stream, $fields, "\t", chr(0), chr(0))
             : fputcsv($stream, $fields);
+    }
+
+    /**
+     * Get an array from a csv/tsv file. The headers are returned as first row.
+     */
+    protected function extractRows(string $filepath, array $options = []): array
+    {
+        $options += [
+            'type' => 'text/csv',
+            'delimiter' => ',',
+            'enclosure' => '"',
+        ];
+        if ($options['type'] === 'text/tab-separated-values') {
+            $options['delimiter'] = "\t";
+        }
+        $delimiter = $options['delimiter'];
+        $enclosure = $options['enclosure'];
+
+        // fgetcsv is not used to avoid issues with bom.
+        $content = file_get_contents($filepath);
+        $content = mb_convert_encoding($content, 'UTF-8');
+        if (substr($content, 0, 3) === chr(0xEF) . chr(0xBB) . chr(0xBF)) {
+            $content = substr($content, 3);
+        }
+        if (empty($content)) {
+            return [];
+        }
+
+        $first = true;
+        $rows = array_map(function ($v) use ($delimiter, $enclosure) {
+            return str_getcsv($v, $delimiter, $enclosure);
+        }, array_map('trim', explode("\n", $content)));
+        foreach ($rows as $key => $row) {
+            if (empty(array_filter($row))) {
+                unset($rows[$key]);
+                continue;
+            }
+            // First row is headers.
+            if ($first) {
+                $first = false;
+                $headers = array_combine($row, $row);
+                $countHeaders = count($headers);
+                // Headers should not be empty and duplicates are forbidden.
+                if (!$countHeaders
+                    || $countHeaders !== count($row)
+                ) {
+                    return [];
+                }
+                $rows[$key] = $headers;
+                continue;
+            }
+            if (count($row) < $countHeaders) {
+                $row = array_slice(array_merge($row, array_fill(0, $countHeaders, '')), 0, $countHeaders);
+            } elseif (count($row) > $countHeaders) {
+                $row = array_slice($row, 0, $countHeaders);
+            }
+            $rows[$key] = array_combine($headers, array_map('trim', $row));
+        }
+
+        $rows = array_values(array_filter($rows));
+        if (!isset($rows[0]['Type'])) {
+            return [];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Check the file, according to its media type.
+     *
+     * @todo Use the class TempFile before.
+     *
+     * @param array $fileData
+     *            File data from a post ($_FILES).
+     * @return array|bool
+     */
+    protected function checkFile(array $fileData)
+    {
+        if (empty($fileData) || empty($fileData['tmp_name'])) {
+            return false;
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mediaType = $finfo->file($fileData['tmp_name']);
+        $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+        $fileData['extension'] = $extension;
+
+        // Manage an exception for a very common format, undetected by fileinfo.
+        if ($mediaType === 'text/plain' || 'application/octet-stream') {
+            $extensions = [
+                'txt' => 'text/plain',
+                'csv' => 'text/csv',
+                'tab' => 'text/tab-separated-values',
+                'tsv' => 'text/tab-separated-values',
+            ];
+            if (isset($extensions[$extension])) {
+                $mediaType = $extensions[$extension];
+                $fileData['type'] = $mediaType;
+            }
+        }
+
+        $supporteds = [
+            // 'application/vnd.oasis.opendocument.spreadsheet' => true,
+            'text/plain' => true,
+            'text/tab-separated-values' => true,
+        ];
+        if (! isset($supporteds[$mediaType])) {
+            return false;
+        }
+
+        return $fileData;
+    }
+
+    protected function fillTerm(?string $term, string $type = 'properties'): ?array
+    {
+        if (empty($term)) {
+            return null;
+        }
+        $member = $this->api()->searchOne($type, ['term' => $term])->getContent();
+        if (empty($member)) {
+            return null;
+        }
+        return [
+            'term' => $term,
+            'vocabulary_namespace_uri' => $member->vocabulary()->namespaceUri(),
+            'vocabulary_label' => $member->vocabulary()->label(),
+            'local_name' => $member->localName(),
+            'label' => $member->label(),
+        ];
     }
 }
