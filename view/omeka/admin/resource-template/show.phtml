@@ -4,19 +4,30 @@
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
  */
 
-// Copy of original file + resource template data and resource template properties data.
+// Copy of original file + resource template data and resource template properties data + export csv/tsv.
 
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
+$url = $this->plugin('url');
+
+$this->headLink()->appendStylesheet($this->assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
 $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 ?>
 
 <?php echo $this->pageTitle($resourceTemplate->label(), 1, $translate('Resource templates')); ?>
 
 <div id="page-actions">
-    <a class="button" href="<?php echo $this->escapeHtml($this->url(null, ['action' => 'export'], true)); ?>"><?php echo $translate('Export'); ?></a>
+    <div id="page-action-menu">
+        <a href="#" class="button expand" aria-label="<?= $translate('Expand') ?>" title="<?= $translate('Expand') ?>">
+            <?= $translate('Export') ?></a>
+            <ul class="collapsible">
+                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'csv']], true)) ?>"><?= $translate('As csv') ?></a></li>
+                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'tsv']], true)) ?>"><?= $translate('As tsv') ?></a></li>
+                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'json']], true)) ?>"><?= $translate('As json') ?></a></li>
+            </ul>
+    </div>
     <?php if ($resourceTemplate->userIsAllowed('update')): ?>
-    <a class="button" href="<?php echo $escape($resourceTemplate->url('edit')); ?>"><?php echo $translate('Edit resource template'); ?></a>
+    <a class="button" href="<?= $escape($resourceTemplate->url('edit')) ?>"><?= $translate('Edit') ?></a>
     <?php endif; ?>
 </div>
 

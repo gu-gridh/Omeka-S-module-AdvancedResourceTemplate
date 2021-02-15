@@ -377,6 +377,20 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
 
     public function exportAction()
     {
+        $output = $this->params()->fromQuery('output', 'json');
+        switch ($output) {
+            case 'csv':
+                return $this->exportCsv('csv');
+            case 'tsv':
+                return $this->exportCsv('tsv');
+            case 'json':
+            default:
+                return $this->exportJson();
+        }
+    }
+
+    protected function exportJson(): \Laminas\Stdlib\ResponseInterface
+    {
         /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $this->api()->read('resource_templates', $this->params('id'))->getContent();
         $templateClass = $template->resourceClass();
@@ -460,10 +474,161 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $headers = $response->getHeaders();
         $headers->addHeaderLine('Content-Type', 'application/json')
                 ->addHeaderLine('Content-Disposition', sprintf('attachment; filename="%s.json"', $filename))
+                // Don't use mb_strlen.
                 ->addHeaderLine('Content-Length', strlen($export));
         $response->setHeaders($headers);
         $response->setContent($export);
         return $response;
+    }
+
+    /**
+     * @param string $type May be "csv" or "tsv".
+     */
+    protected function exportCsv(string $type): \Laminas\Stdlib\ResponseInterface
+    {
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
+        $template = $this->api()->read('resource_templates', $this->params('id'))->getContent();
+
+        $templateHeaders = [
+            'Type',
+            'Template label',
+            'Resource class',
+            'Title property',
+            'Description property',
+        ];
+        $templateHeaders = array_combine($templateHeaders, $templateHeaders);
+        $templatePropertyHeaders = [
+            'Property',
+            'Alternate label',
+            'Alternate comment',
+            'Data types',
+            'Required',
+            'Private',
+        ];
+        $templatePropertyHeaders = array_combine($templatePropertyHeaders, $templatePropertyHeaders);
+
+        $templateProperties = $template->resourceTemplateProperties();
+
+        // Prepare the headers, so loop all datas.
+        $templateDataHeaders = array_keys($template->data());
+
+        $templateDataHeaders = array_map(function ($v) {
+            return 'Template data: ' . $v;
+        }, $templateDataHeaders);
+        $templateDataHeaders = array_combine($templateDataHeaders, $templateDataHeaders);
+
+        $templatePropertyDataHeaders = [];
+        foreach ($templateProperties as $templateProperty) foreach ($templateProperty->data() as $rtpData) {
+            $keys = array_map(function ($v) {
+                return 'Property data: ' . $v;
+            }, array_keys($rtpData->data()));
+            $templatePropertyDataHeaders = array_replace($templatePropertyDataHeaders, array_combine($keys, $keys));
+        }
+        $skips = [
+            'Property data: o:alternate_label',
+            'Property data: o:alternate_comment',
+            'Property data: is-title-property',
+            'Property data: is-description-property',
+            'Property data: o:is_required',
+            'Property data: o:is_private',
+            'Property data: o:data_type',
+        ];
+        $templatePropertyDataHeaders = array_diff($templatePropertyDataHeaders, $skips);
+
+        $headers = array_replace(
+            $templateHeaders,
+            $templateDataHeaders,
+            $templatePropertyHeaders,
+            $templatePropertyDataHeaders
+        );
+
+        $isFlat = function (array $v) {
+            return (bool) array_filter($v, function ($vv) {
+                return !is_scalar($vv);
+            });
+        };
+
+        // Because the output is always small, create it in memory in realtime.
+        $stream = fopen('php://temp', 'w+');
+
+        // Prepend the utf-8 bom to support Windows.
+        fwrite($stream, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        $this->appendCsvRow($stream, $headers, $type);
+        // Template.
+        $templateClass = $template->resourceClass();
+        $templateTitle = $template->titleProperty();
+        $templateDescription = $template->descriptionProperty();
+
+        $row = array_fill_keys($headers, null);
+        $row['Type'] = 'Template';
+        $row['Template label'] = $template->label();
+        $row['Resource class'] = $templateClass ? $templateClass->term() : null;
+        $row['Title property'] = $templateTitle ? $templateTitle->term() : null;
+        $row['Description property'] = $templateDescription ? $templateDescription->term() : null;
+        foreach ($template->data() as $key => $value) {
+            if (is_array($value)) {
+                $row['Template data: ' . $key] = empty($value) || $isFlat($value)
+                    ? implode(' | ', $value)
+                    : json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            } else {
+                $row['Template data: ' . $key] = $value;
+            }
+        }
+
+        $this->appendCsvRow($stream, $row, $type);
+
+        // Properties.
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation $templateProperty */
+        foreach ($templateProperties as $templateProperty) {
+            $propertyRow = array_fill_keys($headers, null);
+            $propertyRow['Type'] = 'Property';
+            $propertyRow['Property'] = $templateProperty->property()->term();
+            foreach ($templateProperty->data() as $rtpData) {
+                $row = $propertyRow;
+                $row['Alternate label'] = $rtpData->alternateLabel();
+                $row['Alternate comment'] = $rtpData->alternateComment();
+                $row['Data types'] = implode(' | ', $rtpData->dataTypes());
+                $row['Required'] = $rtpData->isRequired() ? '1' : '0';
+                $row['Private'] = $rtpData->isPrivate() ? '1' : '0';
+                foreach ($rtpData->data() as $key => $value) {
+                    if (in_array('Property data: ' . $key, $skips)) {
+                        continue;
+                    }
+                    if (is_array($value)) {
+                        $row['Property data: ' . $key] = empty($value) || $isFlat($value)
+                            ? implode(' | ', $value)
+                            : json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    } else {
+                        $row['Property data: ' . $key] = $value;
+                    }
+                }
+                $this->appendCsvRow($stream, $row, $type);
+            }
+        }
+
+        rewind($stream);
+        $export = stream_get_contents($stream);
+        fclose($stream);
+
+        $filename = preg_replace('/[^a-zA-Z0-9]+/', '_', $template->label());
+
+        $response = $this->getResponse();
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine('Content-Type', $type === 'tsv' ? 'text/tab-separated-values' : 'text/csv')
+            ->addHeaderLine('Content-Disposition', sprintf('attachment; filename="%s.%s"', $filename, $type))
+            // Don't use mb_strlen.
+            ->addHeaderLine('Content-Length', strlen($export));
+        $response->setHeaders($headers);
+        $response->setContent($export);
+        return $response;
+    }
+
+    protected function appendCsvRow($stream, array $fields, string $type = 'csv'): void
+    {
+        $type ==='tsv'
+            ? fputcsv($stream, $fields, "\t", chr(0), chr(0))
+            : fputcsv($stream, $fields);
     }
 
     public function addAction()
@@ -545,8 +710,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                                     '<a href="%s">%s</a>',
                                     htmlspecialchars($this->url()->fromRoute(null, [], true)),
                                     $this->translate('Add another resource template?')
-                                    )
-                                );
+                                )
+                            );
                             $successMessage->setEscapeHtml(false);
                         }
                         $this->messenger()->addSuccess($successMessage);
