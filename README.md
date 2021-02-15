@@ -9,17 +9,59 @@ Advanced Resource Template (module for Omeka S)
 the resource templates in order to simplify and to improve the edition of
 resources:
 
-- limit to a closed list of resource classes,
-- require a resource class,
-- limit to a closed list of properties,
-- auto-completion with existing values,
-- default values,
-- locked values,
-- multiple fields with the same property,
-- language selection and pre-selection by template,
-- creation of a new resource during edition of a resource,
-- autofill multiple fields with external data ([IdRef], and [Geonames] and generic
-  json or xml services).
+- Require a resource class from a limited list of resource classes:
+
+  ![Require a resource class from a limited list of resource classes](data/images/required_limited_class.png))
+
+- Limit template to a closed list of properties:
+
+  ![Limit template to defined properties](data/images/closed_template.png)
+
+- Auto-completion with existing values:
+
+  ![Example of autocompletion](data/images/autocompletion.png)
+
+- Default values:
+
+  This option simplifies creation of resources manually.
+
+- Locked values:
+
+  This option is useful for identifiers.
+
+- Multiple fields with the same property:
+
+  This option allows to have multiple times the same property with different
+  settings. For example, you may want to have a free subject and a subject from
+  two thesaurus. They can be set as different data types of the same property,
+  but as three template properties too, so each one has its own label and
+  settings.
+
+  ![Example of multiple subjects with different settings](data/images/duplicate_properties.png)
+
+- Language selection and default by template and by property, or no language:
+
+  ![Example of language by template and property](data/images/advanced_language_settings.png)
+
+- Creation of a new resource during edition of a resource:
+
+  This is useful to create a new author of a resource when authors are managed
+  as resources.
+
+  ![Creation of a new resource via a pop-up](data/images/new_resource_during_edition.png)
+
+- Selection of default data types:
+
+  ![Selection of default data types](data/images/default_datatypes.png)
+
+- Autofill multiple fields with external data ([IdRef], and [Geonames] and generic
+  json or xml services):
+
+  See below.
+
+- Import and export of templates as spreadsheet (csv/tsv):
+
+  ![Export of templates as csv/tsv](data/images/export_spreadsheet.png)
 
 
 Installation
@@ -51,10 +93,8 @@ composer install --no-dev
 Usage
 -----
 
-### Main usage
-
 Simply update your resource templates with the new options and use them in the
-resource forms.
+resource forms. Here are some details for some features.
 
 ### Default value
 
@@ -213,6 +253,9 @@ TODO
 - [ ] Fill autocompletion with resource, not value.
 - [x] Use twig for more complex format.
 - [x] Create a generic mapper.
+- [ ] Improve performance of the autofiller.
+- [ ] Export/import all templates together as spreadsheet.
+- [ ] Validate imported templates with the standard form?
 
 
 Warning
