@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-01 00:00+0000\n"
-"PO-Revision-Date: 2021-02-01 00:00+0000\n"
+"POT-Creation-Date: 2021-02-15 00:00+0000\n"
+"PO-Revision-Date: 2021-02-15 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -62,11 +62,23 @@ msgstr ""
 "Le module \"%s\" a été automatiquement désactivé car ses dépendances ne sont "
 "plus disponibles."
 
-#: view/omeka/admin/resource-template/show.phtml:39
+#: view/omeka/admin/resource-template/show.phtml:24
+msgid "As csv"
+msgstr "En csv"
+
+#: view/omeka/admin/resource-template/show.phtml:25
+msgid "As tsv"
+msgstr "En tsv"
+
+#: view/omeka/admin/resource-template/show.phtml:26
+msgid "As json"
+msgstr "En json"
+
+#: view/omeka/admin/resource-template/show.phtml:50
 msgid "Other settings"
 msgstr "Autres paramètres"
 
-#: view/omeka/admin/resource-template/show.phtml:97
+#: view/omeka/admin/resource-template/show.phtml:108
 msgid "Advanced settings"
 msgstr "Paramètres avancés"
 
@@ -196,7 +208,38 @@ msgstr "Le service \"%1\" n’a pas de correspondances."
 msgid "The service \"%s\" is not available."
 msgstr "Le service \"%s\" n’est pas disponible."
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:523
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:264
+#, php-format
+msgid "Wrong media type (\"%s\") for file."
+msgstr "Média-type incorrect (\"%s\") pour le fichier."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:286
+msgid "The file does not contain any row."
+msgstr "Le fichier ne contient aucune ligne."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:379
+msgid "There is no valid template properties."
+msgstr "Il n’y a aucune propriété valide."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:422
+#, php-format
+msgid "The alternative label for a duplicate property (%s) should be unique."
+msgstr ""
+"Le libellé alternatif pour la propriété en double (%s) doit être unique."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:443
+msgid "File cannot be checked or saved."
+msgstr "Le fichier ne peut pas être vérifié ou enregistré."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:450
+msgid ""
+"The template has duplicate properties. They are mixed in the form, but will "
+"be imported separately."
+msgstr ""
+"Le modèle contient des propriétés en double. Elles sont mélangées dans cette "
+"page, mais seront importées séparément."
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:923
 msgid ""
 "When multiple fields use the same property, only one field can be without "
 "data type."
@@ -204,7 +247,7 @@ msgstr ""
 "Quand plusieurs champs utilisent la même propriété, un seul champ peut être "
 "sans type de données."
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:526
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:926
 msgid ""
 "When multiple fields use the same property, the data types must be unique "
 "among them."
