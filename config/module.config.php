@@ -56,6 +56,7 @@ return [
             Form\Element\OptionalSelect::class => Form\Element\OptionalSelect::class,
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
+            'Omeka\Form\ResourceTemplateImportForm' => Form\ResourceTemplateImportForm::class,
         ],
         'factories' => [
             Form\ResourceTemplateDataFieldset::class => Service\Form\ResourceTemplateDataFieldsetFactory::class,
