@@ -336,8 +336,7 @@ class Mapper extends AbstractPlugin
             $v = $value;
             $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
             unset($filters[0]);
-            foreach ($filters as $filter) {
-                switch ($filter) {
+            foreach ($filters as $filter) switch ($filter) {
                 case 'abs':
                     $v = is_numeric($v) ? abs($v) : $v;
                     break;
@@ -377,7 +376,7 @@ class Mapper extends AbstractPlugin
                     break;
                 case preg_match('~date\s*\(\s*["|\'](?<format>[^"\']+?)["|\']\s*\)~', $filter, $matches) > 0:
                     try {
-                        $v = @date($matches['format'], @strtotime($value));
+                        $v = @date($matches['format'], @strtotime($v));
                     } catch (\Exception $e) {
                         // Nothing.
                     }
@@ -395,12 +394,11 @@ class Mapper extends AbstractPlugin
                     }
                     break;
                 case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
-                    $v = mb_substr($value, $matches['start'], (int) $matches['length']);
+                    $v = mb_substr($v, $matches['start'], (int) $matches['length']);
                     break;
                 default:
                     // Nothing.
                     break;
-            }
             }
             $output = $v;
         }
