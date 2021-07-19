@@ -2,6 +2,12 @@
 
     $(document).ready( function() {
 
+        // In some cases (other modules), this js is used without properties.
+        if (!$('div#properties').length) {
+            // $('body').append('<div id="properties" style="display:none;">');
+            return;
+        }
+
         // Store the default data types.
         if (!$('div#properties').data('default-data-types') || !$('div#properties').data('default-data-types').length) {
             $('div#properties').data('default-data-types', 'literal,resource,uri');
