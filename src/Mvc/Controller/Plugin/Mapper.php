@@ -117,16 +117,16 @@ class Mapper extends AbstractPlugin
             $target = $map['to'];
             if (!empty($target['replace'])) {
                 $target['replace'] = array_fill_keys($target['replace'], '');
-                foreach ($target['replace'] as $query => &$value) {
+                foreach ($target['replace'] as $query => &$replacement) {
                     if (in_array($query, ['{__value__}', '{__label__}'])) {
                         continue;
                     }
                     $query = mb_substr($query, 1, -1);
                     if (isset($input[$query])) {
-                        $value = $input[$query];
+                        $replacement = $input[$query];
                     }
                 }
-                unset($value);
+                unset($replacement);
             }
 
             $query = $map['from'];
@@ -430,9 +430,11 @@ class Mapper extends AbstractPlugin
      * @example
      * ```
      * // The following recursive array:
-     * 'video' => [
-     *      'dataformat' => 'jpg',
-     *      'bits_per_sample' => 24;
+     * [
+     *     'video' => [
+     *         'dataformat' => 'jpg',
+     *         'bits_per_sample' => 24,
+     *     ],
      * ]
      * // is converted into:
      * [

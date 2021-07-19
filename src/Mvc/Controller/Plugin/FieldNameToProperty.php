@@ -9,6 +9,8 @@ class FieldNameToProperty extends AbstractPlugin
     /**
      * Convert a field name as a property array.
      *
+     * @todo Replace with AutomapFields or TransformSource from module BulkImport.
+     *
      * It returns the property name and identified metadata. For example,
      * `dcterms:title @fr-fr ^^literal §private ~pattern for the {__value__} with {/record/data}`
      * will be converted into:
