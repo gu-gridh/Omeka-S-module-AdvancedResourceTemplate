@@ -80,7 +80,7 @@ La première ligne contient la clé et le libellé du schéma, qui seront énum�
 dans le formulaire du modèle de ressource. Plusieurs schémas peuvent être
 ajoutées pour différents services.
 
-Vous pouvez utiliser le même remplissuers avec plusieurs schémas à des fins
+Vous pouvez utiliser le même remplisseurs avec plusieurs schémas à des fins
 différentes : ajouter un numéro à la clé (`[idref:person #2]`). Si le schéma
 n’est pas disponible, il sera ignoré. Ne le modifiez pas une fois définie, sinon
 vous devrez vérifier tous les modèles de ressources qui l’utilisent.
@@ -129,7 +129,7 @@ quatre lignes distinctes :
   Notez que le protocole peut devoir être "http" et non "https" sur certains
   serveurs (celui où Omeka est installé), car la requête est faite par Omeka
   lui-même, et non par le navigateur. De ce fait, pour utiliser les "https"
-  recommandés, vous devrez peut-être [configurer les clés] `slcapath` et `sslcafile`
+  recommandés, vous devrez peut-être [configurer les clés] `sslcapath` et `sslcafile`
   dans le fichier Omeka `config/local.config.php`.
 - la requête avec le joker `{query}`, commençant par un `?`,
 - le chemin à la liste des résultats, lorsqu’il n’est pas en racine, afin de
@@ -175,12 +175,16 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
-- [ ] Remplacer `{__value__}` et `{__label__}` par `{value}` et `{label}`.
+- [ ] Remplacer FieldNameToProperty avec AutomapFields ou TransformSource du module BulkImport.
+- [ ] Remplacer `{__value__}` et `{__label__}` par `{value}` et `{label}` (prêt dans module BulkImport).
 - [ ] Inclure tous les suggesteurs du module [Value Suggest].
 - [ ] Limiter l’autocomplétion aux ressources choisies.
 - [ ] Autocompléter avec des ressources, pas des valeurs.
 - [x] Utiliser twig pour des formats plus complexes.
 - [x] Créer une option de correspondance générique.
+- [ ] Améliorer la performance de l'autorempisseur.
+- [ ] Importer/Exporter tous les modèles ensemble dans un tableur.
+- [ ] Valider les modèles importés avec le formulaire standard ?
 
 
 Attention

@@ -247,7 +247,8 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
-- [ ] Replace `{__value__}` and `{__label__}` by `{value}` and `{label}`.
+- [ ] Replace the mapper with AutomapFields or TransformSource from module BulkImport.
+- [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module BulkImport).
 - [ ] Include all suggesters from module [Value Suggest].
 - [ ] Limit autocompletion to selected resources.
 - [ ] Fill autocompletion with resource, not value.
