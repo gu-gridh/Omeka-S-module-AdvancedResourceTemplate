@@ -21,6 +21,13 @@ resources:
 
   ![Example of autocompletion](data/images/autocompletion.png)
 
+- Maximum number of values:
+
+  It allows to force to have only one value when needed, for example a main
+  category or a publication date, or to limit the values to a specific number.
+
+  You need to take care of languages, that are all included for now.
+
 - Default values:
 
   This option simplifies creation of resources manually.
@@ -252,11 +259,13 @@ TODO
 - [ ] Include all suggesters from module [Value Suggest].
 - [ ] Limit autocompletion to selected resources.
 - [ ] Fill autocompletion with resource, not value.
+- [ ] Take care of language with max values.
 - [x] Use twig for more complex format.
 - [x] Create a generic mapper.
 - [ ] Improve performance of the autofiller.
 - [ ] Export/import all templates together as spreadsheet.
 - [ ] Validate imported templates with the standard form?
+- [ ] Validate items with data (unique value, strict template, etc.).
 
 
 Warning
