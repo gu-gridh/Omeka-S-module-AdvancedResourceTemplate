@@ -6,6 +6,7 @@ $(document).ready(function() {
         // Once loaded, the param is managed dynamically via event "o:template-applied".
         $('form.resource-form').removeClass('on-load');
         sidebar.removeClass('always-open');
+        $('form.resource-form #property-selector-button').hide();
         Omeka.closeSidebar(sidebar);
     }
 
@@ -686,10 +687,12 @@ $(document).ready(function() {
             || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
         ) {
             sidebar.removeClass('always-open');
+            $('form.resource-form #property-selector-button').hide();
             Omeka.closeSidebar(sidebar);
         } else {
             Omeka.openSidebar(sidebar);
             sidebar.addClass('always-open');
+            $('form.resource-form #property-selector-button').show();
         }
 
         prepareResourceClassSelect();
