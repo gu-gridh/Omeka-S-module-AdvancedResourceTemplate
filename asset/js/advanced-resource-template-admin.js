@@ -62,6 +62,24 @@ $(document).ready(function() {
     }
 
     /**
+     * Prepare the button "add-value" after filling values.
+     *
+     * The button may be hidden in a later step too when a value is added.
+     * Don't include the removed values in the total of values.
+     */
+     function prepareFieldMaxValues(field) {
+        var rtpData = field.data('template-data');
+        if (!rtpData) {
+            return;
+        }
+        var selector = field.data('selector');
+        selector = selector ? selector : 'default';
+        if (rtpData.max_values && field.find('.inputs .values > .value').length >= rtpData.max_values) {
+            field.find('.add-values.' + selector + '-selector').hide();
+        }
+   }
+
+    /**
      * Prepare the autocompletion for a property.
      */
     function prepareFieldAutocomplete(field) {
@@ -702,6 +720,7 @@ $(document).ready(function() {
         }
 
         var fields = $('#properties .resource-values.field');
+
         if (!$('#resource-values').data('locked-ready')) {
             fields.each(function(index, field) {
                 prepareFieldLocked($(field));
@@ -710,6 +729,7 @@ $(document).ready(function() {
         }
 
         fields.each(function(index, field) {
+            prepareFieldMaxValues($(field));
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
         });
@@ -721,7 +741,9 @@ $(document).ready(function() {
 
     $(document).on('o:property-added', '.resource-values.field', function() {
         var field = $(this);
-        prepareFieldAutocomplete($(field));
+        // This is managed after values.
+        // prepareFieldMaxValues(field);
+        prepareFieldAutocomplete(field);
         prepareFieldLanguage(field);
     });
 
@@ -738,6 +760,14 @@ $(document).ready(function() {
         var rtpData = field.data('template-data');
         if (!rtpData) {
             return;
+        }
+
+        var selector = field.data('selector');
+        selector = selector ? selector : 'default';
+        if (rtpData.max_values && field.find('.inputs .values > .value').length + 1 >= rtpData.max_values) {
+            field.find('.add-values.' + selector + '-selector').hide();
+        } else {
+            field.find('.add-values.' + selector + '-selector').show();
         }
 
         if (field.data('autocomplete')) {
@@ -780,6 +810,9 @@ $(document).ready(function() {
         } else {
             var defaultValue = jsonDecodeObject(rtpData.default_value);
             fillValue(value, term, dataType, defaultValue === null ? {default: rtpData.default_value.trim()} : defaultValue);
+            if (rtpData.max_values && field.find('.inputs .values > .value').length + 1 >= rtpData.max_values) {
+                field.find('.add-values.' + selector + '-selector').hide();
+            }
         }
     });
 

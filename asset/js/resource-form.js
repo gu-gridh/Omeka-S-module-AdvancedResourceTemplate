@@ -454,7 +454,9 @@
         field.find('.value.default-value').remove();
 
         // Change value selector (multiple, single, or default) and add empty value if needed.
+        var selector = 'default';
         if (templateProperty['o:data_type'].length > 1) {
+            selector = 'multiple';
             defaultSelector.hide();
             singleSelector.hide();
             if (!multipleSelector.find('.add-value').length) {
@@ -462,6 +464,7 @@
             }
             multipleSelector.show();
         } else if (templateProperty['o:data_type'].length === 1) {
+            selector = 'single';
             defaultSelector.hide();
             multipleSelector.hide();
             singleSelector.find('a.add-value.button').data('type', templateProperty['o:data_type'][0]);
@@ -473,6 +476,8 @@
         }
 
         // The empty first value is added during template preparation.
+
+        field.data('selector', selector);
 
         properties.prepend(field);
     };

@@ -12,6 +12,20 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'max_values',
+                'type' => Element\Number::class,
+                'options' => [
+                    'label' => 'Maximum number of values', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'max_value',
+                    'class' => 'setting',
+                    'data-setting-key' => 'max_values',
+                    'min' => '0',
+                    'step' => '1',
+                ],
+            ])
+            ->add([
                 'name' => 'default_value',
                 'type' => Element\Textarea::class,
                 'options' => [
