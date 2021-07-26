@@ -80,8 +80,14 @@ class Module extends AbstractModule
             'view.layout',
             [$this, 'addAdminResourceHeaders']
         );
+        // For simplicity, some modules that use resource form are added here.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Annotation',
+            'view.layout',
+            [$this, 'addAdminResourceHeaders']
+        );
+        $sharedEventManager->attach(
+            \Article\Controller\Admin\ArticleController::class,
             'view.layout',
             [$this, 'addAdminResourceHeaders']
         );
