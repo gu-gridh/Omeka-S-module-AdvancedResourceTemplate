@@ -690,6 +690,16 @@ $(document).ready(function() {
         }
     }
 
+    /**
+     * Determine the resource type (routing).
+     *
+     * @todo  Determine the resource type in a cleaner way (cf. fix #omeka/omeka-s/1655).
+     */
+    function typeResource() {
+        const resourceType = $('#select-resource.sidebar').find('#sidebar-resource-search').data('search-url');
+        return resourceType.substring(resourceType.lastIndexOf('/admin/') + 7, resourceType.lastIndexOf('/sidebar-select'));
+    }
+
     $(document).on('o:form-loaded', 'form.resource-form', function() {
         if (typeof $('#resource-values').data('is-loaded') === 'undefined') {
             prepareAutofiller();
@@ -823,14 +833,13 @@ $(document).ready(function() {
         if (sidebar.find('.quick-add-resource').length || !sidebar.find('#sidebar-resource-search').length) {
             return;
         }
-        // TODO Determine the resource type in a cleaner way (cf. fix #omeka/omeka-s/1655).
-        var resourceType = sidebar.find('#sidebar-resource-search').data('search-url');
-        resourceType = resourceType.substring(resourceType.lastIndexOf('/admin/') + 7, resourceType.lastIndexOf('/sidebar-select'));
+        var resourceType = typeResource();
         if (!resourceType || resourceType === 'media') {
             return;
         }
+        const iconResourceType = resourceType === 'media' ? 'media' : resourceType + 's';
         var button = `<div data-data-type="resource:${resourceType}">
-    <a class="o-icon-${resourceType}s button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
+    <a class="o-icon-${iconResourceType} button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
 </div>`;
         sidebar.find('.search-nav').after(button)
     });
