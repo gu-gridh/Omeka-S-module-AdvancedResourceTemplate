@@ -74,6 +74,8 @@ class MapperHelper extends AbstractPlugin
     protected $dataTypes;
 
     /**
+     * @todo Can be replaced by \BulkImport\Mvc\Controller\Plugin\Bulk
+     *
      * @param Connection $connection
      * @param DataTypeManager $dataTypeManager
      */
@@ -159,24 +161,21 @@ class MapperHelper extends AbstractPlugin
 
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
-                'DISTINCT property.id AS id',
-                'CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+            ->select(
+                'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+                'property.id AS id',
                 // Only the two first selects are needed, but some databases
                 // require "order by" or "group by" value to be in the select.
                 'vocabulary.id',
-                'property.id',
-            ])
+                'property.id'
+            )
             ->from('property', 'property')
             ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
             ->orderBy('vocabulary.id', 'asc')
             ->addOrderBy('property.id', 'asc')
             ->addGroupBy('property.id')
         ;
-        $stmt = $this->connection->executeQuery($qb);
-        // Fetch by key pair is not supported by doctrine 2.0.
-        $this->properties = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->properties = array_map('intval', array_column($this->properties, 'id', 'term'));
+        $this->properties = $this->connection->executeQuery($qb)->fetchAllKeyValue();
         return $this->properties;
     }
 
@@ -205,26 +204,22 @@ class MapperHelper extends AbstractPlugin
 
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
-                'DISTINCT property.id AS id',
-                'CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+            ->select(
+                'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
                 'property.label AS label',
                 // Only the two first selects are needed, but some databases
                 // require "order by" or "group by" value to be in the select.
                 'vocabulary.id',
-                'property.id',
-            ])
+                'property.id'
+            )
             ->from('property', 'property')
             ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
             ->orderBy('vocabulary.id', 'asc')
             ->addOrderBy('property.id', 'asc')
             ->addGroupBy('property.id')
         ;
-        $stmt = $this->connection->executeQuery($qb);
-        // Fetch by key pair is not supported by doctrine 2.0.
-        $propertiyLabels = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $propertiyLabels = array_column($propertiyLabels, 'label', 'term');
-        return $propertiyLabels;
+        $propertyLabels = $this->connection->executeQuery($qb)->fetchAllKeyValue();
+        return $propertyLabels;
     }
 
     /**
@@ -293,24 +288,21 @@ class MapperHelper extends AbstractPlugin
 
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
-                'DISTINCT resource_class.id AS id',
-                'CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
+            ->select(
+                'DISTINCT CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
+                'resource_class.id AS id',
                 // Only the two first selects are needed, but some databases
                 // require "order by" or "group by" value to be in the select.
                 'vocabulary.id',
-                'resource_class.id',
-            ])
+                'resource_class.id'
+            )
             ->from('resource_class', 'resource_class')
             ->innerJoin('resource_class', 'vocabulary', 'vocabulary', 'resource_class.vocabulary_id = vocabulary.id')
             ->orderBy('vocabulary.id', 'asc')
             ->addOrderBy('resource_class.id', 'asc')
             ->addGroupBy('resource_class.id')
         ;
-        $stmt = $this->connection->executeQuery($qb);
-        // Fetch by key pair is not supported by doctrine 2.0.
-        $this->resourceClasses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->resourceClasses = array_map('intval', array_column($this->resourceClasses, 'id', 'term'));
+        $this->resourceClasses = $this->connection->executeQuery($qb)->fetchAllKeyValue();
         return $this->resourceClasses;
     }
 
@@ -327,7 +319,7 @@ class MapperHelper extends AbstractPlugin
     /**
      * Get all resource class labels by term.
      *
-     * @return array Associative array of ids by term.
+     * @return array Associative array of resource class labels by term.
      */
     public function getResourceClassLabels()
     {
@@ -339,25 +331,21 @@ class MapperHelper extends AbstractPlugin
 
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
-                'DISTINCT resource_class.id AS id',
-                'CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
+            ->select(
+                'DISTINCT CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
                 'resource_class.label AS label',
                 // Only the two first selects are needed, but some databases
                 // require "order by" or "group by" value to be in the select.
                 'vocabulary.id',
-                'resource_class.id',
-            ])
+                'resource_class.id'
+            )
             ->from('resource_class', 'resource_class')
             ->innerJoin('resource_class', 'vocabulary', 'vocabulary', 'resource_class.vocabulary_id = vocabulary.id')
             ->orderBy('vocabulary.id', 'asc')
             ->addOrderBy('resource_class.id', 'asc')
             ->addGroupBy('resource_class.id')
         ;
-        $stmt = $this->connection->executeQuery($qb);
-        // Fetch by key pair is not supported by doctrine 2.0.
-        $resourceClassLabels = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $resourceClassLabels = array_column($resourceClassLabels, 'label', 'term');
+        $resourceClassLabels = $this->connection->executeQuery($qb)->fetchAllKeyValue();
         return $resourceClassLabels;
     }
 
@@ -413,17 +401,14 @@ class MapperHelper extends AbstractPlugin
 
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select([
-                'resource_template.id AS id',
+            ->select(
                 'resource_template.label AS label',
-            ])
+                'resource_template.id AS id'
+            )
             ->from('resource_template', 'resource_template')
             ->orderBy('resource_template.id', 'asc')
         ;
-        $stmt = $this->connection->executeQuery($qb);
-        // Fetch by key pair is not supported by doctrine 2.0.
-        $this->resourceTemplates = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->resourceTemplates = array_map('intval', array_column($this->resourceTemplates, 'id', 'label'));
+        $this->resourceTemplates = $this->connection->executeQuery($qb)->fetchAllKeyValue();
         return $this->resourceTemplates;
     }
 
