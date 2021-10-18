@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-15 00:00+0000\n"
-"PO-Revision-Date: 2021-02-15 00:00+0000\n"
+"POT-Creation-Date: 2021-10-18 00:00+0000\n"
+"PO-Revision-Date: 2021-10-18 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0\n"
 
 #: src/Autofiller/GenericAutofiller.php:59
 #: src/Autofiller/GenericAutofiller.php:105
@@ -50,10 +50,10 @@ msgid "This module requires modules \"%s\"."
 msgstr "Ce module requiert les modules \"%s\"."
 
 #: src/Generic/AbstractModule.php:80
-msgid "This module has resources that connot be installed."
+msgid "This module has resources that cannot be installed."
 msgstr "Ce module a des ressources qui ne peuvent pas être installées."
 
-#: src/Generic/AbstractModule.php:707
+#: src/Generic/AbstractModule.php:725
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -90,6 +90,10 @@ msgstr "Classes suggérées"
 msgid "Select classes"
 msgstr "Sélectionner des classes"
 
+#: src/Form/ResourceTemplateImportForm.php:15
+msgid "Resource template file (json, csv, tsv)"
+msgstr "Fichier du modèle de ressource (json, csv, tsv)"
+
 #: src/Form/ResourceTemplateDataFieldset.php:27
 msgid "Require a class"
 msgstr "Requiert une classe"
@@ -103,7 +107,7 @@ msgid "Languages for values"
 msgstr "Langues pour les valeurs"
 
 #: src/Form/ResourceTemplateDataFieldset.php:58
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:74
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:88
 msgid "Default language"
 msgstr "Langue par défaut"
 
@@ -112,17 +116,17 @@ msgid "No language"
 msgstr "Pas de langue"
 
 #: src/Form/ResourceTemplateDataFieldset.php:78
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:42
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:56
 msgid "Autocomplete with existing values"
 msgstr "Auto-compléter avec des valeurs existantes"
 
 #: src/Form/ResourceTemplateDataFieldset.php:81
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:46
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:60
 msgid "Starts with"
 msgstr "Commence par"
 
 #: src/Form/ResourceTemplateDataFieldset.php:82
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
 msgid "Contains"
 msgstr "Contient"
 
@@ -169,23 +173,27 @@ msgid "List of autofillers to use for this template."
 msgstr "Liste des remplisseurs à utiliser pour ce modèle."
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:18
+msgid "Maximum number of values"
+msgstr "Nombre maximal de valeurs"
+
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:32
 msgid "Default value"
 msgstr "Valeur par défaut"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:30
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:44
 msgid "Locked value once saved"
 msgstr "Valeur bloquée une fois enregistrée"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:44
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:88
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:58
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:102
 msgid "Use template setting"
 msgstr "Utiliser le paramètre du modèle"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:75
 msgid "Suggested languages"
 msgstr "Langues suggérées"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:86
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:100
 msgid "Use language"
 msgstr "Utilise la langue"
 
@@ -328,15 +336,12 @@ msgstr "Géonames"
 msgid "Missing autofiller configuration."
 msgstr "Configuration des remplisseurs manquante."
 
-#: config/module.config.php:146
+#: config/module.config.php:147
 msgid "No results"
 msgstr "Pas de résultats"
 
 #~ msgid "Value languages for properties"
 #~ msgstr "Langues pour les valeurs des propriétés"
-
-#~ msgid "Resource templates"
-#~ msgstr "Modèles de ressource"
 
 #~ msgid "Export"
 #~ msgstr "Exporter"

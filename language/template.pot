@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-15 00:00+0000\n"
+"POT-Creation-Date: 2021-10-18 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,10 +50,10 @@ msgid "This module requires modules \"%s\"."
 msgstr ""
 
 #: src/Generic/AbstractModule.php:80
-msgid "This module has resources that connot be installed."
+msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:707
+#: src/Generic/AbstractModule.php:725
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -88,6 +88,10 @@ msgstr ""
 msgid "Select classes"
 msgstr ""
 
+#: src/Form/ResourceTemplateImportForm.php:15
+msgid "Resource template file (json, csv, tsv)"
+msgstr ""
+
 #: src/Form/ResourceTemplateDataFieldset.php:27
 msgid "Require a class"
 msgstr ""
@@ -101,7 +105,7 @@ msgid "Languages for values"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:58
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:74
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:88
 msgid "Default language"
 msgstr ""
 
@@ -110,17 +114,17 @@ msgid "No language"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:78
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:42
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:56
 msgid "Autocomplete with existing values"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:81
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:46
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:60
 msgid "Starts with"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:82
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
 msgid "Contains"
 msgstr ""
 
@@ -162,23 +166,27 @@ msgid "List of autofillers to use for this template."
 msgstr ""
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:18
+msgid "Maximum number of values"
+msgstr ""
+
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:32
 msgid "Default value"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:30
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:44
 msgid "Locked value once saved"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:44
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:88
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:58
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:102
 msgid "Use template setting"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:75
 msgid "Suggested languages"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:86
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:100
 msgid "Use language"
 msgstr ""
 
@@ -314,6 +322,6 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:146
+#: config/module.config.php:147
 msgid "No results"
 msgstr ""
