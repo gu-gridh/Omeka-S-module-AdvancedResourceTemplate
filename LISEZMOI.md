@@ -1,8 +1,9 @@
 Modèles de ressource avancés (module pour Omeka S)
 ==================================================
 
-> __New versions of this module and support for Omeka S version 3.0 and above
-> are available on [GitLab], which seems to respect users and privacy better.__
+> __Les nouvelles versions de ce modules et l’assistance pour Omeka S version 3.0
+> et supérieur sont disponibles sur [GitLab], qui semble mieux respecter les
+> utilisateurs et la vie privée que le précédent entrepôt.__
 
 See [English readme].
 
@@ -196,6 +197,7 @@ Il est toujours recommandé de sauvegarder vos fichiers et vos bases de données
 et de vérifier vos archives régulièrement afin de pouvoir les reconstituer si
 nécessaire.
 
+
 Dépannage
 ---------
 
@@ -239,7 +241,7 @@ connaissance de la licence CeCILL et que vous en acceptez les termes.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2020 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2020 (voir [Daniel-KM] sur GitLab)
 * Library [jQuery-Autocomplete]: Copyright 2012 DevBridge et autres contributeurs
 
 Ces fonctionnalités sont destinées à la future bibliothèque numérique [Manioc]
@@ -248,6 +250,7 @@ de l’Université des Antilles et Université de la Guyane, actuellement géré
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
+[English readme]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [Omeka S]: https://omeka.org/s
 [installer un module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
