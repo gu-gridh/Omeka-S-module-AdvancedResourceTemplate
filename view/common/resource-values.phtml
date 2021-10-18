@@ -2,15 +2,34 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var array $values
- * @var array $templateProperties
+ * @var array $templateProperties If any.
  */
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
+// TODO Replace with event 'rep.resource.display_values'.
 
-$labelInfo = $this->status()->isSiteRequest() ? $this->siteSetting('property_label_information') : $this->setting('property_label_information');
+$plugins = $this->getHelperPluginManager();
+$url = $plugins->get('url');
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+$escapeAttr = $plugins->get('escapeHtmlAttr');
 
-$displayPropertyValues = function($term, $propertyData) use ($templateProperties, $translate, $escape, $labelInfo) {
+if ($this->status()->isSiteRequest()) {
+    $siteSetting = $plugins->get('siteSetting');
+    $labelInfo = $siteSetting('property_label_information');
+    $showLocale = (bool) $siteSetting('show_locale_label', true);
+    $filterLocale = (bool) $siteSetting('filter_locale_values');
+    $lang = $plugins->get('lang')();
+    $langHtml = $filterLocale ? $lang : null;
+} else {
+    $setting = $plugins->get('setting');
+    $labelInfo = $setting('property_label_information');
+    $showLocale = true;
+    $filterLocale = false;
+    $lang = null;
+    $langHtml = null;
+}
+
+$displayPropertyValues = function($term, $propertyData) use ($templateProperties, $translate, $escape, $labelInfo, $showLocale, $filterLocale, $langHtml) {
 // This is a copy of the core view.
 ?>
 <div class="property">
@@ -30,6 +49,7 @@ $displayPropertyValues = function($term, $propertyData) use ($templateProperties
     <?php foreach ($propertyData['values'] as $value): ?>
         <?php
         $valueType = $value->type();
+        $valueLang = $value->lang();
         $class = ['value'];
         if ('resource' == $valueType || strpos($valueType, 'resource') !== false) {
             $class[] = 'resource';
@@ -41,12 +61,14 @@ $displayPropertyValues = function($term, $propertyData) use ($templateProperties
             $class[] = 'private';
         }
         ?>
-        <div class="<?= implode(' ', $class) ?>" lang="<?= $escape($value->lang()) ?>">
-            <?php if ($language = $value->lang()): ?>
-            <span class="language"><?= $language ?></span>
+        <?php if (!$filterLocale || $valueLang == '' || strcasecmp($valueLang, $lang) == 0): ?>
+        <div class="<?= implode(' ', $class) ?>" lang="<?= $escape($valueLang) ?>">
+            <?php if ($showLocale && $valueLang): ?>
+            <span class="language"><?= $valueLang ?></span>
             <?php endif; ?>
-            <?= $value->asHtml() ?>
+            <?= $value->asHtml($langHtml) ?>
         </div>
+        <?php endif; ?>
     <?php endforeach; ?>
     </div>
 </div>
@@ -54,18 +76,20 @@ $displayPropertyValues = function($term, $propertyData) use ($templateProperties
 
 // Check and prepare values when they have multiple labels for the same property.
 $hasMultipleLabels = false;
-if (count($templateProperties)):
+if (count($templateProperties)) {
     $dataTypesLabels = [];
-    foreach ($templateProperties as $rtp) foreach ($rtp->data() ?: [$rtp] as $rtpData):
+    foreach ($templateProperties as $rtp) foreach ($rtp->data() ?: [$rtp] as $rtpData) {
         $property = $rtp->property();
         $term = $property->term();
         $defaultLabel = $translate($property->label());
         $dataTypesLabels[$term]['default'] = $defaultLabel;
         $label = $rtpData->alternateLabel() ?: $defaultLabel;
         $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpData->dataTypes(), $label));
-        if (count(array_unique($dataTypesLabels[$term])) > 1) $hasMultipleLabels = true;
-    endforeach;
-endif;
+        if (count(array_unique($dataTypesLabels[$term])) > 1) {
+            $hasMultipleLabels = true;
+        }
+    }
+}
 
 if ($hasMultipleLabels):
     // The template has specific labels for data types, so gather values.
