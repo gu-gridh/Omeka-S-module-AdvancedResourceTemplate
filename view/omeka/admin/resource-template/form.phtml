@@ -29,7 +29,7 @@ $this->headScript()
     <a href="#" class="delete button sidebar-content" data-sidebar-selector="#delete"><?php echo $translate('Delete'); ?></a>
     <?php endif; ?>
     <?php echo $this->cancelButton(); ?>
-    <button><?php echo $escape($submitLabel); ?></button>
+    <button type="submit"><?php echo $escape($submitLabel); ?></button>
 </div>
 
 <?php $this->trigger("view.$action.form.before", ['form' => $form]); ?>
