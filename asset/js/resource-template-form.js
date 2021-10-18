@@ -80,8 +80,12 @@ propertyList.on('click', '.property-edit', function(e) {
     prop.find('[data-setting-key]').each(function(index, hiddenElement) {
         data[index] = $(hiddenElement);
     });
+    var vocabularyLabel = $('#property-selector > ul > li > ul > li[data-property-id=' + propertyId + ']').closest('li[data-vocabulary-id]').find('> span:first-of-type').text();
+    var propertyTerm = $('#property-selector > ul > li > ul > li[data-property-id=' + propertyId + ']').data('property-term');
 
     // Copy values into the sidebar.
+    $('#edit-sidebar #vocabulary-label').text(vocabularyLabel);
+    $('#edit-sidebar #property-term').text(propertyTerm);
     $('#edit-sidebar #original-label').text(oriLabel.val());
     $('#edit-sidebar #alternate-label').val(altLabel.val());
     $('#edit-sidebar #original-comment').text(oriComment.val());
