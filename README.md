@@ -5,6 +5,8 @@ Advanced Resource Template (module for Omeka S)
 > are available on [GitLab], which seems to respect users and privacy better
 > than the previous repository.__
 
+Voir le [Lisez-moi] en français.
+
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
 the resource templates in order to simplify and to improve the edition of
 resources:
@@ -320,6 +322,7 @@ Université des Antilles and Université de la Guyane, currently managed with
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
+[Lisez-moi]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/LISEZMOI.md
 [Omeka S]: https://omeka.org/s
 [Installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
