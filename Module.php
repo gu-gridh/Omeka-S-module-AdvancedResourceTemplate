@@ -34,6 +34,7 @@ class Module extends AbstractModule
         // Copy or rights of the main Resource Template.
         /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
+        $roles = $acl->getRoles();
         $acl
             ->allow(
                 null,
@@ -60,7 +61,12 @@ class Module extends AbstractModule
                     \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class,
                 ],
                 ['create', 'update', 'delete']
-            );
+            )
+            ->allow(
+                $roles,
+                ['AdvancedResourceTemplate\Controller\Admin\Index']
+            )
+        ;
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
