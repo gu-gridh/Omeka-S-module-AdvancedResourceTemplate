@@ -342,7 +342,7 @@ Université des Antilles and Université de la Guyane, currently managed with
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
-[MIT]: http://http://opensource.org/licenses/MIT
+[MIT]: http://opensource.org/licenses/MIT
 [jQuery-Autocomplete]: https://www.devbridge.com/sourcery/components/jquery-autocomplete/
 [Manioc]: http://www.manioc.org
 [Greenstone]: http://www.greenstone.org

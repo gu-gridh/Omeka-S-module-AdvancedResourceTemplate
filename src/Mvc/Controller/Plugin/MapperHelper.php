@@ -165,7 +165,8 @@ class MapperHelper extends AbstractPlugin
                 'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
                 'property.id AS id',
                 // Only the two first selects are needed, but some databases
-                // require "order by" or "group by" value to be in the select.
+                // require "order by" or "group by" value to be in the select,
+                // in particular to fix the "only_full_group_by" issue.
                 'vocabulary.id',
                 'property.id'
             )
@@ -208,7 +209,8 @@ class MapperHelper extends AbstractPlugin
                 'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
                 'property.label AS label',
                 // Only the two first selects are needed, but some databases
-                // require "order by" or "group by" value to be in the select.
+                // require "order by" or "group by" value to be in the select,
+                // in particular to fix the "only_full_group_by" issue.
                 'vocabulary.id',
                 'property.id'
             )
@@ -292,7 +294,8 @@ class MapperHelper extends AbstractPlugin
                 'DISTINCT CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
                 'resource_class.id AS id',
                 // Only the two first selects are needed, but some databases
-                // require "order by" or "group by" value to be in the select.
+                // require "order by" or "group by" value to be in the select,
+                // in particular to fix the "only_full_group_by" issue.
                 'vocabulary.id',
                 'resource_class.id'
             )
@@ -335,7 +338,8 @@ class MapperHelper extends AbstractPlugin
                 'DISTINCT CONCAT(vocabulary.prefix, ":", resource_class.local_name) AS term',
                 'resource_class.label AS label',
                 // Only the two first selects are needed, but some databases
-                // require "order by" or "group by" value to be in the select.
+                // require "order by" or "group by" value to be in the select,
+                // in particular to fix the "only_full_group_by" issue.
                 'vocabulary.id',
                 'resource_class.id'
             )
