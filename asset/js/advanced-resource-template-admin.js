@@ -97,7 +97,7 @@ $(document).ready(function() {
         });
         field.find('.inputs .values textarea.input-value').prop('autocomplete', 'off').removeClass('autocomplete');
 
-        var autocomplete = templateData.autocomplete ? templateData.autocomplete : 'no';
+        var autocomplete = templateData && templateData.autocomplete ? templateData.autocomplete : 'no';
         autocomplete = rtpData.autocomplete && $.inArray(rtpData.autocomplete, ['no', 'sw', 'in'])
             ? rtpData.autocomplete
             : autocomplete;
@@ -125,7 +125,7 @@ $(document).ready(function() {
             $('#value-languages').after('<datalist id="value-languages-template" class="value-languages"></datalist>');
             datalist = $('#value-languages-template');
         }
-        if (templateData.value_languages && !$.isEmptyObject(templateData.value_languages)) {
+        if (templateData && templateData.value_languages && !$.isEmptyObject(templateData.value_languages)) {
             listName = 'value-languages-template';
             $.each(templateData.value_languages, function(code, label) {
                 datalist.append($('<option>', { value: code, label: label.length ? label : code }));
@@ -152,7 +152,7 @@ $(document).ready(function() {
         inputLanguage.attr('list', listName);
 
         var noLanguage = !!(rtpData.use_language
-            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData.no_language)));
+            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData && templateData.no_language)));
         field.data('no-language', noLanguage);
         field.find('.inputs .values input.value-language').each(function() {
             initValueLanguage($(this), field);
@@ -198,7 +198,7 @@ $(document).ready(function() {
 
         var templateData = $('#resource-values').data('template-data');
         var rtpData = field.data('template-data') ? field.data('template-data') : {};
-        var defaultLanguage = templateData.default_language && templateData.default_language.length
+        var defaultLanguage = templateData && templateData.default_language && templateData.default_language.length
             ? templateData.default_language
             : '';
         defaultLanguage = rtpData.default_language && rtpData.default_language.length
@@ -515,6 +515,7 @@ $(document).ready(function() {
         resourceClassSelect.val(resourceClassId);
 
         if (hasTemplate
+            && templateData
             && templateData.suggested_resource_class_ids
             && templateData.suggested_resource_class_ids.length
         ) {
@@ -532,7 +533,7 @@ $(document).ready(function() {
         }
         resourceClassSelect.val(resourceClassId);
 
-        if (templateData.require_resource_class) {
+        if (templateData && templateData.require_resource_class) {
             resourceClassSelect.attr('require', 'require')
                 .closest('.field').addClass('required');
         } else {
@@ -711,7 +712,7 @@ $(document).ready(function() {
         var sidebar = $('#property-selector');
         var templateData = $('#resource-values').data('template-data');
         var hasTemplate = $('#resource-template-select').val() != '';
-        if ((hasTemplate && templateData.closed_property_list == '1')
+        if ((hasTemplate && templateData && templateData.closed_property_list == '1')
             || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
         ) {
             sidebar.removeClass('always-open');
@@ -786,7 +787,7 @@ $(document).ready(function() {
         }
 
         var templateData = $('#resource-values').data('template-data');
-        var listName = templateData.value_languages && !$.isEmptyObject(templateData.value_languages)
+        var listName = templateData && templateData.value_languages && !$.isEmptyObject(templateData.value_languages)
             ? 'value-languages-template'
             : 'value-languages';
         listName = rtpData.value_languages && !$.isEmptyObject(rtpData.value_languages)
