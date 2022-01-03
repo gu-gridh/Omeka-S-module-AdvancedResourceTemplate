@@ -258,14 +258,17 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         if ($fileData['type'] === 'application/json' || !$fileData['size'] || $fileData['error']) {
             return true;
         }
-        $fileData = $this->checkFile($fileData);
-        if ($fileData === false) {
+
+        $checkedFileData = $this->checkFile($fileData);
+        if (!$checkedFileData) {
             $this->messenger()->addError(new Message(
                 'Wrong media type ("%s") for file.', // @translate
                 $fileData['type']
             ));
             return false;
         }
+
+        $fileData = $checkedFileData;
 
         if ($fileData['type'] === 'text/tab-separated-values') {
             $options = [
@@ -1316,12 +1319,11 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
      *
      * @param array $fileData
      *            File data from a post ($_FILES).
-     * @return array|bool
      */
-    protected function checkFile(array $fileData)
+    protected function checkFile(array $fileData): ?array
     {
         if (empty($fileData) || empty($fileData['tmp_name'])) {
-            return false;
+            return null;
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -1349,11 +1351,12 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
 
         $supporteds = [
             // 'application/vnd.oasis.opendocument.spreadsheet' => true,
+            'text/csv' => true,
             'text/plain' => true,
             'text/tab-separated-values' => true,
         ];
-        if (! isset($supporteds[$mediaType])) {
-            return false;
+        if (!isset($supporteds[$mediaType])) {
+            return null;
         }
 
         return $fileData;
