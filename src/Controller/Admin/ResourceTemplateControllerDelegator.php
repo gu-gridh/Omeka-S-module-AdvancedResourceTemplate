@@ -1312,8 +1312,12 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
         $fileData['extension'] = $extension;
 
+        // Fix old servers.
+        if ($mediaType === 'application/csv') {
+            $mediaType = 'text/csv';
+        }
         // Manage an exception for a very common format, undetected by fileinfo.
-        if ($mediaType === 'text/plain' || 'application/octet-stream') {
+        elseif ($mediaType === 'text/plain' || 'application/octet-stream') {
             $extensions = [
                 'txt' => 'text/plain',
                 'csv' => 'text/csv',
