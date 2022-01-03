@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-18 00:00+0000\n"
+"POT-Creation-Date: 2022-01-03 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,41 +209,41 @@ msgstr ""
 msgid "The service \"%s\" is not available."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:264
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:265
 #, php-format
 msgid "Wrong media type (\"%s\") for file."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:286
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:289
 msgid "The file does not contain any row."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:379
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:397
 msgid "There is no valid template properties."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:422
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:442
 #, php-format
 msgid "The alternative label for a duplicate property (%s) should be unique."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:443
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:463
 msgid "File cannot be checked or saved."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:450
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:470
 msgid ""
 "The template has duplicate properties. They are mixed in the form, but will "
 "be imported separately."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:923
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:943
 msgid ""
 "When multiple fields use the same property, only one field can be without "
 "data type."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:926
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:946
 msgid ""
 "When multiple fields use the same property, the data types must be unique "
 "among them."
