@@ -332,10 +332,17 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         foreach ($rows as $row) {
             switch ($row['Type']) {
                 case 'Template':
-                    $json['o:label'] = @$row['Template label'] ?: '[Untitled]';
-                    $json['o:resource_class'] = $this->fillTerm(@$row['Resource class'], 'resource_classes');
-                    $json['o:title_property'] = $this->fillTerm(@$row['Title property']);
-                    $json['o:description_property'] = $this->fillTerm(@$row['Description property']);
+                    // Add default keys.
+                    $row += [
+                        'Template label' => null,
+                        'Resource class' => null,
+                        'Title property' => null,
+                        'Description property' => null,
+                    ];
+                    $json['o:label'] = $row['Template label'] ?: '[Untitled]';
+                    $json['o:resource_class'] = $this->fillTerm($row['Resource class'], 'resource_classes');
+                    $json['o:title_property'] = $this->fillTerm($row['Title property']);
+                    $json['o:description_property'] = $this->fillTerm($row['Description property']);
                     foreach (array_filter($row, $templateData, ARRAY_FILTER_USE_BOTH) as $header => $cell) {
                         $cell = $cellValue($cell, $header);
                         if ($isEmpty($cell)) {
@@ -345,17 +352,25 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                     }
                     break;
                 case 'Property':
-                    $rtp = $this->fillTerm(@$row['Property']);
+                    $row += [
+                        'Property' => null,
+                        'Alternate label' => null,
+                        'Alternate comment' => null,
+                        'Data types' => null,
+                        'Required' => null,
+                        'Private' => null,
+                    ];
+                    $rtp = $this->fillTerm($row['Property']);
                     if (!$rtp) {
                         break;
                     }
-                    $rtp['o:alternate_label'] = @$row['Alternate label'] ?: '';
-                    $rtp['o:alternate_comment'] = @$row['Alternate comment'] ?: '';
+                    $rtp['o:alternate_label'] = $row['Alternate label'] ?: '';
+                    $rtp['o:alternate_comment'] = $row['Alternate comment'] ?: '';
                     $rtp['data_types'] = array_filter(array_map(function ($v) {
                         return $v ? ['name' => $v, 'label' => $v] : null;
-                    }, $stringToArray(@$row['Data types'])));
-                    $rtp['o:is_required'] = (bool) @row['Required'];
-                    $rtp['o:is_private'] = (bool) @row['Private'];
+                    }, $stringToArray($row['Data types'])));
+                    $rtp['o:is_required'] = (bool) $row['Required'];
+                    $rtp['o:is_private'] = (bool) $row['Private'];
                     $rtpOData = [];
                     foreach (array_filter($row, $propertyData, ARRAY_FILTER_USE_BOTH) as $header => $cell) {
                         $cell = $cellValue($cell, $header);
@@ -409,6 +424,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 if ($rtp['term'] !== $term) {
                     continue;
                 }
+                // Normalize a key for next checks.
+                $rtp['o:alternate_label'] = empty($rtp['o:alternate_label']) ? null : $rtp['o:alternate_label'];
                 if ($first) {
                     $first = false;
                     $firstKey = $key;
@@ -417,7 +434,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 } else {
                     // No duplicate label in case of a duplicate property.
                     // TODO Check with all duplicates.
-                    if (@$firstRtp['o:alternate_label'] === @$rtp['o:alternate_label']) {
+                    if ($firstRtp['o:alternate_label'] === $rtp['o:alternate_label']) {
                         $this->messenger()->addError(sprintf(
                             'The alternative label for a duplicate property (%s) should be unique.', // @translate
                             $term
