@@ -9,6 +9,8 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
  * Extract data from a string with a mapping.
+ *
+ * @todo Merge with \BulkImport\Mvc\Controller\Plugin\TransformSource.
  */
 class Mapper extends AbstractPlugin
 {
