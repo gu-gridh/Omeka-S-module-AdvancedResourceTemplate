@@ -135,6 +135,13 @@ body.modal.sidebar-open #content {
     min-width: 100%;
 }
 
+/* Template show */
+.class-row .class-term,
+#properties .property-term {
+    display: table;
+    font-size: small;
+}
+
 /* Template form */
 /* Copy from module DataVisualization */
 

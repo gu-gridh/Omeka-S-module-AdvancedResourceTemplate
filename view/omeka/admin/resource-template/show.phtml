@@ -35,6 +35,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 <div class="class-row">
     <span class="class-label"><?php echo $translate('Class'); ?></span>
     <span class="class-value"><?php echo $translate($resourceTemplate->resourceClass()->label()); ?></span>
+    <span class="class-term"><?php echo $translate($resourceTemplate->resourceClass()->term()); ?></span>
 </div>
 <?php endif; ?>
 
@@ -56,7 +57,10 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
         <?php $resourceTemplateProperty = $rtpData; ?>
         <tr data-property-id="<?php echo $escape($property->id()); ?>">
             <td>
-                <?php echo $escape($translate($property->label())); ?>
+                <span>
+                    <span class="property-label"><?php echo $escape($translate($property->label())); ?></span>
+                    <span class="property-term"><?php echo $escape($translate($property->term())); ?></span>
+                </span>
                 <ul class="actions">
                     <li><?php echo $this->hyperlink('', '#', [
                         'data-sidebar-content-url' => $property->url('show-details'),
