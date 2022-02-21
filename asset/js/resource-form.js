@@ -34,7 +34,8 @@
             applyResourceTemplate(true);
         });
 
-        $('a.value-language').on('click', function(e) {
+
+        $('#resource-values').on('click', 'a.value-language', function(e) {
             e.preventDefault();
             var languageButton = $(this);
             var languageInput = languageButton.next('input.value-language');
@@ -51,6 +52,11 @@
             } else {
                 this.setCustomValidity(Omeka.jsTranslate('Please enter a valid language tag'));
             }
+        });
+
+        $('.o-icon-more').on('click', function(e) {
+            e.preventDefault();
+            $(this).parent('.more-actions').toggleClass('active');
         });
 
         // Make new value inputs whenever "add value" button clicked.
@@ -209,6 +215,9 @@
 
             $('#values-json').val(JSON.stringify(collectValues()));
         });
+
+        Omeka.initializeSelector('#item-sites', '#site-selector');
+        Omeka.initializeSelector('#item-item-sets', '#item-set-selector');
 
         initPage();
     });
@@ -475,7 +484,7 @@
             defaultSelector.show();
         }
 
-        // The empty first value is added during template preparation.
+        // Unlike omeka js, the empty first value is added during template preparation.
 
         field.data('selector', selector);
 
