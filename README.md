@@ -184,6 +184,8 @@ Note that [geonames] requires a user name (that should be the one of your
 institution, but it can be "demo", "google", or "johnsmith"). Test it on
 https://api.geonames.org/searchJSON?username=demo.
 
+If the key contains `.` or a `\`, it should be escaped with a `\`: `\.` and `\\`.
+
 More largely, you can append any arguments to the query sent to the remote
 service: simply append them url encoded on a line beginning with `?`.
 
