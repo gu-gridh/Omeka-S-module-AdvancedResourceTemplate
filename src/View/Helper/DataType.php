@@ -15,9 +15,10 @@ class DataType extends \Omeka\View\Helper\DataType
      */
     protected $formElementManager;
 
-    public function __construct(DataTypeManager $dataTypeManager, FormElementManager $formElementManager)
+    public function __construct(DataTypeManager $dataTypeManager, array $valueAnnotatingDataTypes, FormElementManager $formElementManager)
     {
         $this->manager = $dataTypeManager;
+        $this->valueAnnotatingDataTypes = $valueAnnotatingDataTypes;
         $this->dataTypes = $this->manager->getRegisteredNames();
         $this->formElementManager = $formElementManager;
     }
@@ -38,20 +39,5 @@ class DataType extends \Omeka\View\Helper\DataType
             $element->setEmptyOption('');
         }
         return $this->getView()->formSelect($element);
-    }
-
-    public function getTemplates()
-    {
-        $view = $this->getView();
-        $templates = '';
-        $resource = isset($view->resource) ? $view->resource : null;
-        $partial = $view->plugin('partial');
-        foreach ($this->dataTypes as $dataType) {
-            $templates .= $partial('common/data-type-wrapper', [
-                'dataType' => $dataType,
-                'resource' => $resource,
-            ]);
-        }
-        return $templates;
     }
 }

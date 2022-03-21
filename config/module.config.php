@@ -141,6 +141,10 @@ return [
             ],
         ],
     ],
+    // Just to avoid a notice on omeka < 3.2.
+    'data_types' => [
+        'value_annotating' => [],
+    ],
     'js_translate_strings' => [
         'New item', // @translate
         'New item set', // @translate

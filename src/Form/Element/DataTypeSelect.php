@@ -68,21 +68,14 @@ class DataTypeSelect extends Select
         return array_merge($options, $optgroupOptions);
     }
 
-    /**
-     * @param DataTypeManager $dataTypeManager
-     * @return self
-     */
-    public function setDataTypeManager(DataTypeManager $dataTypeManager)
+    public function setDataTypeManager(DataTypeManager $dataTypeManager): self
     {
         $this->dataTypeManager = $dataTypeManager;
         $this->dataTypes = $dataTypeManager->getRegisteredNames();
         return $this;
     }
 
-    /**
-     * @return DataTypeManager
-     */
-    public function getDataTypeManager()
+    public function getDataTypeManager(): DataTypeManager
     {
         return $this->dataTypeManager;
     }
