@@ -12,6 +12,34 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'min_length',
+                'type' => Element\Number::class,
+                'options' => [
+                    'label' => 'Minimum length (characters)', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'min_length',
+                    'class' => 'setting',
+                    'data-setting-key' => 'min_length',
+                    'min' => '0',
+                    'step' => '1',
+                ],
+            ])
+            ->add([
+                'name' => 'max_length',
+                'type' => Element\Number::class,
+                'options' => [
+                    'label' => 'Maximum length (characters)', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'max_length',
+                    'class' => 'setting',
+                    'data-setting-key' => 'max_length',
+                    'min' => '0',
+                    'step' => '1',
+                ],
+            ])
+            ->add([
                 'name' => 'min_values',
                 'type' => Element\Number::class,
                 'options' => [

@@ -62,6 +62,33 @@ $(document).ready(function() {
     }
 
     /**
+     * Set min/max length of a literal field.
+     */
+    function prepareFieldLength(field) {
+        const rtpData = field.data('template-data');
+        if (!rtpData) {
+            return;
+        }
+
+        const dataType = field.data('data-types') && field.data('data-types').length ? field.data('data-types').split(',')[0] : 'literal';
+        if (dataType !== 'literal') {
+            return;
+        }
+
+        const textarea = field.find('textarea.input-value');
+        if (rtpData.min_length) {
+            textarea.attr('minlength', rtpData.min_length);
+        } else {
+            textarea.removeAttr('minlength');
+        }
+        if (rtpData.max_length) {
+            textarea.attr('maxlength', rtpData.max_length);
+        } else {
+            textarea.removeAttr('maxlength');
+        }
+    }
+
+    /**
      * Prepare the number of specified fields when a minimum number is set.
      */
     function prepareFieldMinValues(field) {
@@ -765,6 +792,7 @@ $(document).ready(function() {
         }
 
         fields.each(function(index, field) {
+            prepareFieldLength($(field));
             prepareFieldMinValues($(field));
             prepareFieldMaxValues($(field));
             prepareFieldAutocomplete($(field));
@@ -779,6 +807,7 @@ $(document).ready(function() {
     $(document).on('o:property-added', '.resource-values.field', function() {
         const field = $(this);
         // This is managed after values (and useless for this event).
+        // prepareFieldLength(field);
         // prepareFieldMinValues(field);
         // prepareFieldMaxValues(field);
         prepareFieldAutocomplete(field);
@@ -810,6 +839,15 @@ $(document).ready(function() {
         if (field.data('autocomplete')) {
             value.find('textarea.input-value').addClass('autocomplete');
             value.find('textarea.input-value.autocomplete').each(initAutocomplete);
+        }
+
+        if (dataType === 'literal') {
+            if (rtpData.min_length) {
+                value.find('textarea.input-value').attr('minlength', rtpData.min_length);
+            }
+            if (rtpData.max_length) {
+                value.find('textarea.input-value').attr('maxlength', rtpData.max_length);
+            }
         }
 
         const templateData = $('#resource-values').data('template-data');
