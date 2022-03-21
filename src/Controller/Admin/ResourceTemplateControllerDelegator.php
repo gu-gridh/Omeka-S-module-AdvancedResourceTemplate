@@ -791,7 +791,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             $export['o:resource_template_property'][] = $exportRtp;
         }
 
-        $filename = preg_replace('/[^a-zA-Z0-9]+/', '_', $template->label());
+        $filename = $this->slugify($template->label());
         $export = json_encode($export, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         $response = $this->getResponse();
@@ -961,7 +961,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $export = stream_get_contents($stream);
         fclose($stream);
 
-        $filename = preg_replace('/[^a-zA-Z0-9]+/', '_', $template->label());
+        $filename = $this->slugify($template->label());
 
         $response = $this->getResponse();
         $headers = $response->getHeaders();
@@ -972,6 +972,26 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $response->setHeaders($headers);
         $response->setContent($export);
         return $response;
+    }
+
+    /**
+     * Transform the given string into a valid filename
+     */
+    protected function slugify(string $input): string
+    {
+        if (extension_loaded('intl')) {
+            $transliterator = \Transliterator::createFromRules(':: NFD; :: [:Nonspacing Mark:] Remove; :: NFC;');
+            $slug = $transliterator->transliterate($input);
+        } elseif (extension_loaded('iconv')) {
+            $slug = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $input);
+        } else {
+            $slug = $input;
+        }
+        $slug = mb_strtolower($slug, 'UTF-8');
+        $slug = preg_replace('/[^a-z0-9-]+/u', '_', $slug);
+        $slug = preg_replace('/-{2,}/', '_', $slug);
+        $slug = preg_replace('/-*$/', '', $slug);
+        return $slug;
     }
 
     public function addAction()
