@@ -6,6 +6,10 @@ use AdvancedResourceTemplate\View\Helper\CustomVocabBaseType;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
+/**
+ * Copied in \BulkExport\View\Helper\CustomVocabBaseType
+ * Used in Contribute.
+ */
 class CustomVocabBaseTypeFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)

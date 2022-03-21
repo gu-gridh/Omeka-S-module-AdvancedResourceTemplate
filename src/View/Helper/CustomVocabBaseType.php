@@ -4,6 +4,10 @@ namespace AdvancedResourceTemplate\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 
+/**
+ * Copied in \BulkExport\View\Helper\CustomVocabBaseType
+ * Used in Contribute.
+ */
 class CustomVocabBaseType extends AbstractHelper
 {
     /**

@@ -23,7 +23,9 @@ resources:
 
   ![Example of autocompletion](data/images/autocompletion.png)
 
-- Maximum number of values:
+- Minimum/maximum length of a literal value
+
+- Minimum/maximum number of values:
 
   It allows to force to have only one value when needed, for example a main
   category or a publication date, or to limit the values to a specific number.
@@ -34,9 +36,15 @@ resources:
 
   This option simplifies creation of resources manually.
 
+- Automatic value:
+
+  This option allows to add a value to the resource. By construction, this value
+  cannot be removed.
+
 - Locked values:
 
-  This option is useful for identifiers.
+  This option is useful for identifiers. Note that an automatic value is always
+  a locked value, so this option is designed  for other values.
 
 - Multiple fields with the same property:
 
@@ -138,13 +146,48 @@ For a linked resource, that is useful only for a better display:
 }
 ```
 
+### Automatic value
+
+This option can be set at template level or template property level. The aim is
+the same, but when created, the property level display the input in the form.
+
+#### Property level
+
+The value specified in the field will be appended to the resource.
+
+The value may be a simple string or a json representation of a value (like in
+the api). The type of the value should be one specified in the data types of the
+template property. A check is done for validity, for example the id should
+exists when the data type is a resource.
+
+Some basic placeholders can be used with json dot notation and basic twig-like
+commands. The format is the same than the auto-filling (see below).  and will be improved with
+the [Bulk Import] in a future release.
+
+#### Template level
+
+Unlike property level, multiple values can be set, one by line.
+
+For templates, the property should be specified too, and eventually other data
+(language, visibility).
+
+For example, to define the template and an automatic identifier for a media when
+saving an item:
+
+```
+~ = o:resource_template = 1
+        o:resource_template = 1
+~ = dcterms:identifier ^^literal {o:item.dcterms:creator.0..@value}_{o:item.o:template.o:label}_{{ index() }}
+```
+
 ### Autofilling
 
 For the autofilling, you have to set the mappings inside the main settings, then
 to select it inside the resource template.
 
 The mapping is a simple text specifying the services and the mappings. it uses
-the same format than the modules [Bulk Export], [Bulk Import], and [Bulk Import Files].
+a similar format than the modules [Bulk Export], [Bulk Import], and [Bulk Import Files].
+It will be improved with the [Bulk Import] format in a future release.
 
 #### Integrated services
 
@@ -184,7 +227,7 @@ Note that [geonames] requires a user name (that should be the one of your
 institution, but it can be "demo", "google", or "johnsmith"). Test it on
 https://api.geonames.org/searchJSON?username=demo.
 
-If the key contains `.` or a `\`, it should be escaped with a `\`: `\.` and `\\`.
+If the key contains a `.` or a `\`, it should be escaped with a `\`: `\.` and `\\`.
 
 More largely, you can append any arguments to the query sent to the remote
 service: simply append them url encoded on a line beginning with `?`.
@@ -258,8 +301,8 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
-- [ ] Replace the mapper with AutomapFields or TransformSource from module BulkImport.
-- [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module BulkImport).
+- [ ] Replace the mapper with AutomapFields or TransformSource from module [Bulk Import].
+- [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module [Bulk Import]).
 - [ ] Include all suggesters from module [Value Suggest].
 - [ ] Limit autocompletion to selected resources.
 - [ ] Fill autocompletion with resource, not value.
@@ -270,6 +313,7 @@ TODO
 - [ ] Export/import all templates together as spreadsheet.
 - [ ] Validate imported templates with the standard form?
 - [ ] Validate items with data (unique value, strict template, etc.).
+- [ ] Finalize the review-import form with duplicated properties and custom vocabs.
 
 
 Warning

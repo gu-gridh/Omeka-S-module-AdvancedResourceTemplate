@@ -116,6 +116,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
     public function resourceTemplateProperties()
     {
         $resTemProps = [];
+        // Get services one time.
         $services = $this->getServiceLocator();
         foreach ($this->resource->getResourceTemplateProperties() as $resTemProp) {
             $resTemProps[] = new ResourceTemplatePropertyRepresentation($resTemProp, $services);
@@ -125,6 +126,8 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
 
     /**
      * @return \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation|null
+     *
+     * @todo To be removed.
      *
      * {@inheritDoc}
      * @see \Omeka\Api\Representation\ResourceTemplateRepresentation::resourceTemplateProperty()
