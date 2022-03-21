@@ -20,6 +20,7 @@ class ResourceTemplateDataFieldset extends Fieldset
     public function init(): void
     {
         $this
+            // Force specified classes.
             ->add([
                 'name' => 'require_resource_class',
                 'type' => Element\Checkbox::class,

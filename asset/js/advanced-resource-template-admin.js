@@ -1,20 +1,20 @@
 $(document).ready(function() {
 
     // Initialize the sidebar according to the main option.
-    var sidebar = $('#property-selector');
+    const sidebarPropertySelector = $('#property-selector');
     if ($('form.resource-form').hasClass('closed-property-list on-load')) {
         // Once loaded, the param is managed dynamically via event "o:template-applied".
         $('form.resource-form').removeClass('on-load');
-        sidebar.removeClass('always-open');
+        sidebarPropertySelector.removeClass('always-open');
         $('form.resource-form #property-selector-button').hide();
-        Omeka.closeSidebar(sidebar);
+        Omeka.closeSidebar(sidebarPropertySelector);
     }
 
     /**
      * Prepare the lock for original values of a property.
      */
     function prepareFieldLocked(field) {
-        var rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const rtpData = field.data('template-data') ? field.data('template-data') : {};
         if (rtpData.locked_value != true) {
             return;
         }
@@ -22,8 +22,8 @@ $(document).ready(function() {
         // Some weird selectors are needed to manage all cases.
         // Check if a value is filled: don't lock an empty value.
         var isEmpty = true;
-        field.find('.inputs .values .value:not(.default-value) .input-body').find('input, select, textarea').filter('[data-value-key]').each(function () {
-            var input = $(this);
+        field.find('.inputs .values .value:not(.default-value) .input-body').find('input, select, textarea').filter('[data-value-key]').each(function() {
+            const input = $(this);
             // Check real value only, often hidden.
             if ($.inArray(input.data('value-key'), ['@value', 'value_resource_id', '@id', 'o:label']) === -1) {
                 return;
@@ -42,7 +42,7 @@ $(document).ready(function() {
         }
 
         field.find('.inputs .values .value:not(.default-value) .input-body').find('input, select, textarea').addClass('original-value');
-        var originalValues = field.find('.input-body .original-value');
+        const originalValues = field.find('.input-body .original-value');
         originalValues
             .prop('readonly', 'readonly')
             .attr('readonly', 'readonly');
@@ -67,30 +67,31 @@ $(document).ready(function() {
      * The button may be hidden in a later step too when a value is added.
      * Don't include the removed values in the total of values.
      */
-     function prepareFieldMaxValues(field) {
-        var rtpData = field.data('template-data');
+    function prepareFieldMaxValues(field) {
+        const rtpData = field.data('template-data');
         if (!rtpData) {
             return;
         }
-        var selector = field.data('selector');
-        selector = selector ? selector : 'default';
-        if (rtpData.max_values && field.find('.inputs .values > .value').length >= rtpData.max_values) {
-            field.find('.add-values.' + selector + '-selector').hide();
+        const currentCountValues = field.find('.inputs .values > .value').length;
+        if (!rtpData.max_values || currentCountValues < rtpData.max_values) {
+            return;
         }
-   }
+        const selector = field.data('selector') ? field.data('selector') : 'default';
+        field.find('.add-values.' + selector + '-selector').hide();
+    }
 
     /**
      * Prepare the autocompletion for a property.
      */
     function prepareFieldAutocomplete(field) {
-        var templateData = $('#resource-values').data('template-data');
-        var rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const templateData = $('#resource-values').data('template-data');
+        const rtpData = field.data('template-data') ? field.data('template-data') : {};
 
         // Reset autocomplete for all properties.
         $('.inputs .values textarea.input-value').prop('autocomplete', 'off');
         field.removeData('autocomplete');
         field.find('.inputs .values textarea.input-value.autocomplete').each(function() {
-            var autocomp = $(this).autocomplete();
+            const autocomp = $(this).autocomplete();
             if (autocomp) {
                 autocomp.dispose();
             }
@@ -113,11 +114,11 @@ $(document).ready(function() {
      */
     function prepareFieldLanguage(field) {
         // Add a specific datalist for the property. It replaces the previous one from another template.
-        var templateData = $('#resource-values').data('template-data');
-        var rtpData = field.data('template-data') ? field.data('template-data') : {};
-        var listName = 'value-languages';
-        var term = field.data('property-term');
+        const templateData = $('#resource-values').data('template-data');
+        const rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const term = field.data('property-term');
 
+        var listName = 'value-languages';
         var datalist = $('#value-languages-template');
         if (datalist.length) {
             datalist.empty();
@@ -148,10 +149,10 @@ $(document).ready(function() {
         }
 
         // Use the main datalist, or the template one, or the property one.
-        var inputLanguage = field.find('.values input.value-language');
+        const inputLanguage = field.find('.values input.value-language');
         inputLanguage.attr('list', listName);
 
-        var noLanguage = !!(rtpData.use_language
+        const noLanguage = !!(rtpData.use_language
             && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData && templateData.no_language)));
         field.data('no-language', noLanguage);
         field.find('.inputs .values input.value-language').each(function() {
@@ -163,8 +164,8 @@ $(document).ready(function() {
      * Init the language input.
      */
     function initValueLanguage(languageInput, field) {
+        const languageButton = languageInput.prev('a.value-language');
         var languageElement;
-        var languageButton = languageInput.prev('a.value-language');
         var language = languageInput.val();
         if (field.data('no-language') == true) {
             language = '';
@@ -192,12 +193,12 @@ $(document).ready(function() {
         if (valueObj) {
             return;
         }
-        if (field.data('no-language') == true) {
+        if (field.data('no-language')) {
             return;
         }
 
-        var templateData = $('#resource-values').data('template-data');
-        var rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const templateData = $('#resource-values').data('template-data');
+        const rtpData = field.data('template-data') ? field.data('template-data') : {};
         var defaultLanguage = templateData && templateData.default_language && templateData.default_language.length
             ? templateData.default_language
             : '';
@@ -213,10 +214,10 @@ $(document).ready(function() {
     /**
      * Make a new property field with data stored in the property selector.
      *
-     * Copy of resource-form.js, not available here, except the trigger.
+     * Copy of resource-form.js, not available here, except the trigger, managed outside.
      * @see resource-form.js makeNewField()
      */
-    var makeNewField = function(property, dataTypes) {
+    const makeNewField = function(property, dataTypes) {
         // Prepare data type name of the field.
         if (!dataTypes || dataTypes.length < 1) {
             dataTypes = $('div#properties').data('default-data-types').split(',');
@@ -228,24 +229,24 @@ $(document).ready(function() {
             case 'object':
                 propertyLi = property;
                 propertyId = propertyLi.data('property-id');
-            break;
+                break;
 
             case 'number':
                 propertyId = property;
                 propertyLi = $('#property-selector').find("li[data-property-id='" + propertyId + "']");
-            break;
+                break;
 
             case 'string':
                 propertyLi = $('#property-selector').find("li[data-property-term='" + property + "']");
                 propertyId = propertyLi.data('property-id');
-            break;
+                break;
 
             default:
                 return null;
         }
 
-        var term = propertyLi.data('property-term');
-        var field = $('.resource-values.field.template').clone(true);
+        const term = propertyLi.data('property-term');
+        const field = $('.resource-values.field.template').clone(true);
         field.removeClass('template');
         field.find('.field-label').text(propertyLi.data('child-search')).attr('id', 'property-' + propertyId + '-label');
         field.find('.field-term').text(term);
@@ -273,18 +274,19 @@ $(document).ready(function() {
     /**
      * Make a new value.
      *
-     * Copy of resource-form.js, not available here.
+     * Copy of resource-form.js, not available here, in order to add a function
+     * before trigger.
      * @see resource-form.js makeNewValue()
      */
-    var makeNewValue = function(term, dataType, valueObj) {
+    const makeNewValue = function(term, dataType, valueObj) {
         var field = $('.resource-values.field[data-property-term="' + term + '"]');
         // Get the value node from the templates.
         if (!dataType || typeof dataType !== 'string') {
             dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
         }
-        var fieldForDataType = field.filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; });
+        const fieldForDataType = field.filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; });
         field = fieldForDataType.length ? fieldForDataType.first() : field.first();
-        var value = $('.value.template[data-data-type="' + dataType + '"]').clone(true);
+        const value = $('.value.template[data-data-type="' + dataType + '"]').clone(true);
         value.removeClass('template');
         value.attr('data-term', term);
 
@@ -293,7 +295,7 @@ $(document).ready(function() {
         if (field.hasClass('private') || (valueObj && false === valueObj['is_public'])) {
             isPublic = false;
         }
-        var valueVisibilityButton = value.find('a.value-visibility');
+        const valueVisibilityButton = value.find('a.value-visibility');
         if (isPublic) {
             valueVisibilityButton.removeClass('o-icon-private').addClass('o-icon-public');
             valueVisibilityButton.attr('aria-label', Omeka.jsTranslate('Make private'));
@@ -305,7 +307,7 @@ $(document).ready(function() {
         }
 
         // Prepare the value node.
-        var valueLabelID = 'property-' + field.data('property-id') + '-label';
+        const valueLabelID = 'property-' + field.data('property-id') + '-label';
         value.find('input.is_public')
             .val(isPublic ? 1 : 0);
         value.find('span.label')
@@ -326,9 +328,9 @@ $(document).ready(function() {
      *
      * Because resource-form.js listens event first, some fixes should be done
      * for some data types, for example for a timestamp with an incomplete date,
-     * that can't' be managed by currently implemented twig features.
+     * that can't be managed for autofilling by currently implemented twig features.
      *
-     * @todo Implement missing twig features ("if empty", etc.).
+     * @todo Implement missing twig features ("if empty", etc.) or add a specific function.
      */
     function fixValueForDataType(valueObj, dataType) {
         if (!valueObj || !Object.keys(valueObj).length) {
@@ -350,8 +352,8 @@ $(document).ready(function() {
     function fillValue(value, term, dataType, valueObj) {
         // If defaultValue is undefined, it means that valueObj is filled.
         var v;
-        var defaultValue = valueObj.default;
-        var isSpecific = typeof defaultValue !== 'undefined';
+        const defaultValue = valueObj.default;
+        const isSpecific = typeof defaultValue !== 'undefined';
 
         // Manage specific data type "resource".
         if (dataType.startsWith('resource')) {
@@ -366,14 +368,14 @@ $(document).ready(function() {
             value.find('input.value[data-value-key="value_resource_id"]').val(valueObj['value_resource_id']);
             // TODO Get the title from the api (when authentication will be opened).
             value.find('span.default').hide();
-            var resource = value.find('.selected-resource');
+            const resource = value.find('.selected-resource');
             resource.find('.o-title')
                 .removeClass() // remove all classes
                 .addClass('o-title ' + valueObj['value_resource_name'])
-                .html($('<a>', {href: valueObj['url'], text: valueObj['display_title']}));
+                .html($('<a>', { href: valueObj['url'], text: valueObj['display_title'] }));
             if (typeof valueObj['thumbnail_url'] !== 'undefined') {
                 resource.find('.o-title')
-                    .prepend($('<img>', {src: valueObj['thumbnail_url']}));
+                    .prepend($('<img>', { src: valueObj['thumbnail_url'] }));
             }
         }
 
@@ -382,18 +384,18 @@ $(document).ready(function() {
             if (dataType === 'uri' || dataType.startsWith('valuesuggest')) {
                 if (defaultValue.match(/^(\S+)\s(.*)/)) {
                     valueObj = defaultValue.match(/^(\S+)\s(.*)/).slice(1);
-                    valueObj = {'@id': valueObj[0], 'o:label': valueObj[1]};
+                    valueObj = { '@id': valueObj[0], 'o:label': valueObj[1] };
                 } else {
-                    valueObj = {'@id': defaultValue};
+                    valueObj = { '@id': defaultValue };
                 }
             } else {
-                valueObj = {'@value': defaultValue};
+                valueObj = { '@value': defaultValue };
             }
         }
 
         // Prepare simple single-value form inputs using data-value-key.
-        value.find(':input').each(function () {
-            var valueKey = $(this).data('valueKey');
+        value.find(':input').each(function() {
+            const valueKey = $(this).data('valueKey');
             // Default language is managed separately.
             if (!valueKey || valueKey === '@language') {
                 return;
@@ -404,7 +406,7 @@ $(document).ready(function() {
 
         // @see custom-vocab.js
         if (dataType.startsWith('customvocab:')) {
-            var selectTerms = value.find('select.terms');
+            const selectTerms = value.find('select.terms');
             selectTerms.find('option[value="' + valueObj['@value'] + '"]').prop('selected', true);
             selectTerms.chosen({ width: '100%', });
             selectTerms.trigger('chosen:updated');
@@ -445,14 +447,14 @@ $(document).ready(function() {
         // Value Suggest is a lot more complex. Sub-trigger value?
         // @see valuesuggest.js
         if (dataType.startsWith('valuesuggest')) {
-            var thisValue = value;
-            var suggestInput = thisValue.find('.valuesuggest-input');
-            var labelInput = thisValue.find('input[data-value-key="o:label"]');
-            var idInput = thisValue.find('input[data-value-key="@id"]');
-            var valueInput = thisValue.find('input[data-value-key="@value"]');
-            // var languageLabel = thisValue.find('.value-language.label');
-            var languageInput = thisValue.find('input[data-value-key="@language"]');
-            // var languageRemove = thisValue.find('.value-language.remove');
+            const thisValue = value;
+            const suggestInput = thisValue.find('.valuesuggest-input');
+            const labelInput = thisValue.find('input[data-value-key="o:label"]');
+            const idInput = thisValue.find('input[data-value-key="@id"]');
+            const valueInput = thisValue.find('input[data-value-key="@value"]');
+            // const languageLabel = thisValue.find('.value-language.label');
+            const languageInput = thisValue.find('input[data-value-key="@language"]');
+            // const languageRemove = thisValue.find('.value-language.remove');
             var idContainer = thisValue.find('.valuesuggest-id-container');
 
             if (valueObj['o:label']) {
@@ -481,7 +483,7 @@ $(document).ready(function() {
                 idInput.prop('disabled', false);
                 labelInput.prop('disabled', false);
                 valueInput.prop('disabled', true);
-                var link = $('<a>')
+                const link = $('<a>')
                     .attr('href', idInput.val())
                     .attr('target', '_blank')
                     .text(idInput.val());
@@ -500,13 +502,14 @@ $(document).ready(function() {
      * Manage the options for the resource class select.
      */
     function prepareResourceClassSelect() {
-        var templateData = $('#resource-values').data('template-data');
-        var hasTemplate = $('#resource-template-select').val() != '';
-        var resourceClassSelect = $('#resource-values #resource-class-select');
-        var resourceClassId = resourceClassSelect.val();
+        const templateData = $('#resource-values').data('template-data');
+        const hasTemplate = $('#resource-template-select').val() != '';
+        const resourceClassSelect = $('#resource-values #resource-class-select');
+        const resourceClassId = resourceClassSelect.val();
 
-        // Reset or store the default full list of resource classes.
-        var areResourceClassesStored = typeof $('#resource-values').data('resource_class_select') !== 'undefined';
+        // Store the default full list of resource classes to allow to restore 
+        // it when the template is changed.
+        const areResourceClassesStored = typeof $('#resource-values').data('resource_class_select') !== 'undefined';
         if (areResourceClassesStored) {
             resourceClassSelect.html($('#resource-values').data('resource_class_select'));
         } else {
@@ -521,7 +524,7 @@ $(document).ready(function() {
         ) {
             templateData.suggested_resource_class_ids.map(Number);
             resourceClassSelect.find('option').each(function() {
-                var resClassId = Number($(this).val());
+                const resClassId = Number($(this).val());
                 if (resClassId && !templateData.suggested_resource_class_ids.includes(resClassId)) {
                     $(this).remove();
                 }
@@ -547,19 +550,19 @@ $(document).ready(function() {
     function prepareAutofiller() {
         $('#resource-values .non-properties .field.autofiller').remove();
 
-        var templateData = $('#resource-values').data('template-data');
+        const templateData = $('#resource-values').data('template-data');
         if (!templateData || !templateData.autofillers || !templateData.autofillers.length) {
             return;
         }
 
         templateData.autofillers.forEach(function(autofillerName) {
             $.get(baseUrl + 'admin/autofiller/settings', {
-                    service: autofillerName,
-                    template: $('#resource-template-select').val(),
-                })
+                service: autofillerName,
+                template: $('#resource-template-select').val(),
+            })
                 .done(function(data) {
-                    var autofiller = data.data.autofiller;
-                    var autofillerId = 'autofiller-' + autofillerName.replace(/[\W_]+/g,'-');
+                    const autofiller = data.data.autofiller;
+                    const autofillerId = 'autofiller-' + autofillerName.replace(/[\W_]+/g, '-');
                     $('#resource-values .non-properties').append(`
 <div class="field autofiller">
     <div class="field-meta">
@@ -569,7 +572,7 @@ $(document).ready(function() {
         <input type="text" class="autofiller" id="${autofillerId}">
     </div>
 </div>`);
-                    var autofillerField = $('#' + autofillerId);
+                    const autofillerField = $('#' + autofillerId);
                     autofillerField.autocomplete({
                         serviceUrl: baseUrl + 'admin/autofiller',
                         deferRequestBy: 200,
@@ -589,13 +592,13 @@ $(document).ready(function() {
                         transformResult: function(response) {
                             return response.data;
                         },
-                        onSearchStart: function (params) {
+                        onSearchStart: function(/*params*/) {
                             $(this).css('cursor', 'progress');
                         },
-                        onSearchComplete: function (query, suggestions) {
+                        onSearchComplete: function(/*query, suggestions*/) {
                             $(this).css('cursor', 'default');
                         },
-                        onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+                        onSearchError: function(query, jqXHR, textStatus, errorThrown) {
                             // If there is no response, the request is aborted for autocompletion.
                             if (jqXHR.responseJSON) {
                                 if (jqXHR.responseJSON.status === 'fail') {
@@ -606,20 +609,20 @@ $(document).ready(function() {
                                 autofillerField.autocomplete().dispose();
                             }
                         },
-                        beforeRender: function (container, suggestions) {
+                        beforeRender: function(container, suggestions) {
                             container.children().each(function(index) {
                                 if (Object.keys(suggestions[index].data).length) {
-                                    var info = $(this).append('<div class="suggest-info autofill"><dl></dl></div>').find('.suggest-info dl');
+                                    const info = $(this).append('<div class="suggest-info autofill"><dl></dl></div>').find('.suggest-info dl');
                                     $.each(suggestions[index].data, function(term, value) {
-                                        info.append(`<dt>${value[0].property_label ? value[0].property_label : term }</dt>`);
+                                        info.append(`<dt>${value[0].property_label ? value[0].property_label : term}</dt>`);
                                         value.forEach(function(val) {
-                                            info.append(`<dd>${typeof val['@value'] === 'undefined' || String(val['@value']) && !String(val['@value']).length ? val['@id'] : val['@value'] }</dd>`);
+                                            info.append(`<dd>${typeof val['@value'] === 'undefined' || String(val['@value']) && !String(val['@value']).length ? val['@id'] : val['@value']}</dd>`);
                                         });
                                     });
                                 }
                             });
                         },
-                        onSelect: function (suggestion) {
+                        onSelect: function(suggestion) {
                             autofill(suggestion.data);
                         },
                     });
@@ -630,7 +633,7 @@ $(document).ready(function() {
     function autofill(values) {
         Object.keys(values).forEach(function(term) {
             values[term].forEach(function(value) {
-                var field = $('.resource-values.field[data-property-term="' + term + '"]').filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
+                const field = $('.resource-values.field[data-property-term="' + term + '"]').filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
                 if (!field.length) {
                     field = makeNewField(term);
                 }
@@ -642,7 +645,7 @@ $(document).ready(function() {
     }
 
     function initAutocomplete() {
-        var autocompleteField = $(this);
+        const autocompleteField = $(this);
         autocompleteField.autocomplete({
             serviceUrl: baseUrl + 'admin/values',
             dataType: 'json',
@@ -662,13 +665,13 @@ $(document).ready(function() {
             transformResult: function(response) {
                 return response.data;
             },
-            onSearchStart: function (params) {
+            onSearchStart: function(/*params*/) {
                 $(this).css('cursor', 'progress');
             },
-            onSearchComplete: function (query, suggestions) {
+            onSearchComplete: function(/*query, suggestions*/) {
                 $(this).css('cursor', 'default');
             },
-            onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+            onSearchError: function(query, jqXHR, textStatus, errorThrown) {
                 // If there is no response, the request is aborted for autocompletion.
                 if (jqXHR.responseJSON) {
                     if (jqXHR.responseJSON.status === 'fail') {
@@ -684,7 +687,7 @@ $(document).ready(function() {
 
     function jsonDecodeObject(string) {
         try {
-            var obj = JSON.parse(string);
+            const obj = JSON.parse(string);
             return obj && typeof obj === 'object' && Object.keys(obj).length ? obj : null;
         } catch (e) {
             return null;
@@ -709,18 +712,17 @@ $(document).ready(function() {
     });
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
-        var sidebar = $('#property-selector');
-        var templateData = $('#resource-values').data('template-data');
-        var hasTemplate = $('#resource-template-select').val() != '';
+        const templateData = $('#resource-values').data('template-data');
+        const hasTemplate = $('#resource-template-select').val() != '';
         if ((hasTemplate && templateData && templateData.closed_property_list == '1')
             || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
         ) {
-            sidebar.removeClass('always-open');
+            sidebarPropertySelector.removeClass('always-open');
             $('form.resource-form #property-selector-button').hide();
-            Omeka.closeSidebar(sidebar);
+            Omeka.closeSidebar(sidebarPropertySelector);
         } else {
-            Omeka.openSidebar(sidebar);
-            sidebar.addClass('always-open');
+            Omeka.openSidebar(sidebarPropertySelector);
+            sidebarPropertySelector.addClass('always-open');
             $('form.resource-form #property-selector-button').show();
         }
 
@@ -730,7 +732,7 @@ $(document).ready(function() {
             return;
         }
 
-        var fields = $('#properties .resource-values.field');
+        const fields = $('#properties .resource-values.field');
 
         if (!$('#resource-values').data('locked-ready')) {
             fields.each(function(index, field) {
@@ -751,7 +753,7 @@ $(document).ready(function() {
     });
 
     $(document).on('o:property-added', '.resource-values.field', function() {
-        var field = $(this);
+        const field = $(this);
         // This is managed after values.
         // prepareFieldMaxValues(field);
         prepareFieldAutocomplete(field);
@@ -759,8 +761,8 @@ $(document).ready(function() {
     });
 
     $(document).on('o:prepare-value', function(e, dataType, value, valueObj) {
+        const term = value.data('term');
         var field = value.closest('.resource-values.field');
-        var term = value.data('term');
         if (!field.length) {
             field = $('#properties [data-property-term="' + term + '"].field')
                 .filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; }).first();
@@ -768,13 +770,12 @@ $(document).ready(function() {
                 return;
             }
         }
-        var rtpData = field.data('template-data');
+        const rtpData = field.data('template-data');
         if (!rtpData) {
             return;
         }
 
-        var selector = field.data('selector');
-        selector = selector ? selector : 'default';
+        const selector = field.data('selector') ? field.data('selector') : 'default';
         if (rtpData.max_values && field.find('.inputs .values > .value').length + 1 >= rtpData.max_values) {
             field.find('.add-values.' + selector + '-selector').hide();
         } else {
@@ -786,7 +787,7 @@ $(document).ready(function() {
             value.find('textarea.input-value.autocomplete').each(initAutocomplete);
         }
 
-        var templateData = $('#resource-values').data('template-data');
+        const templateData = $('#resource-values').data('template-data');
         var listName = templateData && templateData.value_languages && !$.isEmptyObject(templateData.value_languages)
             ? 'value-languages-template'
             : 'value-languages';
@@ -819,8 +820,8 @@ $(document).ready(function() {
         ) {
             return;
         } else {
-            var defaultValue = jsonDecodeObject(rtpData.default_value);
-            fillValue(value, term, dataType, defaultValue === null ? {default: rtpData.default_value.trim()} : defaultValue);
+            const defaultValue = jsonDecodeObject(rtpData.default_value);
+            fillValue(value, term, dataType, defaultValue === null ? { default: rtpData.default_value.trim() } : defaultValue);
             if (rtpData.max_values && field.find('.inputs .values > .value').length + 1 >= rtpData.max_values) {
                 field.find('.add-values.' + selector + '-selector').hide();
             }
@@ -830,36 +831,36 @@ $(document).ready(function() {
     var modal;
     // Append the button to create a new resource.
     $(document).on('o:sidebar-content-loaded', 'body.sidebar-open', function(e) {
-        var sidebar = $('#select-resource.sidebar');
-        if (sidebar.find('.quick-add-resource').length || !sidebar.find('#sidebar-resource-search').length) {
+        const sidebarResourceSelector = $('#select-resource.sidebar');
+        if (sidebarResourceSelector.find('.quick-add-resource').length || !sidebarResourceSelector.find('#sidebar-resource-search').length) {
             return;
         }
-        var resourceType = typeResource();
+        const resourceType = typeResource();
         if (!resourceType || resourceType === 'media') {
             return;
         }
         const iconResourceType = resourceType === 'media' ? 'media' : resourceType + 's';
-        var button = `<div data-data-type="resource:${resourceType}">
+        const button = `<div data-data-type="resource:${resourceType}">
     <a class="o-icon-${iconResourceType} button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
 </div>`;
-        sidebar.find('.search-nav').after(button)
+        sidebarResourceSelector.find('.search-nav').after(button)
     });
     // Allow to create a new resource in a modal window during edition of another resource.
     $(document).on('click', '.quick-add-resource', function(e) {
         e.preventDefault();
         // Save the modal in local storage to allow recursive new resources.
-        var d = new Date();
-        var windowName = 'new resource ' + d.getTime();
-        var windowFeatures = 'titlebar=no,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes,directories=no,fullscreen=no,top=90,left=120,width=830,height=700';
+        const d = new Date();
+        const windowName = 'new resource ' + d.getTime();
+        const windowFeatures = 'titlebar=no,menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes,directories=no,fullscreen=no,top=90,left=120,width=830,height=700';
         modal = window.open(e.target.href, windowName, windowFeatures);
         window.localStorage.setItem('modal', modal);
         // Check if the modal is closed, then refresh the list of resources.
-        var checkSidebarModal = setInterval(function() {
+        const checkSidebarModal = setInterval(function() {
             if (modal && modal.closed) {
                 clearInterval(checkSidebarModal);
                 // Wait to let Omeka saves the new resource, if any.
                 setTimeout(function() {
-                    var s = $('#sidebar-resource-search');
+                    const s = $('#sidebar-resource-search');
                     Omeka.populateSidebarContent(s.closest('.sidebar'), s.data('search-url'), '');
                 }, 2000);
             }
