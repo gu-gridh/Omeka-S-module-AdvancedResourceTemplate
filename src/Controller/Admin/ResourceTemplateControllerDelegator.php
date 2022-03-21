@@ -1318,7 +1318,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
      * @todo Use the class TempFile before.
      *
      * @param array $fileData
-     *            File data from a post ($_FILES).
+     *   File data from a post ($_FILES).
      */
     protected function checkFile(array $fileData): ?array
     {
@@ -1335,8 +1335,12 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         if ($mediaType === 'application/csv') {
             $mediaType = 'text/csv';
         }
+        // Some computers don't detect csv or tsv, so add excel too.
+        elseif ($mediaType === 'application/vnd.ms-excel') {
+            $fileData['type'] = strpos($mediaType, "\t") !== false ? 'text/tab-separated-values' : 'text/csv';
+        }
         // Manage an exception for a very common format, undetected by fileinfo.
-        elseif ($mediaType === 'text/plain' || 'application/octet-stream') {
+        elseif ($mediaType === 'text/plain' || $mediaType === 'application/octet-stream') {
             $extensions = [
                 'txt' => 'text/plain',
                 'csv' => 'text/csv',
