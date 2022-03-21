@@ -7,7 +7,7 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 class FieldNameToProperty extends AbstractPlugin
 {
     /**
-     * Convert a field name as a property array.
+     * Convert a field name as a property value array.
      *
      * @todo Replace with AutomapFields or TransformSource from module BulkImport.
      *
@@ -29,7 +29,7 @@ class FieldNameToProperty extends AbstractPlugin
      * @param string $field
      * @return array|null
      */
-    public function __invoke($field)
+    public function __invoke($field): ?array
     {
         $base = [
             'field' => null,
@@ -86,12 +86,9 @@ class FieldNameToProperty extends AbstractPlugin
 
     /**
      * Trim all whitespaces.
-     *
-     * @param string $string
-     * @return string
      */
-    public function trimUnicode($string)
+    public function trimUnicode($string): string
     {
-        return preg_replace('/^[\s\h\v[:blank:][:space:]]+|[\s\h\v[:blank:][:space:]]+$/u', '', $string);
+        return preg_replace('/^[\s\h\v[:blank:][:space:]]+|[\s\h\v[:blank:][:space:]]+$/u', '', (string) $string);
     }
 }

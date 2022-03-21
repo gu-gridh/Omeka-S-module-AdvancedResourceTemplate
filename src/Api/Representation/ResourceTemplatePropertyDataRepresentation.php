@@ -7,6 +7,10 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Representation\AbstractRepresentation;
 use Omeka\Api\Representation\PropertyRepresentation;
 
+/**
+ * In order to be compatible with core, it copies original resource template
+ * property too.
+ */
 class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
 {
     /**

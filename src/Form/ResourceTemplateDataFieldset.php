@@ -2,11 +2,11 @@
 
 namespace AdvancedResourceTemplate\Form;
 
-use AdvancedResourceTemplate\Form\Element\OptionalSelect;
+use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Laminas\I18n\Translator\TranslatorAwareTrait;
-use Omeka\Form\Element\ArrayTextarea;
+use Omeka\Form\Element as OmekaElement;
 
 class ResourceTemplateDataFieldset extends Fieldset
 {
@@ -42,7 +42,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'value_languages',
-                'type' => ArrayTextarea::class,
+                'type' => OmekaElement\ArrayTextarea::class,
                 'options' => [
                     'label' => 'Languages for values', // @translate
                     'as_key_value' => true,
@@ -89,7 +89,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'autofillers',
-                'type' => OptionalSelect::class,
+                'type' => AdvancedResourceTemplateElement\OptionalSelect::class,
                 'options' => [
                     'label' => 'Autofillers', // @translate
                     'value_options' => $this->autofillers,
@@ -100,7 +100,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'multiple' => true,
                     'class' => 'chosen-select',
                     'data-placeholder' => count($this->autofillers)
-                        ? 'Select autofillers…' // @translate
+                        ? $this->getTranslator()->translate('Select autofillers…') // @translate
                         : $this->getTranslator()->translate('No configured autofiller.'), // @translate
                 ],
             ]);

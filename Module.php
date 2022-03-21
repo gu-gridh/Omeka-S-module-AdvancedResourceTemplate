@@ -153,6 +153,8 @@ class Module extends AbstractModule
 
     public function handleResourceForm(Event $event): void
     {
+        // TODO Remove the admin check for contribute (or copy the feature in the module).
+
         /** @var \Omeka\Mvc\Status $status */
         $services = $this->getServiceLocator();
         $status = $services->get('Omeka\Status');
@@ -161,8 +163,8 @@ class Module extends AbstractModule
         }
 
         $settings = $services->get('Omeka\Settings');
-        $closedResourceId = (bool) (int) $settings->get('advancedresourcetemplate_closed_property_list');
-        if (!$closedResourceId) {
+        $closedPropertyList = (bool) (int) $settings->get('advancedresourcetemplate_closed_property_list');
+        if (!$closedPropertyList) {
             return;
         }
 
@@ -208,6 +210,8 @@ class Module extends AbstractModule
 
     public function addResourceTemplateFormElements(Event $event): void
     {
+        // For an example, see module Contribute (fully standard anyway).
+
         /** @var \Omeka\Form\ResourceTemplateForm $form */
         $form = $event->getTarget();
         $advancedFieldset = $this->getServiceLocator()->get('FormElementManager')
@@ -222,6 +226,8 @@ class Module extends AbstractModule
 
     public function addResourceTemplatePropertyFieldsetElements(Event $event): void
     {
+        // For an example, see module Contribute (fully standard anyway).
+
         /**
          * // @var \Omeka\Form\ResourceTemplatePropertyFieldset $fieldset
          * @var \AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset $fieldset
@@ -232,7 +238,7 @@ class Module extends AbstractModule
             ->get(\AdvancedResourceTemplate\Form\ResourceTemplatePropertyDataFieldset::class)
             ->setName('advancedresourcetemplate_property');
         // The bug inside the fieldset for o:data implies to set elements at the root.
-        // Anyway, it simplify saved data.
+        // Anyway, it simplifies saving data.
         // $fieldset
         //     ->get('o:data')
         //     ->add($advancedFieldset);

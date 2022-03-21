@@ -10,6 +10,7 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 /**
  * Extract data from a string with a mapping.
  *
+ * @deprecated Use Bulk Import transform source.
  * @todo Merge with \BulkImport\Mvc\Controller\Plugin\TransformSource.
  */
 class Mapper extends AbstractPlugin
@@ -37,31 +38,28 @@ class Mapper extends AbstractPlugin
      *
      * @var bool
      */
-    protected $simpleExtract = false;
+    protected $isSimpleExtract = false;
 
     /**
      * @var ArrayObject
      */
     protected $result;
 
-    /**
-     * @return self
-     */
-    public function __invoke()
+    public function __invoke(): self
     {
         return $this;
     }
 
-    public function setMapping(array $mapping)
+    public function setMapping(array $mapping): self
     {
         $this->mapperHelper = $this->getController()->mapperHelper();
         $this->mapping = $this->normalizeMapping($mapping);
         return $this;
     }
 
-    public function setSimpleExtract($simpleExtract)
+    public function setIsSimpleExtract($isSimpleExtract): self
     {
-        $this->simpleExtract = (bool) $simpleExtract;
+        $this->isSimpleExtract = (bool) $isSimpleExtract;
         return $this;
     }
 
@@ -72,7 +70,7 @@ class Mapper extends AbstractPlugin
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function urlArray($url)
+    public function urlArray(string $url): array
     {
         $content = file_get_contents($url);
         $content = json_decode($content, true);
@@ -89,7 +87,7 @@ class Mapper extends AbstractPlugin
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function urlXml($url)
+    public function urlXml(string $url): array
     {
         $content = file_get_contents($url);
         if (empty($content)) {
@@ -105,7 +103,7 @@ class Mapper extends AbstractPlugin
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function array(array $input)
+    public function array(array $input): array
     {
         if (empty($this->mapping)) {
             return [];
@@ -141,7 +139,7 @@ class Mapper extends AbstractPlugin
                 $value = $input[$query];
             }
 
-            $this->simpleExtract
+            $this->isSimpleExtract
                 ? $this->simpleExtract($value, $target, $query)
                 : $this->appendValueToTarget($value, $target);
         }
@@ -152,11 +150,10 @@ class Mapper extends AbstractPlugin
     /**
      * Extract data from a xml string with a mapping.
      *
-     * @param string $string
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function xml($xml)
+    public function xml(string $xml): array
     {
         if (empty($this->mapping)) {
             return [];
@@ -201,7 +198,7 @@ class Mapper extends AbstractPlugin
             $query = $map['from'];
             if ($query === '~') {
                 $value = '';
-                $this->simpleExtract
+                $this->isSimpleExtract
                     ? $this->simpleExtract($value, $target, $query)
                     : $this->appendValueToTarget($value, $target);
             } else {
@@ -211,7 +208,7 @@ class Mapper extends AbstractPlugin
                 }
                 // The answer has many nodes.
                 foreach ($nodeList as $node) {
-                    $this->simpleExtract
+                    $this->isSimpleExtract
                         ? $this->simpleExtract($node->nodeValue, $target, $query)
                         : $this->appendValueToTarget($node->nodeValue, $target);
                 }
@@ -221,12 +218,7 @@ class Mapper extends AbstractPlugin
         return $this->result->exchangeArray([]);
     }
 
-    /**
-     * @param array $array
-     * @param string $path
-     * @return array|null
-     */
-    public function extractSubArray(array $array, $path)
+    public function extractSubArray(array $array, string $path): ?array
     {
         foreach (explode('.', $path) as $subpath) {
             if (isset($array[$subpath])) {
@@ -238,12 +230,7 @@ class Mapper extends AbstractPlugin
         return is_array($array) ? $array : null;
     }
 
-    /**
-     * @param string $xml
-     * @param string $xpath
-     * @return array|null
-     */
-    public function extractSubArrayXml($xml, $path)
+    public function extractSubArrayXml(string $xml, string $path): ?array
     {
         // Check if the xml is fully formed.
         $xml = trim($xml);
@@ -325,12 +312,8 @@ class Mapper extends AbstractPlugin
      * Convert a value into another value via twig filters.
      *
      * Only some filters are managed basically on value.
-     *
-     * @param string $value
-     * @param array $target
-     * @return string
      */
-    protected function twig($value, $target)
+    protected function twig($value, $target): string
     {
         $matches = [];
         $target['twig'] = array_fill_keys($target['twig'], '');
@@ -408,7 +391,7 @@ class Mapper extends AbstractPlugin
         return str_replace(array_keys($target['twig']), array_values($target['twig']), $target['pattern']);
     }
 
-    protected function normalizeMapping(array $mapping)
+    protected function normalizeMapping(array $mapping): array
     {
         $translate = $this->getController()->plugin('translate');
         foreach ($mapping as &$map) {
