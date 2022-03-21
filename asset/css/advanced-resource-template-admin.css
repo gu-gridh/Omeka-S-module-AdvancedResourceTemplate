@@ -143,7 +143,20 @@ body.modal.sidebar-open #content {
 }
 
 /* Template form */
-/* Copy from module DataVisualization */
+/* Adaptation from module DataVisualization */
+
+form #properties .property.row .property-term {
+    display: inherit;
+    font-size: small;
+    margin-left: auto;
+    margin-right: 12px;
+    opacity: 0.8;
+}
+form #properties .property.row .property-term ~ .actions,
+form #properties .property.row .property-term ~ .title-property-cell,
+form #properties .property.row .property-term ~ .description-property-cell {
+  margin-left: 0;
+}
 
 #page-action-menu {
     display: inline-block;

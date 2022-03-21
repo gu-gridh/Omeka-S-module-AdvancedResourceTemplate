@@ -29,7 +29,8 @@ $formElement = $this->plugin('formElement');
 
     <span class="sortable-handle"></span>
     <span class="original-label-cell" title="<?= $property->term() ?>"><?= $escape($translate($property->label())) ?></span>
-    <span class="alternate-label-cell"><?php echo $escape($propertyFieldset->get('o:alternate_label')->getValue()); ?></span>
+    <span class="alternate-label-cell"><?= $escape($propertyFieldset->get('o:alternate_label')->getValue()) ?></span>
+    <span class="property-term"><?= $escape($property->term()) ?></span>
 
     <ul class="actions">
         <li><?php echo $this->hyperlink('', '#', [
