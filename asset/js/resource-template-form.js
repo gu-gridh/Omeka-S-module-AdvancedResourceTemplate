@@ -117,6 +117,9 @@ propertyList.on('click', '.property-edit', function(e) {
     $('#set-changes').off('click.setchanges').on('click.setchanges', function(e) {
         altLabel.val($('#edit-sidebar #alternate-label').val());
         prop.find('.alternate-label-cell').text($('#edit-sidebar #alternate-label').val());
+        $('#edit-sidebar #is-private').prop('checked')
+            ? prop.find('.visibility').removeClass('o-icon-public').addClass('o-icon-private').prop('aria-label', Omeka.jsTranslate('Private'))
+            : prop.find('.visibility').removeClass('o-icon-private').addClass('o-icon-public').prop('aria-label', Omeka.jsTranslate('Public'));
         altComment.val($('#edit-sidebar #alternate-comment').val());
         if ($('#edit-sidebar #is-title-property').prop('checked')) {
             titleProperty.val(propertyId);

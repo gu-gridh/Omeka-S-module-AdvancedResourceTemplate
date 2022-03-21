@@ -145,6 +145,17 @@ body.modal.sidebar-open #content {
 /* Template form */
 /* Adaptation from module DataVisualization */
 
+form #properties .property.row .visibility {
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 0 6px;
+}
+form #properties .property.row .visibility.o-icon-public {
+    display: none;
+}
+form #properties .property.row .visibility.o-icon-private {
+    opacity: 0.5;
+}
 form #properties .property.row .property-term {
     display: inherit;
     font-size: small;
