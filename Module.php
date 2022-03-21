@@ -335,11 +335,11 @@ class Module extends AbstractModule
 
         /**
          * @var array $customVocabBaseTypes
-         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper $mapper
+         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
         $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
-        $mapper = $services->get('ControllerPluginManager')->get(\AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper::class);
+        $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
 
         $newResourceData = $mapper
@@ -468,13 +468,13 @@ class Module extends AbstractModule
          * @var \Omeka\Api\Manager $api
          * @var array $customVocabBaseTypes
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty
-         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper $mapper
+         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
         $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
         $fieldNameToProperty = $services->get('ControllerPluginManager')->get('fieldNameToProperty');
-        $mapper = $services->get('ControllerPluginManager')->get(\AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper::class);
+        $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
         // TODO Use mapper transformSource from module Bulk Import (json dot notation or jmespath + basic twig).
 

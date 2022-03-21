@@ -32,7 +32,7 @@ abstract class AbstractAutofiller implements AutofillerInterface
     protected $httpClient;
 
     /**
-     * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper
+     * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper
      */
     protected $mapper;
 
@@ -42,7 +42,7 @@ abstract class AbstractAutofiller implements AutofillerInterface
         $this->options = $options ?: [];
         $this->httpClient = $services->get('Omeka\HttpClient');
         $pluginManager = $services->get('ControllerPluginManager');
-        $this->mapper = $pluginManager->get('mapper');
+        $this->mapper = $pluginManager->get('artMapper');
     }
 
     public function getLabel()

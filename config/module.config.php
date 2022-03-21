@@ -86,10 +86,10 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'fieldNameToProperty' => Mvc\Controller\Plugin\FieldNameToProperty::class,
-            'mapper' => Mvc\Controller\Plugin\Mapper::class,
             'messenger' => Mvc\Controller\Plugin\Messenger::class,
         ],
         'factories' => [
+            'artMapper' => Service\ControllerPlugin\ArtMapperFactory::class,
             'mapperHelper' => Service\ControllerPlugin\MapperHelperFactory::class,
         ],
     ],

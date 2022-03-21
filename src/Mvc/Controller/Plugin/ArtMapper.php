@@ -2,10 +2,12 @@
 
 namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 
+use AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper;
 use ArrayObject;
 use DOMDocument;
 use DOMXPath;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\Api\Manager as ApiManager;
 
 /**
  * Extract data from a string with a mapping.
@@ -13,10 +15,10 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
  * @deprecated Use Bulk Import transform source.
  * @todo Merge with \BulkImport\Mvc\Controller\Plugin\TransformSource.
  */
-class Mapper extends AbstractPlugin
+class ArtMapper extends AbstractPlugin
 {
     /**
-     * @var \Omeka\Mvc\Controller\Plugin\Api
+     * @var \Omeka\Api\Manager
      */
     protected $api;
 
@@ -60,6 +62,15 @@ class Mapper extends AbstractPlugin
      */
     protected $lastResultValue;
 
+    public function __construct(ApiManager $api, MapperHelper $mapperHelper, array $customVocabBaseTypes)
+    {
+        // Don't use api plugin, because a form may be set and will be removed
+        // when recalled (nearly anywhere), even for a simple read.
+        $this->api = $api;
+        $this->mapperHelper = $mapperHelper;
+        $this->customVocabBaseTypes = $customVocabBaseTypes;
+    }
+
     public function __invoke(): self
     {
         return $this;
@@ -67,13 +78,6 @@ class Mapper extends AbstractPlugin
 
     public function setMapping(array $mapping): self
     {
-        // Because a mapping is required, it is used as a construct for now.
-        if (is_null($this->mapperHelper)) {
-            $controller = $this->getController();
-            $this->api = $controller->api();
-            $this->mapperHelper = $controller->mapperHelper();
-            $this->customVocabBaseTypes = $controller->viewHelpers()->get('customVocabBaseType')();
-        }
         $this->mapping = $this->normalizeMapping($mapping);
         return $this;
     }
