@@ -25,6 +25,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         if (!$this->getRequest()->isPost()) {
             return parent::importAction();
         }
+
+        // Process import form.
         $file = $this->params()->fromFiles('file');
         if ($file) {
             // To avoid duplication of code, the csv/tsv file is converted into
@@ -37,6 +39,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 'form' => $this->getForm(ResourceTemplateImportForm::class),
             ]);
         }
+
         $form = $this->getForm(ResourceTemplateReviewImportForm::class);
         $data = $this->params()->fromPost();
         $form->setData($data);
@@ -53,11 +56,79 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             $import['o:resource_template_property'][$key]['o:data_type'] = $dataTypeList;
         }
 
+        // Clean the form when duplicate properties.
         foreach ($import['o:resource_template_property'] as $key => $rtp) {
-            foreach (array_keys($rtp['o:data'] ?? []) as $k) {
+            unset($import['o:resource_template_property'][$key]['vocabulary_namespace_uri']);
+            unset($import['o:resource_template_property'][$key]['vocabulary_label']);
+            unset($import['o:resource_template_property'][$key]['local_name']);
+            unset($import['o:resource_template_property'][$key]['label']);
+            unset($import['o:resource_template_property'][$key]['vocabulary_prefix']);
+            unset($import['o:resource_template_property'][$key]['data_type_label']);
+            $rtp = $import['o:resource_template_property'][$key];
+            // Check duplicate properties when there are multiple data types.
+            if (isset($dataTypes[$key]) && count($dataTypes[$key]) > 1
+                && isset($rtp['o:data_type']) && count($rtp['o:data_type']) > 1
+                && isset($rtp['o:data']) && count($rtp['o:data']) > 1
+            ) {
+                // Reorder the data types according to original content, not the
+                // form element select, and fill each sub-data with the right
+                // data types.
+                $dataTypeListOriginal = $rtp['data_types'];
+                $rtp['o:data_type'] = array_unique($rtp['o:data_type']);
+                $dataTypeListNew = array_combine($rtp['o:data_type'], $rtp['o:data_type']);
+                $dataTypeListNewOrdered = [];
+                foreach ($dataTypeListOriginal as $dataTypeOriginal => $dataTypeOriginalData) {
+                    if (isset($dataTypeListNew[$dataTypeOriginal])) {
+                        $dataTypeListNewOrdered[$dataTypeOriginal] = $dataTypeOriginalData;
+                        unset($dataTypeListNew[$dataTypeOriginal]);
+                    }
+                    // Else it is a custom vocab, whose id may be different, so
+                    // take them in order. It will be improved with new form.
+                    // In most of the real use cases, it is enough anyway.
+                    // Or the user modified the list, and it's not managed.
+                    else {
+                        foreach ($dataTypeListNew as $dataTypeNew) {
+                            if (strtok($dataTypeNew, ':') === 'customvocab') {
+                                $dataTypeListNewOrdered[$dataTypeNew] = ['name' => $dataTypeNew, 'label' => $dataTypeNew];
+                                unset($dataTypeListNew[$dataTypeNew]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Keep remaining new data types.
+                $dataTypeListNewOrdered = array_merge($dataTypeListNewOrdered, $dataTypeListNew);
+                $import['o:resource_template_property'][$key]['data_types'] = $dataTypeListNewOrdered;
+                $import['o:resource_template_property'][$key]['o:data_type'] = array_keys($dataTypeListNewOrdered);
+                // Separate the data types by rtp data.
+                $count = count($rtp['o:data']);
+                foreach (array_keys($rtp['o:data']) as $k) {
+                    --$count;
+                    if ($count) {
+                        if (count($dataTypeListNewOrdered)) {
+                            $first = array_shift($dataTypeListNewOrdered);
+                            $rtpDataDataType = [$first['name']];
+                        } else {
+                            $rtpDataDataType = [];
+                        }
+                        $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'] = $rtpDataDataType;
+                    } else {
+                        $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'] = array_keys($dataTypeListNewOrdered);
+                    }
+                }
+            } else {
+                $import['o:resource_template_property'][$key]['o:data'][0] = $rtp['o:data'][0] ?? $rtp;
+                $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'];
+            }
+            unset($import['o:resource_template_property'][$key]['o:data'][0]['o:data']);
+            foreach (array_keys($rtp['o:data']) as $k) {
                 unset($import['o:resource_template_property'][$key]['o:data'][$k]['data_types']);
             }
         }
+
+        $import['o:resource_class'] = empty($import['o:resource_class']['o:id']) ? null : ['o:id' => $import['o:resource_class']['o:id']];
+        $import['o:title_property'] = empty($import['o:title_property']['o:id']) ? null : ['o:id' => $import['o:title_property']['o:id']];
+        $import['o:description_property'] = empty($import['o:description_property']['o:id']) ? null : ['o:id' => $import['o:description_property']['o:id']];
 
         $response = $this->api($form)->create('resource_templates', $import);
         if ($response) {
