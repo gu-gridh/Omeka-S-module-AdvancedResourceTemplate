@@ -104,6 +104,18 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'split_separator',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Separator to split a literal value', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'split_separator',
+                    'class' => 'setting',
+                    'data-setting-key' => 'split_separator',
+                ],
+            ])
+            ->add([
                 'name' => 'autocomplete',
                 'type' => Element\Radio::class,
                 'options' => [

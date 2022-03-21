@@ -75,32 +75,32 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.update.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.create.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.update.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.create.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.update.pre',
-            [$this, 'appendAutomaticValue']
+            [$this, 'handleTemplateSettingsOnSave']
         );
 
         // Add css/js to some admin pages.
@@ -162,7 +162,7 @@ class Module extends AbstractModule
         );
     }
 
-    public function appendAutomaticValue(Event $event): void
+    public function handleTemplateSettingsOnSave(Event $event): void
     {
         /** @var \Omeka\Api\Request $request */
         $request = $event->getParam('request');
@@ -190,6 +190,7 @@ class Module extends AbstractModule
         // Property level.
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
+                $resource = $this->explodeValueFromTemplatePropertyData($rtpData, $resource);
                 $automaticValue = $this->automaticValueFromTemplatePropertyData($rtpData, $resource);
                 if (!is_null($automaticValue)) {
                     $resource[$templateProperty->property()->term()][] = $automaticValue;
@@ -387,6 +388,43 @@ class Module extends AbstractModule
                 $resource[$term][] = $newValue;
             }
         }
+
+        return $resource;
+    }
+
+    protected function explodeValueFromTemplatePropertyData(
+        \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation $rtpData,
+        array $resource
+    ): array {
+        // Explode value requires a literal value.
+        if ($rtpData->dataType() !== 'literal') {
+            return $resource;
+        }
+
+        $separator = trim((string) $rtpData->dataValue('split_separator'));
+        if ($separator === '') {
+            return $resource;
+        }
+
+        $term = $rtpData->property()->term();
+        if (!isset($resource[$term])) {
+            return $resource;
+        }
+
+        // Check for literal value and explode when possible.
+        $result = [];
+        foreach ($resource[$term] as $value) {
+            if ($value['type'] !== 'literal' || !isset($value['@value'])) {
+                $result[] = $value;
+                continue;
+            }
+            foreach (array_filter(array_map('trim', explode($separator, $value['@value'])), 'strlen') as $val) {
+                $v = $value;
+                $v['@value'] = $val;
+                $result[] = $v;
+            }
+        }
+        $resource[$term] = $result;
 
         return $resource;
     }
