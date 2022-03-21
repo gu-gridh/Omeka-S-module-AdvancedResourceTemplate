@@ -27,6 +27,7 @@ class ResourceTemplateForm extends Form
             ],
         ]);
 
+        // Unlike core, multiple classes can be suggested or required.
         $this->add([
             'name' => 'o:resource_class',
             'type' => ResourceClassSelect::class,

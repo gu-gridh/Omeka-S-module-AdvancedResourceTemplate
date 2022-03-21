@@ -103,6 +103,38 @@ class Module extends AbstractModule
             [$this, 'handleTemplateSettingsOnSave']
         );
 
+        // Check the resource according to the specified template settings.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+
         // Add css/js to some admin pages.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
@@ -168,7 +200,7 @@ class Module extends AbstractModule
         $request = $event->getParam('request');
 
         // This is the resource representation array passed to the api for
-        // creation/update. So simply add the value if not present.
+        // creation/update.
         $resource = $request->getContent();
 
         $templateId = $resource['o:resource_template']['o:id'] ?? null;
@@ -183,6 +215,8 @@ class Module extends AbstractModule
         } catch (\Exception $e) {
             return;
         }
+
+        // Simply add the value if not present.
 
         // Template level.
         $resource = $this->appendAutomaticValuesFromTemplateData($template, $resource);
@@ -199,6 +233,155 @@ class Module extends AbstractModule
         }
 
         $request->setContent($resource);
+    }
+
+    public function validateEntityHydratePost(Event $event): void
+    {
+        /** @var \Omeka\Entity\Resource $entity */
+        $entity = $event->getParam('entity');
+
+        /** @var \Omeka\Entity\ResourceTemplate $templateEntity */
+        $templateEntity = $entity->getResourceTemplate();
+        if (!$templateEntity) {
+            return;
+        }
+
+        /** @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter */
+        $adapter = $event->getTarget();
+
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
+        $template = $adapter->getAdapter('resource_templates')->getRepresentation($templateEntity);
+
+        /** @var \Omeka\Api\Request $request */
+        // $request = $event->getParam('request');
+
+        /** @var \Omeka\Stdlib\ErrorStore $errorStore */
+        $errorStore = $event->getParam('errorStore');
+
+        // Because the form doesn't contain the properties, that are added
+        // dynamically, and because the resource controllers don't include the
+        // stored messages from create/update events, error messages may be
+        // added directly.
+        // TODO Include the check in the resource form. Add a fake hidden element? Or fix api plugin (the form is static in plugin api, so it is removed when called somewhere else)? For now, just js (issue is only on the min/max numbers of values).
+        /** @var \Omeka\Mvc\Status $status */
+        $status = $this->getServiceLocator()->get('Omeka\Status');
+        $routeMatch = $status->getRouteMatch();
+        $routeName = $routeMatch->getMatchedRouteName();
+        // Module Contribute can use the error store, so no issue here.
+        $directMessage = $routeName === 'admin/default'
+            && in_array($routeMatch->getParam('__CONTROLLER__'), ['item', 'item-set', 'media', 'annotation'])
+            && in_array($routeMatch->getParam('action'), ['add', 'edit']);
+        $messenger = $directMessage ? new \Omeka\Mvc\Controller\Plugin\Messenger() : null;
+
+        // Template level.
+        $requireClass = (bool) $template->dataValue('require_resource_class');
+        if ($requireClass) {
+            $resourceClass = $entity->getResourceClass();
+            if (!$resourceClass) {
+                $errorStore->addError('o:resource_class', 'A class is required.'); // @translate
+            } else {
+                $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
+                if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
+                    if (count($suggestedClasses) === 1) {
+                        $message = new \Omeka\Stdlib\Message(
+                            'The class should be "%s".', // @translate
+                            key($suggestedClasses)
+                        );
+                        $errorStore->addError('o:resource_class', $message);
+                        if ($directMessage) {
+                            $messenger->addError($message);
+                        }
+                    } else {
+                        $message = new \Omeka\Stdlib\Message(
+                            'The class should be one of "%s".', // @translate
+                            implode('", "', array_keys($suggestedClasses))
+                        );
+                        $errorStore->addError('o:resource_class', $message);
+                        if ($directMessage) {
+                            $messenger->addError($message);
+                        }
+                    }
+                }
+            }
+        }
+
+        // TODO Manage closed property list: but good data can be added via modules (identifier, etc.).
+
+        // Some checks can be done simpler via representation.
+        /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
+        $resource = $adapter->getRepresentation($entity);
+
+        // Property level.
+        foreach ($template->resourceTemplateProperties() as $templateProperty) {
+            foreach ($templateProperty->data() as $rtpData) {
+                $term = $templateProperty->property()->term();
+                $minLength = (int) $rtpData->dataValue('min_length');
+                $maxLength = (int) $rtpData->dataValue('max_length');
+                if ($minLength || $maxLength) {
+                    foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
+                        $length = mb_strlen($value->value());
+                        if ($minLength && $length < $minLength) {
+                            $message = new \Omeka\Stdlib\Message(
+                                'The value for term "%1$s" is shorter (%2$d characters) than the minimal size (%3$d characters).', // @translate
+                                $term, $length, $minLength
+                            );
+                            $errorStore->addError($term, $message);
+                            if ($directMessage) {
+                                $messenger->addError($message);
+                            }
+                        }
+                        if ($maxLength && $length > $maxLength) {
+                            $message = new \Omeka\Stdlib\Message(
+                                'The value for term "%1$s" is longer (%2$d characters) than the maximal size (%3$d characters).', // @translate
+                                $term, $length, $maxLength
+                            );
+                            $errorStore->addError($term, $message);
+                            if ($directMessage) {
+                                $messenger->addError($message);
+                            }
+                        }
+                    }
+                }
+
+                // TODO Fix api($form) to manage the minimum number of values in admin resource form.
+                if ($directMessage) {
+                    continue;
+                }
+
+                $minValues = (int) $rtpData->dataValue('min_values');
+                $maxValues = (int) $rtpData->dataValue('max_values');
+                if ($minValues || $maxValues) {
+                    // The number of values may be specific for each type.
+                    $isRequired = $rtpData->isRequired();
+                    $values = $resource->value($term, ['all' => true, 'type' => $rtpData->dataTypes()]);
+                    $countValues = count($values);
+                    if ($isRequired && $minValues && $countValues < $minValues) {
+                        $message = new \Omeka\Stdlib\Message(
+                            'The number of values (%1$d) for term "%2$s" is lower than the minimal number (%3$d).', // @translate
+                            $countValues, $term, $minValues
+                        );
+                        $errorStore->addError($term, $message);
+                        if ($directMessage) {
+                            $messenger->addError($message);
+                        }
+                        break;
+                    }
+                    if ($maxValues && $countValues > $maxValues) {
+                        $message = new \Omeka\Stdlib\Message(
+                            'The number of values (%1$d) for term "%2$s" is greater than the maximal number (%3$d).', // @translate
+                            $countValues, $term, $maxValues
+                        );
+                        $errorStore->addError($term, $message);
+                        if ($directMessage) {
+                            $messenger->addError($message);
+                        }
+                        break;
+                    }
+                }
+
+                // TODO Check language (but they are suggested languages).
+            }
+        }
     }
 
     public function addAdminResourceHeaders(Event $event): void

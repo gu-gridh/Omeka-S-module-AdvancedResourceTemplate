@@ -1145,6 +1145,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             $post['o:data']['suggested_resource_class_ids'] = [(int) $post['o:resource_class']];
         }
         $post['o:data']['suggested_resource_class_ids'] = array_filter($post['o:data']['suggested_resource_class_ids']);
+
+        // To simplify validation, store suggested resource classes as terms.
+        if ($post['o:data']['suggested_resource_class_ids']) {
+            $result = [];
+            foreach ($this->api()->search('resource_classes', ['id' => array_values($post['o:data']['suggested_resource_class_ids'])], ['initialize' => false])->getContent() as $class) {
+                $result[$class->term()] = $class->id();
+            }
+            $post['o:data']['suggested_resource_class_ids'] = $result;
+        }
         $post['o:resource_class'] = reset($post['o:data']['suggested_resource_class_ids']) ?: null;
 
         $post['o:resource_class'] = empty($post['o:resource_class']) ? null : ['o:id' => (int) $post['o:resource_class']];
