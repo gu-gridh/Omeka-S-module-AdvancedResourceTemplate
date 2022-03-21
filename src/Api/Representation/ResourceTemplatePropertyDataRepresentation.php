@@ -40,6 +40,48 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         return $this->resource->getData()[$name] ?? $default;
     }
 
+    public function dataValueMetadata(string $name, ?string $metadata = null, $default = null)
+    {
+        $dt = $this->resource->getData();
+        if (!isset($dt[$name])) {
+            return $default;
+        }
+        $meta = $dt[$name];
+        switch ($metadata) {
+            case 'params':
+            case 'params_raw':
+                return $meta;
+            case 'params_json':
+            case 'params_json_array':
+                return @json_decode($meta, true) ?: [];
+            case 'params_json_object':
+                return @json_decode($meta) ?: (object) [];
+            case 'params_key_value_array':
+                $params = array_map('trim', explode("\n", trim($meta)));
+                $list = [];
+                foreach ($params as $keyValue) {
+                    $list[] = array_map('trim', explode('=', $keyValue, 2));
+                }
+                return $list;
+            case 'params_key_value':
+            default:
+                $params = array_filter(array_map('trim', explode("\n", trim($meta))), 'strlen');
+                $list = [];
+                foreach ($params as $keyValue) {
+                    list($key, $value) = strpos($keyValue, '=') === false
+                        ? [$keyValue, null]
+                        : array_map('trim', explode('=', $keyValue, 2));
+                    if ($key !== '') {
+                        $list[$key] = $value;
+                    }
+                }
+                if ($metadata === 'params_key_value') {
+                    return $list;
+                }
+                return $list[$metadata] ?? null;
+        }
+    }
+
     public function template(): ResourceTemplateRepresentation
     {
         return $this->getAdapter('resource_templates')

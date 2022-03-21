@@ -49,4 +49,35 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
     {
         return $this->data(0);
     }
+
+    /**
+     * Get all values from the main data of the current template property.
+     */
+    public function mainDataValues(): array
+    {
+        $dt = $this->data(0);
+        return $dt ? $dt->data() : [];
+    }
+
+    /**
+     * Get a value from the main data of the current template property.
+     */
+    public function mainDataValue(string $name, $default = null)
+    {
+        $dt = $this->data(0);
+        return is_null($dt)
+            ? $default
+            : $dt->dataValue($name, $default);
+    }
+
+    /**
+     * Get a value metadata from the main data of the current template property.
+     */
+    public function mainDataValueMetadata(string $name, ?string $metadata = null, $default = null)
+    {
+        $dt = $this->data(0);
+        return is_null($dt)
+            ? $default
+            : $dt->dataValueMetadata($name, $metadata, $default);
+    }
 }
