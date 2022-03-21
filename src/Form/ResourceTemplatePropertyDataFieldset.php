@@ -80,6 +80,18 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'automatic_value',
+                'type' => Element\Textarea::class,
+                'options' => [
+                    'label' => 'Automatic value (on save)', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'automatic_value',
+                    'class' => 'setting',
+                    'data-setting-key' => 'automatic_value',
+                ],
+            ])
+            ->add([
                 'name' => 'locked_value',
                 'type' => Element\Checkbox::class,
                 'options' => [

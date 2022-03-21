@@ -71,6 +71,39 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
+        // Manage the auto-value setting for each resource type.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.create.pre',
+            [$this, 'appendAutomaticValue']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.update.pre',
+            [$this, 'appendAutomaticValue']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.create.pre',
+            [$this, 'appendAutomaticValue']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.update.pre',
+            [$this, 'appendAutomaticValue']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.create.pre',
+            [$this, 'appendAutomaticValue']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.update.pre',
+            [$this, 'appendAutomaticValue']
+        );
+
+        // Add css/js to some admin pages.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
             'view.layout',
@@ -127,6 +160,40 @@ class Module extends AbstractModule
             'form.add_elements',
             [$this, 'addResourceTemplatePropertyFieldsetElements']
         );
+    }
+
+    public function appendAutomaticValue(Event $event): void
+    {
+        /** @var \Omeka\Api\Request $request */
+        $request = $event->getParam('request');
+
+        // This is the resource representation array passed to the api for
+        // creation/update. So simply add the value if not present.
+        $resource = $request->getContent();
+
+        $templateId = $resource['o:resource_template']['o:id'] ?? null;
+        if (!$templateId) {
+            return;
+        }
+
+        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        try {
+            /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
+            $template = $api->read('resource_templates', ['id' => $templateId])->getContent();
+        } catch (\Exception $e) {
+            return;
+        }
+
+        foreach ($template->resourceTemplateProperties() as $templateProperty) {
+            foreach ($templateProperty->data() as $rtpData) {
+                $automaticValue = $this->automaticValue($rtpData, $resource);
+                if (!is_null($automaticValue)) {
+                    $resource[$templateProperty->property()->term()][] = $automaticValue;
+                }
+            }
+        }
+
+        $request->setContent($resource);
     }
 
     public function addAdminResourceHeaders(Event $event): void
@@ -247,6 +314,122 @@ class Module extends AbstractModule
         }
     }
 
+    protected function automaticValue(
+        \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation $rtpData,
+        array $resource
+    ): ?array {
+        $automaticValue = trim((string) $rtpData->dataValue('automatic_value'));
+        if ($automaticValue === '') {
+            return null;
+        }
+
+        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $automaticValueArray = json_decode($automaticValue, true);
+        if (is_array($automaticValueArray)) {
+            if (empty($automaticValueArray['type'])) {
+                $automaticValueArray['type'] = $rtpData->dataType() ?? 'literal';
+            } else {
+                // Check validity of the data type.
+                /** @var \Omeka\DataType\Manager $dataTypeManager */
+                $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
+                if (!$dataTypeManager->has($automaticValueArray['type'])) {
+                    return null;
+                }
+                $dataTypes = $rtpData->dataTypes();
+                if ($dataTypes && !in_array($automaticValueArray['type'], $dataTypes)) {
+                    return null;
+                }
+            }
+            // Check the validity of the data with the data type.
+            $dataTypeColon = strtok($automaticValueArray['type'], ':');
+            switch ($automaticValueArray['type']) {
+                case $dataTypeColon === 'resource':
+                    if (empty($automaticValue['value_resource_id'])) {
+                        return null;
+                    }
+                    // Check the value.
+                    $automaticValue['value_resource_id'] = (int) $automaticValue['value_resource_id'];
+                    try {
+                        $api->read('resources', ['id' => $automaticValue['value_resource_id']], ['initialize' => false, 'finalize' => false]);
+                    } catch (\Exception $e) {
+                        return null;
+                    }
+                    $check = array_intersect_key($automaticValueArray, ['type' => null, 'value_resource_id' => null]);
+                    break;
+                case 'uri':
+                case $dataTypeColon === 'valuesuggest':
+                case $dataTypeColon === 'valuesuggestall':
+                    if (empty($automaticValue['@id'])) {
+                        return null;
+                    }
+                    $check = array_intersect_key($automaticValueArray, ['type' => null, '@id' => null]);
+                    break;
+                case 'literal':
+                default:
+                    if (!isset($automaticValueArray['@value']) || !strlen((string) $automaticValueArray['@value'])) {
+                        return null;
+                    }
+                    $check = array_intersect_key($automaticValueArray, ['type' => null, '@value' => null]);
+                    break;
+            }
+        } else {
+            // Use the first data type.
+            $dataType = $rtpData->dataType() ?? 'literal';
+            $dataTypeColon = strtok($dataType, ':');
+            switch ($dataType) {
+                case $dataTypeColon === 'resource':
+                    // Check the value.
+                    $automaticValue = (int) $automaticValue;
+                    try {
+                        $api->read('resources', ['id' => $automaticValue], ['initialize' => false, 'finalize' => false]);
+                    } catch (\Exception $e) {
+                        return null;
+                    }
+                    $automaticValueArray = [
+                        'type' => $dataType,
+                        'value_resource_id' => $automaticValue,
+                    ];
+                    break;
+                case 'uri':
+                case $dataTypeColon === 'valuesuggest':
+                case $dataTypeColon === 'valuesuggestall':
+                    $automaticValueArray = [
+                        'type' => $dataType,
+                        '@id' => $automaticValue,
+                    ];
+                    break;
+                case 'literal':
+                default:
+                    $automaticValueArray = [
+                        'type' => $dataType,
+                        '@value' => $automaticValue,
+                    ];
+                    break;
+            }
+            $check = $automaticValueArray;
+        }
+
+        // Check if the value is already set on the main value data.
+        ksort($check);
+        $property = $rtpData->property();
+        $term = $property->term();
+        foreach ($resource[$term] ?? [] as $value) {
+            $checkValue = array_intersect_key($value, $check);
+            if (isset($checkValue['value_resource_id'])) {
+                $checkValue['value_resource_id'] = (int) $checkValue['value_resource_id'];
+            }
+            ksort($checkValue);
+            if ($check === $checkValue) {
+                return null;
+            }
+        }
+
+        // The value does not exist, so return it.
+        return ['property_id' => $property->id()]
+            + $automaticValueArray
+            + ['is_public' => !$rtpData->isPrivate()];
+    }
+
     protected function autofillersToString($autofillers)
     {
         if (is_string($autofillers)) {
@@ -312,6 +495,7 @@ class Module extends AbstractModule
             return $string;
         }
 
+        /** @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty */
         $fieldNameToProperty = $this->getServiceLocator()->get('ControllerPluginManager')->get('fieldNameToProperty');
 
         $result = [];

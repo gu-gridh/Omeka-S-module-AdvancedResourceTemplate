@@ -109,6 +109,12 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         return $this->dataValue('o:alternate_comment');
     }
 
+    public function dataType(): ?string
+    {
+        $datatypes = $this->dataValue('o:data_type', []);
+        return $datatypes ? reset($datatypes) : null;
+    }
+
     public function dataTypes(): array
     {
         return $this->dataValue('o:data_type', []);
