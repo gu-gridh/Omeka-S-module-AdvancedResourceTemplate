@@ -141,6 +141,12 @@ return [
             ],
         ],
     ],
+    'assets' => [
+        // Override internals assets. Only for Omeka assets: modules can use another filename.
+        'internals' => [
+            'js/resource-form.js' => 'AdvancedResourceTemplate',
+        ],
+    ],
     // Just to avoid a notice on omeka < 3.2.
     'data_types' => [
         'value_annotating' => [],
