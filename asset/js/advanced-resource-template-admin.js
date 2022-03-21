@@ -130,6 +130,26 @@ $(document).ready(function() {
     }
 
     /**
+     * Disable manual edition of specified values.
+     */
+    function prepareFieldReadOnly(field) {
+        const rtpData = field.data('template-property-data');
+        if (!rtpData) {
+            return;
+        }
+        if (typeof rtpData.property_read_only === undefined || !Number(rtpData.property_read_only)) {
+            return;
+        }
+        field.find('.inputs .values :input:not([type=hidden])').each(function (idx, el) {
+            $(el)
+                .attr('readonly', 'readonly')
+                // Remove "required" from empty values.
+                .attr('required', false);
+        });
+        field.find('.inputs .remove-value, .inputs .add-values').hide();
+    }
+
+    /**
      * Prepare the autocompletion for a property.
      */
     function prepareFieldAutocomplete(field) {
@@ -795,6 +815,7 @@ $(document).ready(function() {
             prepareFieldLength($(field));
             prepareFieldMinValues($(field));
             prepareFieldMaxValues($(field));
+            prepareFieldReadOnly($(field));
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
         });
@@ -810,6 +831,7 @@ $(document).ready(function() {
         // prepareFieldLength(field);
         // prepareFieldMinValues(field);
         // prepareFieldMaxValues(field);
+        prepareFieldReadOnly(field);
         prepareFieldAutocomplete(field);
         prepareFieldLanguage(field);
     });

@@ -92,6 +92,18 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'property_read_only',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Property disabled in form (editable only by api/job)', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'property_read_only',
+                    'class' => 'setting',
+                    'data-setting-key' => 'property_read_only',
+                ],
+            ])
+            ->add([
                 'name' => 'locked_value',
                 'type' => Element\Checkbox::class,
                 'options' => [
