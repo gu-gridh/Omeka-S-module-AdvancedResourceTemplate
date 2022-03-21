@@ -16,6 +16,11 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 class Mapper extends AbstractPlugin
 {
     /**
+     * @var \Omeka\Mvc\Controller\Plugin\Api
+     */
+    protected $api;
+
+    /**
      * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper
      */
     protected $mapperHelper;
@@ -65,6 +70,7 @@ class Mapper extends AbstractPlugin
         // Because a mapping is required, it is used as a construct for now.
         if (is_null($this->mapperHelper)) {
             $controller = $this->getController();
+            $this->api = $controller->api();
             $this->mapperHelper = $controller->mapperHelper();
             $this->customVocabBaseTypes = $controller->viewHelpers()->get('customVocabBaseType')();
         }
@@ -75,6 +81,15 @@ class Mapper extends AbstractPlugin
     public function setIsSimpleExtract($isSimpleExtract): self
     {
         $this->isSimpleExtract = (bool) $isSimpleExtract;
+        return $this;
+    }
+
+    /**
+     * Allow to manage id for internal resources.
+     */
+    public function setIsInternalSource($isInternalSource): self
+    {
+        $this->isInternalSource = (bool) $isInternalSource;
         return $this;
     }
 
@@ -369,7 +384,16 @@ class Mapper extends AbstractPlugin
             case $baseType === 'resource':
                 // The mapping from an external service cannot be an internal
                 // resource.
-                // Nevertheless, for internal source, the result is kept below.
+                // Nevertheless, for internal source, the result is checked and
+                // kept below.
+                if ($this->isInternalSource) {
+                    try {
+                        $this->api->read('resources', ['id' => $value], ['initialize' => false, 'finalize' => false]);
+                    } catch (\Exception $e) {
+                        $this->lastResultValue = $value;
+                        return;
+                    }
+                }
                 break;
             case 'uri':
             case $dataTypeColon === 'valuesuggest':

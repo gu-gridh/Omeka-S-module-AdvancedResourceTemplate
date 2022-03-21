@@ -89,6 +89,16 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'automatic_values',
+                'type' => Element\Textarea::class,
+                'options' => [
+                    'label' => 'Automatic values (on save)', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'automatic_values',
+                ],
+            ])
+            ->add([
                 'name' => 'autofillers',
                 'type' => AdvancedResourceTemplateElement\OptionalSelect::class,
                 'options' => [

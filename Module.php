@@ -184,6 +184,10 @@ class Module extends AbstractModule
             return;
         }
 
+        // Template level.
+        $resource = $this->appendAutomaticValuesFromTemplateData($template, $resource);
+
+        // Property level.
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
                 $automaticValue = $this->automaticValueFromTemplatePropertyData($rtpData, $resource);
@@ -314,6 +318,79 @@ class Module extends AbstractModule
         }
     }
 
+    protected function appendAutomaticValuesFromTemplateData(
+        \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template,
+        array $resource
+    ): array {
+        $automaticValues = trim((string) $template->dataValue('automatic_values'));
+        if ($automaticValues === '') {
+            return $resource;
+        }
+
+        $mapping = $this->stringToAutofillers("[automatic_values]\n$automaticValues");
+        if (!$mapping || !$mapping['automatic_values']['mapping']) {
+            return $resource;
+        }
+
+        /**
+         * @var array $customVocabBaseTypes
+         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper $mapper
+         */
+        $services = $this->getServiceLocator();
+        $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
+        $mapper = $services->get('ControllerPluginManager')->get(\AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper::class);
+
+
+        $newResourceData = $mapper
+            ->setMapping($mapping['automatic_values']['mapping'])
+            ->setIsSimpleExtract(false)
+            ->setIsInternalSource(true)
+            ->array($resource);
+
+        // Append only new data.
+        foreach ($newResourceData as $term => $newValues) {
+            foreach ($newValues as $newValue) {
+                $dataType = $newValue['type'];
+                $dataTypeColon = strtok($dataType, ':');
+                $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($dataType, 12)] ?? 'literal' : null;
+                switch ($dataType) {
+                    case $dataTypeColon === 'resource':
+                    case $baseType === 'resource':
+                        $check = [
+                            'type' => $dataType,
+                            'value_resource_id' => (int) $newValue['value_resource_id'],
+                        ];
+                        break;
+                    case 'uri':
+                    case $dataTypeColon === 'valuesuggest':
+                    case $dataTypeColon === 'valuesuggestall':
+                    case $baseType === 'uri':
+                        $check = array_intersect_key($newValue, ['type' => null, '@id' => null]);
+                        break;
+                    case 'literal':
+                    // case $baseType === 'literal':
+                    default:
+                        $check = array_intersect_key($newValue, ['type' => null, '@value' => null]);
+                        break;
+                }
+                ksort($check);
+                foreach ($resource[$term] ?? [] as $value) {
+                    $checkValue = array_intersect_key($value, $check);
+                    if (isset($checkValue['value_resource_id'])) {
+                        $checkValue['value_resource_id'] = (int) $checkValue['value_resource_id'];
+                    }
+                    ksort($checkValue);
+                    if ($check === $checkValue) {
+                        continue 2;
+                    }
+                }
+                $resource[$term][] = $newValue;
+            }
+        }
+
+        return $resource;
+    }
+
     protected function automaticValueFromTemplatePropertyData(
         \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation $rtpData,
         array $resource
@@ -399,6 +476,7 @@ class Module extends AbstractModule
                     $automaticValue['value_resource_id'] = (int) $mapper
                         ->setMapping([])
                         ->setIsSimpleExtract(false)
+                        ->setIsInternalSource(true)
                         ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
 
                     // Check the value.
@@ -425,6 +503,7 @@ class Module extends AbstractModule
                     $automaticValue['@id'] = $mapper
                         ->setMapping([])
                         ->setIsSimpleExtract(false)
+                        ->setIsInternalSource(true)
                         ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
 
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@id' => null]);
@@ -444,6 +523,7 @@ class Module extends AbstractModule
                     $automaticValue['@value'] = $mapper
                         ->setMapping([])
                         ->setIsSimpleExtract(false)
+                        ->setIsInternalSource(true)
                         ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
 
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@value' => null]);
@@ -461,6 +541,7 @@ class Module extends AbstractModule
             $automaticValueTransformed = $mapper
                 ->setMapping([])
                 ->setIsSimpleExtract(false)
+                ->setIsInternalSource(true)
                 ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
 
             switch ($dataType) {
@@ -594,7 +675,7 @@ class Module extends AbstractModule
             // Start a new autofiller.
             $first = mb_substr($line, 0, 1);
             if ($first === '[') {
-                preg_match('~^\[\s*(?<service>[a-zA-Z][a-zA-Z0-9]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))?\s*(?:#\s*(?<variant>[^\]]+))?\s*\]\s*(?:=?\s*(?<label>.*))$~', $line, $matches);
+                preg_match('~^\[\s*(?<service>[a-zA-Z][\w-]*)\s*(?:\:\s*(?<sub>[a-zA-Z][a-zA-Z0-9:]*))?\s*(?:#\s*(?<variant>[^\]]+))?\s*\]\s*(?:=?\s*(?<label>.*))$~', $line, $matches);
                 if (empty($matches['service'])) {
                     continue;
                 }
