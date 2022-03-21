@@ -116,6 +116,19 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'resource_query',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Filter linked resources with a query', // @translate
+                    'info' => 'Use url arguments of a standard advanced search query', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'resource_query',
+                    'class' => 'setting',
+                    'data-setting-key' => 'resource_query',
+                ],
+            ])
+            ->add([
                 'name' => 'autocomplete',
                 'type' => Element\Radio::class,
                 'options' => [

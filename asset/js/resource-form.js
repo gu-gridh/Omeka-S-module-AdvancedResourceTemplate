@@ -338,7 +338,16 @@
             $('.selecting-resource').removeClass('selecting-resource');
             selectButton.closest('.value').addClass('selecting-resource');
             $('#select-item a').data('property-term', term);
-            Omeka.populateSidebarContent(sidebar, selectButton.data('sidebar-content-url'));
+
+            // Manage first filtered search query if set in resource template property.
+            // Next queries will use it automaticaly (see sidebar-select.phtml).
+            const resourceQuery = typeof templatePropertyData === 'object' ? templatePropertyData.resource_query : null;
+
+            Omeka.populateSidebarContent(
+                sidebar,
+                selectButton.data('sidebar-content-url'),
+                resourceQuery
+            );
             Omeka.openSidebar(sidebar);
         });
 
