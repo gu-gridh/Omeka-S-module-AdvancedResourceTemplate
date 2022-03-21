@@ -14,20 +14,39 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
     }
 
     /**
-     * A template property may have multiple data according to data types.
+     * Get all the template data associated to the current template property.
      *
-     * @return ResourceTemplatePropertyDataRepresentation[]
+     * Note: A template property may have multiple data according to data types.
+     *
+     * @return ResourceTemplatePropertyDataRepresentation[]|ResourceTemplatePropertyDataRepresentation|null
      */
-    public function data(): array
+    public function data(?int $index = null)
     {
-        $list = [];
-        $services = $this->getServiceLocator();
-        $rtpDatas = $services->get('Omeka\EntityManager')
-            ->getRepository(ResourceTemplatePropertyData::class)
-            ->findBy(['resourceTemplateProperty' => $this->templateProperty]);
-        foreach ($rtpDatas as $rtpData) {
-            $list[] = new ResourceTemplatePropertyDataRepresentation($rtpData, $services);
+        // TODO Currently, static data returns are always the same, so use id.
+        static $lists = [];
+        $id = $this->templateProperty->getId();
+        if (!isset($lists[$id])) {
+            $lists[$id] = [];
+            $services = $this->getServiceLocator();
+            $rtpDatas = $services->get('Omeka\EntityManager')
+                ->getRepository(ResourceTemplatePropertyData::class)
+                ->findBy(['resourceTemplateProperty' => $this->templateProperty]);
+            foreach ($rtpDatas as $rtpData) {
+                $lists[$id][] = new ResourceTemplatePropertyDataRepresentation($rtpData, $services);
+            }
         }
-        return $list;
+        return is_null($index)
+            ? $lists[$id]
+            : ($lists[$id][$index] ?? null);
+    }
+
+    /**
+     * Get the main data of the current template property.
+     *
+     * @return ResourceTemplatePropertyDataRepresentation[]|ResourceTemplatePropertyDataRepresentation
+     */
+    public function mainData(): ?ResourceTemplatePropertyDataRepresentation
+    {
+        return $this->data(0);
     }
 }

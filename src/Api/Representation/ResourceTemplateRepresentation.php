@@ -39,10 +39,16 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
      */
     public function data(): array
     {
-        $data = $this->getServiceLocator()->get('Omeka\EntityManager')
-            ->getRepository(ResourceTemplateData::class)
-            ->findOneBy(['resourceTemplate' => $this->id()]);
-        return $data ? $data->getData() : [];
+        // TODO Currently, static data return are always the same, so use id.
+        static $datas = [];
+        $id = $this->id();
+        if (!isset($datas[$id])) {
+            $rtd = $this->getServiceLocator()->get('Omeka\EntityManager')
+                ->getRepository(ResourceTemplateData::class)
+                ->findOneBy(['resourceTemplate' => $this->id()]);
+            $datas[$id] = $rtd ? $rtd->getData() : [];
+        }
+        return $datas[$id];
     }
 
     /**
