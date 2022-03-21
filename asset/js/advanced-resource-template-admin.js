@@ -14,7 +14,7 @@ $(document).ready(function() {
      * Prepare the lock for original values of a property.
      */
     function prepareFieldLocked(field) {
-        const rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
         if (rtpData.locked_value != true) {
             return;
         }
@@ -65,7 +65,7 @@ $(document).ready(function() {
      * Set min/max length of a literal field.
      */
     function prepareFieldLength(field) {
-        const rtpData = field.data('template-data');
+        const rtpData = field.data('template-property-data');
         if (!rtpData) {
             return;
         }
@@ -92,7 +92,7 @@ $(document).ready(function() {
      * Prepare the number of specified fields when a minimum number is set.
      */
     function prepareFieldMinValues(field) {
-        const rtpData = field.data('template-data');
+        const rtpData = field.data('template-property-data');
         if (!rtpData) {
             return;
         }
@@ -117,7 +117,7 @@ $(document).ready(function() {
      * Don't include the removed values in the total of values.
      */
     function prepareFieldMaxValues(field) {
-        const rtpData = field.data('template-data');
+        const rtpData = field.data('template-property-data');
         if (!rtpData) {
             return;
         }
@@ -134,7 +134,7 @@ $(document).ready(function() {
      */
     function prepareFieldAutocomplete(field) {
         const templateData = $('#resource-values').data('template-data');
-        const rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
 
         // Reset autocomplete for all properties.
         $('.inputs .values textarea.input-value').prop('autocomplete', 'off');
@@ -164,7 +164,7 @@ $(document).ready(function() {
     function prepareFieldLanguage(field) {
         // Add a specific datalist for the property. It replaces the previous one from another template.
         const templateData = $('#resource-values').data('template-data');
-        const rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
         const term = field.data('property-term');
 
         var listName = 'value-languages';
@@ -247,7 +247,7 @@ $(document).ready(function() {
         }
 
         const templateData = $('#resource-values').data('template-data');
-        const rtpData = field.data('template-data') ? field.data('template-data') : {};
+        const rtpData = field.data('template-property-data') ? field.data('template-property-data') : {};
         var defaultLanguage = templateData && templateData.default_language && templateData.default_language.length
             ? templateData.default_language
             : '';
@@ -824,7 +824,7 @@ $(document).ready(function() {
                 return;
             }
         }
-        const rtpData = field.data('template-data');
+        const rtpData = field.data('template-property-data');
         if (!rtpData) {
             return;
         }
@@ -891,23 +891,39 @@ $(document).ready(function() {
         }
     });
 
+    /**
+     * Enable/disable quick creation of a resource, except media. Default is enabled.
+     **/
+
     var modal;
-    // Append the button to create a new resource.
-    $(document).on('o:sidebar-content-loaded', 'body.sidebar-open', function(e) {
-        const sidebarResourceSelector = $('#select-resource.sidebar');
-        if (sidebarResourceSelector.find('.quick-add-resource').length || !sidebarResourceSelector.find('#sidebar-resource-search').length) {
-            return;
-        }
+
+    // Append the button to create a new resource, except media.
+    $(document).on('o:sidebar-content-loaded', '#select-resource.sidebar', function(e) {
+        const sidebar = $(this);
         const resourceType = typeResource();
-        if (!resourceType || resourceType === 'media') {
-            return;
+        const isManagedResourceType = resourceType && resourceType !== 'media';
+        const templateData = $('#resource-values').data('template-data');
+        const templatePropertyData = sidebar.data('template-property-data');
+        const quickNewResourceTemplate = typeof templateData === 'object'
+            && (typeof templateData.quick_new_resource === 'undefined' || templateData.quick_new_resource !== 'no');
+        const quickNewResourceTemplateProperty = typeof templatePropertyData === 'object'
+            ? (typeof templatePropertyData.quick_new_resource === 'undefined' || templatePropertyData.quick_new_resource === ''
+                ? quickNewResourceTemplate
+                : templatePropertyData.quick_new_resource !== 'no'
+            )
+            : quickNewResourceTemplate;
+
+        if (isManagedResourceType && quickNewResourceTemplateProperty) {
+            const iconResourceType = resourceType === 'media' ? 'media' : resourceType + 's';
+            const button = `<div class="quick-new-resource" data-data-type="resource:${resourceType}">
+        <a class="o-icon-${iconResourceType} button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
+    </div>`;
+            sidebar.find('.search-nav').after(button)
+        } else {
+            sidebar.find('.quick-new-resource').remove()
         }
-        const iconResourceType = resourceType === 'media' ? 'media' : resourceType + 's';
-        const button = `<div data-data-type="resource:${resourceType}">
-    <a class="o-icon-${iconResourceType} button quick-add-resource" href="${baseUrl + 'admin/' + resourceType}/add?window=modal" target="_blank"> ${Omeka.jsTranslate('New ' + resourceType.replace('-', ' '))}</a>
-</div>`;
-        sidebarResourceSelector.find('.search-nav').after(button)
     });
+
     // Allow to create a new resource in a modal window during edition of another resource.
     $(document).on('click', '.quick-add-resource', function(e) {
         e.preventDefault();
@@ -930,6 +946,7 @@ $(document).ready(function() {
         }, 100);
         return false;
     });
+
     // Add a new resource on modal window.
     $(document).on('click', '.modal form.resource-form #page-actions button[type=submit]', function(e) {
         // Warning: the submit may not occur when the modal is not focus.
@@ -948,6 +965,7 @@ $(document).ready(function() {
         }
         return false;
     });
+
     // Cancel modal window.
     $(document).on('click', '.modal form.resource-form #page-actions a.cancel', function(e) {
         e.preventDefault();

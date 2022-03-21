@@ -42,6 +42,37 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'quick_new_resource',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Allow quick creation of a resource', // @translate
+                    'value_options' => [
+                        'yes' => 'Yes', // @translate
+                        'no' => 'No', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'quick_new_resource',
+                    'value' => 'yes',
+                ],
+            ])
+            ->add([
+                'name' => 'autocomplete',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Autocomplete with existing values', // @translate
+                    'value_options' => [
+                        'no' => 'No', // @translate
+                        'sw' => 'Starts with', // @translate
+                        'in' => 'Contains', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'autocomplete',
+                    'value' => 'no',
+                ],
+            ])
+            ->add([
                 'name' => 'value_languages',
                 'type' => OmekaElement\ArrayTextarea::class,
                 'options' => [
@@ -70,22 +101,6 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'no_language',
-                ],
-            ])
-            ->add([
-                'name' => 'autocomplete',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Autocomplete with existing values', // @translate
-                    'value_options' => [
-                        'no' => 'No', // @translate
-                        'sw' => 'Starts with', // @translate
-                        'in' => 'Contains', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    'id' => 'autocomplete',
-                    'value' => 'no',
                 ],
             ])
             ->add([

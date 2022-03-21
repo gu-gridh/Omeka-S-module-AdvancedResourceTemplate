@@ -339,6 +339,11 @@
             selectButton.closest('.value').addClass('selecting-resource');
             $('#select-item a').data('property-term', term);
 
+            // Copy template property data in sidebar to be able to respond to sidebar events.
+            const templatePropertyData = selectButton.closest('.resource-values').data('template-property-data');
+            sidebar.data('term', term);
+            sidebar.data('template-property-data', templatePropertyData);
+
             // Manage first filtered search query if set in resource template property.
             // Next queries will use it automaticaly (see sidebar-select.phtml).
             const resourceQuery = typeof templatePropertyData === 'object' ? templatePropertyData.resource_query : null;
@@ -661,7 +666,7 @@
 
         // Store specific data of this template property.
         field.attr('data-template-id', templateId);
-        field.data('template-data', templateProperty['o:data'] ? templateProperty['o:data'] : {});
+        field.data('template-property-data', templateProperty['o:data'] ? templateProperty['o:data'] : {});
 
         // Remove any unchanged default values for this property so we start fresh.
         field.find('.value.default-value').remove();
@@ -735,7 +740,7 @@
         // Reset data of the previous template.
         $('#resource-values').data('template-data', {});
         fields.attr('data-template-id', '');
-        fields.data('template-data', {});
+        fields.data('template-property-data', {});
 
         // Fieldsets may have been marked as required or private in a previous state.
         fields.removeClass('required');

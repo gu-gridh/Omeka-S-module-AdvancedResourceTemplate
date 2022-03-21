@@ -129,6 +129,24 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'quick_new_resource',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Allow quick creation of a resource', // @translate
+                    'value_options' => [
+                        '' => 'Use template setting', // @translate
+                        'yes' => 'Yes', // @translate
+                        'no' => 'No', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    // 'id' => 'quick_new_resource',
+                    'class' => 'setting',
+                    'data-setting-key' => 'quick_new_resource',
+                    'value' => '',
+                ],
+            ])
+            ->add([
                 'name' => 'autocomplete',
                 'type' => Element\Radio::class,
                 'options' => [
