@@ -323,7 +323,10 @@ class Module extends AbstractModule
             return null;
         }
 
-        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $services = $this->getServiceLocator();
+        $api = $services->get('Omeka\ApiManager');
+        $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
+
         $automaticValueArray = json_decode($automaticValue, true);
         if (is_array($automaticValueArray)) {
             if (empty($automaticValueArray['type'])) {
@@ -342,8 +345,11 @@ class Module extends AbstractModule
             }
             // Check the validity of the data with the data type.
             $dataTypeColon = strtok($automaticValueArray['type'], ':');
+            $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($automaticValueArray['type'], 12)] ?? 'literal' : null;
+
             switch ($automaticValueArray['type']) {
                 case $dataTypeColon === 'resource':
+                case $baseType === 'resource':
                     if (empty($automaticValue['value_resource_id'])) {
                         return null;
                     }
@@ -359,12 +365,14 @@ class Module extends AbstractModule
                 case 'uri':
                 case $dataTypeColon === 'valuesuggest':
                 case $dataTypeColon === 'valuesuggestall':
+                case $baseType === 'uri':
                     if (empty($automaticValue['@id'])) {
                         return null;
                     }
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@id' => null]);
                     break;
                 case 'literal':
+                // case $baseType === 'literal':
                 default:
                     if (!isset($automaticValueArray['@value']) || !strlen((string) $automaticValueArray['@value'])) {
                         return null;
@@ -376,8 +384,10 @@ class Module extends AbstractModule
             // Use the first data type.
             $dataType = $rtpData->dataType() ?? 'literal';
             $dataTypeColon = strtok($dataType, ':');
+            $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($dataType, 12)] ?? 'literal' : null;
             switch ($dataType) {
                 case $dataTypeColon === 'resource':
+                case $baseType === 'resource':
                     // Check the value.
                     $automaticValue = (int) $automaticValue;
                     try {
@@ -393,12 +403,14 @@ class Module extends AbstractModule
                 case 'uri':
                 case $dataTypeColon === 'valuesuggest':
                 case $dataTypeColon === 'valuesuggestall':
+                case $baseType === 'uri':
                     $automaticValueArray = [
                         'type' => $dataType,
                         '@id' => $automaticValue,
                     ];
                     break;
                 case 'literal':
+                // case $baseType === 'literal':
                 default:
                     $automaticValueArray = [
                         'type' => $dataType,

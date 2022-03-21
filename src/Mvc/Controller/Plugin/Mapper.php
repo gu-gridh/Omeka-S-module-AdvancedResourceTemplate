@@ -21,6 +21,11 @@ class Mapper extends AbstractPlugin
     protected $mapperHelper;
 
     /**
+     * @var array
+     */
+    protected $customVocabBaseTypes;
+
+    /**
      * Normalize a mapping.
      *
      * Mapping is either a list of xpath or json path mapped with properties:
@@ -52,7 +57,11 @@ class Mapper extends AbstractPlugin
 
     public function setMapping(array $mapping): self
     {
-        $this->mapperHelper = $this->getController()->mapperHelper();
+        // Because a mapping is required, it is used as a construct for now.
+        if (is_null($this->mapperHelper)) {
+            $this->mapperHelper = $this->getController()->mapperHelper();
+            $this->customVocabBaseTypes = $this->getController()->viewHelpers()->get('customVocabBaseType')();
+        }
         $this->mapping = $this->normalizeMapping($mapping);
         return $this;
     }
@@ -286,24 +295,27 @@ class Mapper extends AbstractPlugin
             }
         }
 
+        $dataTypeColon = strtok($v['type'], ':');
+        $baseType = $dataTypeColon === 'customvocab' ? $this->customVocabBaseTypes[(int) substr($v['type'], 12)] ?? 'literal' : null;
+
         switch ($v['type']) {
-            default:
-            case 'literal':
-            // case strpos($v['type'], 'customvocab:') === 0:
-                $v['@value'] = $value;
-                $this->result[$target['field']][] = $v;
+            case $dataTypeColon === 'resource':
+            case $baseType === 'resource':
+                // The mapping from an external service cannot be an internal
+                // resource.
                 break;
             case 'uri':
-            case strpos($target['type'], 'valuesuggest:') === 0:
+            case $dataTypeColon === 'valuesuggest':
+            case $dataTypeColon === 'valuesuggestall':
+            case $baseType === 'uri':
                 $v['@id'] = $value;
                 $this->result[$target['field']][] = $v;
                 break;
-            case 'resource':
-            case 'resource:item':
-            case 'resource:media':
-            case 'resource:itemset':
-                // The mapping from an external service cannot be an internal
-                // resource.
+            case 'literal':
+            // case $baseType === 'literal':
+            default:
+                $v['@value'] = $value;
+                $this->result[$target['field']][] = $v;
                 break;
         }
     }

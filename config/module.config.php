@@ -48,6 +48,7 @@ return [
         'factories' => [
             // TODO To be removed with #omeka/omeka-s/1623.
             'assetUrl' => Service\ViewHelper\AssetUrlFactory::class,
+            'customVocabBaseType' => Service\ViewHelper\CustomVocabBaseTypeFactory::class,
             'dataType' => Service\ViewHelper\DataTypeFactory::class,
         ],
     ],
