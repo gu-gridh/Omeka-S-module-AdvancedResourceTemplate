@@ -326,7 +326,24 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
     protected function prepareImportFile(array $fileData): bool
     {
         // In such a case, return to the parent check.
-        if ($fileData['type'] === 'application/json' || !$fileData['size'] || $fileData['error']) {
+        if (!$fileData['size'] || $fileData['error'] || !$fileData['size']) {
+            return true;
+        }
+
+        if ($fileData['type'] === 'application/json') {
+            $hasDuplicate = false;
+            $content = json_decode(file_get_contents($fileData['tmp_name']), true) ?: [];
+            foreach ($content['o:resource_template_property'] ?? [] as $rtp) {
+                if (count($rtp['o:data'] ?? []) > 1) {
+                    $hasDuplicate = true;
+                    break;
+                }
+            }
+            if ($hasDuplicate) {
+                $this->messenger()->addWarning(
+                    'The template has duplicate properties. They are mixed in the form, but will be imported separately.' // @translate
+                );
+            }
             return true;
         }
 
