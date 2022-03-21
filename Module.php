@@ -186,7 +186,7 @@ class Module extends AbstractModule
 
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                $automaticValue = $this->automaticValue($rtpData, $resource);
+                $automaticValue = $this->automaticValueFromTemplatePropertyData($rtpData, $resource);
                 if (!is_null($automaticValue)) {
                     $resource[$templateProperty->property()->term()][] = $automaticValue;
                 }
@@ -314,7 +314,7 @@ class Module extends AbstractModule
         }
     }
 
-    protected function automaticValue(
+    protected function automaticValueFromTemplatePropertyData(
         \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation $rtpData,
         array $resource
     ): ?array {
@@ -323,14 +323,52 @@ class Module extends AbstractModule
             return null;
         }
 
+        $property = $rtpData->property();
+        return $this->appendAutomaticPropertyValueToResource($resource, [
+            'data_types' => $rtpData->dataTypes(),
+            'is_public' => !$rtpData->isPrivate(),
+            'term' => $property->term(),
+            'property_id' => $property->id(),
+            'value' => $automaticValue,
+        ]);
+    }
+
+    protected function appendAutomaticPropertyValueToResource(
+        array $resource,
+        ?array $map
+    ): ?array {
+        if (empty($map) || empty($map['property_id'])) {
+            return null;
+        }
+
+        $term = $map['term'];
+        $propertyId = $map['property_id'];
+        $automaticValue = $map['value'];
+        $dataTypes = $map['data_types'];
+        $isPublic = $map['is_public'] ?? true;
+        // Use the first data type by default.
+        $dataType = count($dataTypes) ? reset($dataTypes) : 'literal';
+
+        /**
+         * @var \Omeka\Api\Manager $api
+         * @var array $customVocabBaseTypes
+         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty
+         * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper $mapper
+         */
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
         $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
+        $fieldNameToProperty = $services->get('ControllerPluginManager')->get('fieldNameToProperty');
+        $mapper = $services->get('ControllerPluginManager')->get(\AdvancedResourceTemplate\Mvc\Controller\Plugin\Mapper::class);
+
+        // TODO Use mapper transformSource from module Bulk Import (json dot notation or jmespath + basic twig).
+
+        // Only the main rdf data is checked for transformation.
 
         $automaticValueArray = json_decode($automaticValue, true);
         if (is_array($automaticValueArray)) {
             if (empty($automaticValueArray['type'])) {
-                $automaticValueArray['type'] = $rtpData->dataType() ?? 'literal';
+                $automaticValueArray['type'] = $dataType;
             } else {
                 // Check validity of the data type.
                 /** @var \Omeka\DataType\Manager $dataTypeManager */
@@ -338,7 +376,6 @@ class Module extends AbstractModule
                 if (!$dataTypeManager->has($automaticValueArray['type'])) {
                     return null;
                 }
-                $dataTypes = $rtpData->dataTypes();
                 if ($dataTypes && !in_array($automaticValueArray['type'], $dataTypes)) {
                     return null;
                 }
@@ -353,8 +390,18 @@ class Module extends AbstractModule
                     if (empty($automaticValue['value_resource_id'])) {
                         return null;
                     }
+
+                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['value_resource_id']}";
+                    $to = $fieldNameToProperty($to);
+                    if (!$to) {
+                        return null;
+                    }
+                    $automaticValue['value_resource_id'] = (int) $mapper
+                        ->setMapping([])
+                        ->setIsSimpleExtract(false)
+                        ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
+
                     // Check the value.
-                    $automaticValue['value_resource_id'] = (int) $automaticValue['value_resource_id'];
                     try {
                         $api->read('resources', ['id' => $automaticValue['value_resource_id']], ['initialize' => false, 'finalize' => false]);
                     } catch (\Exception $e) {
@@ -369,6 +416,17 @@ class Module extends AbstractModule
                     if (empty($automaticValue['@id'])) {
                         return null;
                     }
+
+                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['@id']}";
+                    $to = $fieldNameToProperty($to);
+                    if (!$to) {
+                        return null;
+                    }
+                    $automaticValue['@id'] = $mapper
+                        ->setMapping([])
+                        ->setIsSimpleExtract(false)
+                        ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
+
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@id' => null]);
                     break;
                 case 'literal':
@@ -377,27 +435,47 @@ class Module extends AbstractModule
                     if (!isset($automaticValueArray['@value']) || !strlen((string) $automaticValueArray['@value'])) {
                         return null;
                     }
+
+                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['@value']}";
+                    $to = $fieldNameToProperty($to);
+                    if (!$to) {
+                        return null;
+                    }
+                    $automaticValue['@value'] = $mapper
+                        ->setMapping([])
+                        ->setIsSimpleExtract(false)
+                        ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
+
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@value' => null]);
                     break;
             }
         } else {
-            // Use the first data type.
-            $dataType = $rtpData->dataType() ?? 'literal';
             $dataTypeColon = strtok($dataType, ':');
             $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($dataType, 12)] ?? 'literal' : null;
+
+            $to = "$term ^^$dataType ~ $automaticValue";
+            $to = $fieldNameToProperty($to);
+            if (!$to) {
+                return null;
+            }
+            $automaticValueTransformed = $mapper
+                ->setMapping([])
+                ->setIsSimpleExtract(false)
+                ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
+
             switch ($dataType) {
                 case $dataTypeColon === 'resource':
                 case $baseType === 'resource':
                     // Check the value.
-                    $automaticValue = (int) $automaticValue;
+                    $automaticValueTransformed = (int) $automaticValueTransformed;
                     try {
-                        $api->read('resources', ['id' => $automaticValue], ['initialize' => false, 'finalize' => false]);
+                        $api->read('resources', ['id' => $automaticValueTransformed], ['initialize' => false, 'finalize' => false]);
                     } catch (\Exception $e) {
                         return null;
                     }
                     $automaticValueArray = [
                         'type' => $dataType,
-                        'value_resource_id' => $automaticValue,
+                        'value_resource_id' => $automaticValueTransformed,
                     ];
                     break;
                 case 'uri':
@@ -406,7 +484,7 @@ class Module extends AbstractModule
                 case $baseType === 'uri':
                     $automaticValueArray = [
                         'type' => $dataType,
-                        '@id' => $automaticValue,
+                        '@id' => $automaticValueTransformed,
                     ];
                     break;
                 case 'literal':
@@ -414,7 +492,7 @@ class Module extends AbstractModule
                 default:
                     $automaticValueArray = [
                         'type' => $dataType,
-                        '@value' => $automaticValue,
+                        '@value' => $automaticValueTransformed,
                     ];
                     break;
             }
@@ -423,8 +501,6 @@ class Module extends AbstractModule
 
         // Check if the value is already set on the main value data.
         ksort($check);
-        $property = $rtpData->property();
-        $term = $property->term();
         foreach ($resource[$term] ?? [] as $value) {
             $checkValue = array_intersect_key($value, $check);
             if (isset($checkValue['value_resource_id'])) {
@@ -437,9 +513,9 @@ class Module extends AbstractModule
         }
 
         // The value does not exist, so return it.
-        return ['property_id' => $property->id()]
+        return ['property_id' => $propertyId]
             + $automaticValueArray
-            + ['is_public' => !$rtpData->isPrivate()];
+            + ['is_public' => $isPublic];
     }
 
     protected function autofillersToString($autofillers)

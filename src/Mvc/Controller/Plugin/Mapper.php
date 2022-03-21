@@ -50,6 +50,11 @@ class Mapper extends AbstractPlugin
      */
     protected $result;
 
+    /**
+     * @var string
+     */
+    protected $lastResultValue;
+
     public function __invoke(): self
     {
         return $this;
@@ -59,8 +64,9 @@ class Mapper extends AbstractPlugin
     {
         // Because a mapping is required, it is used as a construct for now.
         if (is_null($this->mapperHelper)) {
-            $this->mapperHelper = $this->getController()->mapperHelper();
-            $this->customVocabBaseTypes = $this->getController()->viewHelpers()->get('customVocabBaseType')();
+            $controller = $this->getController();
+            $this->mapperHelper = $controller->mapperHelper();
+            $this->customVocabBaseTypes = $controller->viewHelpers()->get('customVocabBaseType')();
         }
         $this->mapping = $this->normalizeMapping($mapping);
         return $this;
@@ -118,6 +124,7 @@ class Mapper extends AbstractPlugin
             return [];
         }
 
+        // TODO Factorize with extractSingleValue().
         $this->result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         $input = $this->flatArray($input);
@@ -270,6 +277,62 @@ class Mapper extends AbstractPlugin
         return $array;
     }
 
+    /**
+     * Extract a value from a source and a path and transform it with mapping.
+     *
+     * @param array $map The map array with keys "from" and "to".
+     * @return array A list of value.
+     */
+    public function extractValueDirect($source, $map): ?array
+    {
+        $this->result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $this->lastResultValue = null;
+
+        $input = $this->flatArray($source);
+        $target = $map['to'];
+        if (!empty($target['replace'])) {
+            $target['replace'] = array_fill_keys($target['replace'], '');
+            foreach ($target['replace'] as $query => &$replacement) {
+                if (in_array($query, ['{__value__}', '{__label__}'])) {
+                    continue;
+                }
+                $query = mb_substr($query, 1, -1);
+                if (isset($input[$query])) {
+                    $replacement = $input[$query];
+                }
+            }
+            unset($replacement);
+        }
+
+        $query = $map['from'];
+        if ($query === '~') {
+            $value = '';
+        } else {
+            if (!isset($input[$query])) {
+                return null;
+            }
+            $value = $input[$query];
+        }
+
+        $this->isSimpleExtract
+            ? $this->simpleExtract($value, $target, $query)
+            : $this->appendValueToTarget($value, $target);
+
+        return $this->result->exchangeArray([]);
+    }
+
+    /**
+     * Extract a value from a source and a path and transform it with mapping.
+     *
+     * @param array $map The map array with keys "from" and "to".
+     * @return array A list of value.
+     */
+    public function extractValueOnly($source, $map)
+    {
+        $this->extractValueDirect($source, $map);
+        return $this->lastResultValue;
+    }
+
     protected function simpleExtract($value, $target, $source): void
     {
         $this->result[] = [
@@ -285,14 +348,17 @@ class Mapper extends AbstractPlugin
         unset($v['field'], $v['pattern'], $v['replace']);
 
         if (!empty($target['pattern'])) {
+            $transformed = $target['pattern'];
             if (!empty($target['replace'])) {
                 $target['replace']['{__value__}'] = $value;
                 $target['replace']['{__label__}'] = $value;
-                $value = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+                $transformed = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
             }
             if (!empty($target['twig'])) {
-                $value = $this->twig($value, $target);
+                $target['pattern'] = $transformed;
+                $transformed = $this->twig($value, $target);
             }
+            $value = $transformed;
         }
 
         $dataTypeColon = strtok($v['type'], ':');
@@ -303,6 +369,7 @@ class Mapper extends AbstractPlugin
             case $baseType === 'resource':
                 // The mapping from an external service cannot be an internal
                 // resource.
+                // Nevertheless, for internal source, the result is kept below.
                 break;
             case 'uri':
             case $dataTypeColon === 'valuesuggest':
@@ -318,6 +385,8 @@ class Mapper extends AbstractPlugin
                 $this->result[$target['field']][] = $v;
                 break;
         }
+
+        $this->lastResultValue = $value;
     }
 
     /**
