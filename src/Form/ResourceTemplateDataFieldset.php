@@ -104,6 +104,17 @@ class ResourceTemplateDataFieldset extends Fieldset
                         ? $this->getTranslator()->translate('Select autofillers…') // @translate
                         : $this->getTranslator()->translate('No configured autofiller.'), // @translate
                 ],
+            ])
+            ->add([
+                'name' => 'settings',
+                'type' => Element\Textarea::class,
+                'options' => [
+                    'label' => 'More settings', // @translate
+                    'info' => 'Allow to pass some settings, usually for theme and generally via key-value pairs or json.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'settings',
+                ],
             ]);
     }
 

@@ -108,7 +108,20 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                     // 'id' => 'use_language',
                     'class' => 'setting',
                     'data-setting-key' => 'use_language',
-                    'value' => 'template',
+                    'value' => '',
+                ],
+            ])
+            ->add([
+                'name' => 'settings',
+                'type' => Element\Textarea::class,
+                'options' => [
+                    'label' => 'More settings', // @translate
+                    'info' => 'Allow to pass some settings, usually for theme and generally via key-value pairs or json.', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'settings',
+                    'class' => 'setting',
+                    'data-setting-key' => 'settings',
                 ],
             ]);
     }
