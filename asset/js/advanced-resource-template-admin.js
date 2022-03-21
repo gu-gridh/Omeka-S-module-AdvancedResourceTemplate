@@ -289,6 +289,7 @@ $(document).ready(function() {
         const value = $('.value.template[data-data-type="' + dataType + '"]').clone(true);
         value.removeClass('template');
         value.attr('data-term', term);
+        value.data('valueAnnotations', valueObj ? valueObj['@annotation'] : null);
 
         // Get and display the value's visibility.
         var isPublic = true; // values are public by default
