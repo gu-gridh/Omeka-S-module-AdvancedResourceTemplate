@@ -12,13 +12,27 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'min_values',
+                'type' => Element\Number::class,
+                'options' => [
+                    'label' => 'Minimum number of values (when required)', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'min_values',
+                    'class' => 'setting',
+                    'data-setting-key' => 'min_values',
+                    'min' => '0',
+                    'step' => '1',
+                ],
+            ])
+            ->add([
                 'name' => 'max_values',
                 'type' => Element\Number::class,
                 'options' => [
                     'label' => 'Maximum number of values', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'max_value',
+                    // 'id' => 'max_values',
                     'class' => 'setting',
                     'data-setting-key' => 'max_values',
                     'min' => '0',

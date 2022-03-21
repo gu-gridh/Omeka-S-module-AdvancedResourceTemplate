@@ -62,6 +62,28 @@ $(document).ready(function() {
     }
 
     /**
+     * Prepare the number of specified fields when a minimum number is set.
+     */
+    function prepareFieldMinValues(field) {
+        const rtpData = field.data('template-data');
+        if (!rtpData) {
+            return;
+        }
+        const currentCountValues = field.find('.inputs .values > .value').length;
+        if (!rtpData.min_values || currentCountValues >= rtpData.min_values
+            || (rtpData.max_values && currentCountValues >= rtpData.max_values)
+        ) {
+            return;
+        }
+        const dataType = field.data('data-types') && field.data('data-types').length ? field.data('data-types').split(',')[0] : 'literal';
+        for (let i = 0; i < (rtpData.min_values - currentCountValues); i++) {
+            // Add only one field, because it is called recursively.
+            const value = makeNewValue(field.data('property-term'), dataType);
+            field.find('.values').append(value);
+        }
+    }
+
+    /**
      * Prepare the button "add-value" after filling values.
      *
      * The button may be hidden in a later step too when a value is added.
@@ -743,6 +765,7 @@ $(document).ready(function() {
         }
 
         fields.each(function(index, field) {
+            prepareFieldMinValues($(field));
             prepareFieldMaxValues($(field));
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
@@ -755,7 +778,8 @@ $(document).ready(function() {
 
     $(document).on('o:property-added', '.resource-values.field', function() {
         const field = $(this);
-        // This is managed after values.
+        // This is managed after values (and useless for this event).
+        // prepareFieldMinValues(field);
         // prepareFieldMaxValues(field);
         prepareFieldAutocomplete(field);
         prepareFieldLanguage(field);
