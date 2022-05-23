@@ -2,12 +2,12 @@
 
 namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 
-use AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper;
 use ArrayObject;
 use DOMDocument;
 use DOMXPath;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Manager as ApiManager;
+use Omeka\Mvc\Controller\Plugin\Translate;
 
 /**
  * Extract data from a string with a mapping.
@@ -26,6 +26,11 @@ class ArtMapper extends AbstractPlugin
      * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper
      */
     protected $mapperHelper;
+
+    /**
+     * @var \Omeka\Mvc\Controller\Plugin\Translate
+     */
+    protected $translate;
 
     /**
      * @var array
@@ -62,12 +67,17 @@ class ArtMapper extends AbstractPlugin
      */
     protected $lastResultValue;
 
-    public function __construct(ApiManager $api, MapperHelper $mapperHelper, array $customVocabBaseTypes)
-    {
+    public function __construct(
+        ApiManager $api,
+        MapperHelper $mapperHelper,
+        Translate $translate,
+        array $customVocabBaseTypes
+    ) {
         // Don't use api plugin, because a form may be set and will be removed
         // when recalled (nearly anywhere), even for a simple read.
         $this->api = $api;
         $this->mapperHelper = $mapperHelper;
+        $this->translate = $translate;
         $this->customVocabBaseTypes = $customVocabBaseTypes;
     }
 
@@ -502,7 +512,7 @@ class ArtMapper extends AbstractPlugin
 
     protected function normalizeMapping(array $mapping): array
     {
-        $translate = $this->getController()->plugin('translate');
+        $translate = $this->translate;
         foreach ($mapping as &$map) {
             $to = &$map['to'];
             $to['property_id'] = $this->mapperHelper->getPropertyId($to['field']);
