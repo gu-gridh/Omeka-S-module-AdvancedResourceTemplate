@@ -150,6 +150,7 @@ return [
     'assets' => [
         // Override internals assets. Only for Omeka assets: modules can use another filename.
         'internals' => [
+            'js/global.js' => 'AdvancedResourceTemplate',
             'js/resource-form.js' => 'AdvancedResourceTemplate',
         ],
     ],
