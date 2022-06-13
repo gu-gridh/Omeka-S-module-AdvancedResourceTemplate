@@ -317,11 +317,7 @@ var Omeka = {
     disableQueryTextInput: function() {
         var queryType = $(this);
         var queryText = queryType.siblings('.query-text');
-        if (queryType.val() === 'ex' || queryType.val() === 'nex') {
-            queryText.prop('disabled', true);
-        } else {
-            queryText.prop('disabled', false);
-        }
+        queryText.prop('disabled', ['ex', 'nex', 'exs', 'nexs', 'exm', 'nexm', 'lex', 'nlex'].includes(queryType.val()));
     },
 
     // Clean the search query of empty or otherwise unneeded inputs.
