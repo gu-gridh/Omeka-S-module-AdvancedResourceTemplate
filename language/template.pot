@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-21 00:00+0000\n"
+"POT-Creation-Date: 2022-06-13 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,7 +70,7 @@ msgstr ""
 
 #: src/Generic/AbstractModule.php:735
 #, php-format
-msgid "This module requires the module \"%s\", version %s or above."
+msgid "This module requires the module \"%1$s\", version %2$s or above."
 msgstr ""
 
 #: src/Generic/AbstractModule.php:832
@@ -110,42 +110,42 @@ msgid ""
 "or direct api process."
 msgstr ""
 
-#: Module.php:281
+#: Module.php:282
 msgid "A class is required."
 msgstr ""
 
-#: Module.php:287
+#: Module.php:288
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr ""
 
-#: Module.php:296
+#: Module.php:297
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr ""
 
-#: Module.php:325
+#: Module.php:326
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:335
+#: Module.php:336
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:360
+#: Module.php:361
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
 "number (%3$d)."
 msgstr ""
 
-#: Module.php:371
+#: Module.php:372
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
@@ -445,6 +445,6 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:162
+#: config/module.config.php:164
 msgid "No results"
 msgstr ""
