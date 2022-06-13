@@ -278,7 +278,9 @@
             var valueObj = $('.resource-details').data('resource-values');
             var value = $('.value.selecting-resource');
             if (value.hasClass('value')) {
-                $(document).trigger('o:prepare-value', ['resource', value, valueObj]);
+                const dataTypeNames = {items: 'resource:item', item_sets: 'resource:itemset', media: 'resource:media'};
+                const dataTypeName = dataTypeNames[valueObj.value_resource_name] ? dataTypeNames[valueObj.value_resource_name] : 'resource';
+                $(document).trigger('o:prepare-value', [dataTypeName, value, valueObj]);
             } else if (value.hasClass('value-annotation')) {
                 const dataTypeName = value.find('input.data_type').val();
                 valueObj.type = dataTypeName;
@@ -304,12 +306,14 @@
                 var field = value.closest('.resource-values.field');
                 $('#item-results').find('.resource')
                     .has('input.select-resource-checkbox:checked').each(function(index) {
+                        var valueObj = $(this).data('resource-values');
+                        const dataTypeNames = {items: 'resource:item', item_sets: 'resource:itemset', media: 'resource:media'};
+                        const dataTypeName = dataTypeNames[valueObj.value_resource_name] ? dataTypeNames[valueObj.value_resource_name] : 'resource';
                         if (0 < index) {
-                            value = makeNewValue(field.data('property-term'), 'resource');
+                            value = makeNewValue(field.data('property-term'), dataTypeName);
                             field.find('.values').append(value);
                         }
-                        var valueObj = $(this).data('resource-values');
-                        $(document).trigger('o:prepare-value', ['resource', value, valueObj]);
+                        $(document).trigger('o:prepare-value', [dataTypeName, value, valueObj]);
                     });
             } else if (value.hasClass('value-annotation')) {
                 const dataTypeName = value.find('input.data_type').val();

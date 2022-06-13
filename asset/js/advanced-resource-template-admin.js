@@ -427,11 +427,18 @@ $(document).ready(function() {
 
         // Manage specific data type "resource".
         if (dataType.startsWith('resource')) {
+            const dataTypeLabels = {
+                'resource': Omeka.jsTranslate('Resource'),
+                'resource:item': Omeka.jsTranslate('Item'),
+                'resource:itemset': Omeka.jsTranslate('Item set'),
+                'resource:media': Omeka.jsTranslate('Media'),
+            };
+            const dataTypeLabel = dataTypeLabels[dataType] ? dataTypeLabels[dataType] : dataTypeLabels['resource'];
             if (isSpecific && /^\d+$/.test(defaultValue)) {
                 valueObj = {
-                    display_title: Omeka.jsTranslate('Resource') + ' #' + defaultValue,
+                    display_title: dataTypeLabel + ' #' + defaultValue,
                     value_resource_id: defaultValue,
-                    value_resource_name: 'resource',
+                    value_resource_name: dataType,
                     url: '#',
                 };
             }
