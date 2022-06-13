@@ -222,7 +222,7 @@ $(document).ready(function() {
         inputLanguage.attr('list', listName);
 
         const noLanguage = !!(rtpData.use_language
-            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData && templateData.no_language)));
+            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData && Number(templateData.no_language))));
         field.data('no-language', noLanguage);
         field.find('.inputs .values input.value-language').each(function() {
             initValueLanguage($(this), field);
@@ -606,7 +606,7 @@ $(document).ready(function() {
         }
         resourceClassSelect.val(resourceClassId);
 
-        if (templateData && templateData.require_resource_class) {
+        if (templateData && Number(templateData.require_resource_class)) {
             resourceClassSelect.attr('require', 'require')
                 .closest('.field').addClass('required');
         } else {
