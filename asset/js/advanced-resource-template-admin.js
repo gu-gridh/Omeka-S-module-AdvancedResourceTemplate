@@ -115,6 +115,8 @@ $(document).ready(function() {
      *
      * The button may be hidden in a later step too when a value is added.
      * Don't include the removed values in the total of values.
+     *
+     * The button is displayed when a value is removed.
      */
     function prepareFieldMaxValues(field) {
         const rtpData = field.data('template-property-data');
@@ -918,6 +920,22 @@ $(document).ready(function() {
                 field.find('.add-values.' + selector + '-selector').hide();
             }
         }
+    });
+
+    /**
+     * Display the button "add value" in all cases: if there is a max number of
+     * values, the button will be removed.
+     *
+     * @todo Manage the issue when there are two values, but only one max.
+     */
+    $(document).on('click', 'a.remove-value', function(e) {
+        var field = $(this).closest('.resource-values.field');
+        const rtpData = field.data('template-property-data');
+        if (!rtpData) {
+            return;
+        }
+        const selector = field.data('selector') ? field.data('selector') : 'default';
+        field.find('.add-values.' + selector + '-selector').show();
     });
 
     /**
