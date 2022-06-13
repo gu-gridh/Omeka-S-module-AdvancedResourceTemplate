@@ -266,7 +266,8 @@ class Module extends AbstractModule
         /** @var \Omeka\Mvc\Status $status */
         $status = $this->getServiceLocator()->get('Omeka\Status');
         $routeMatch = $status->getRouteMatch();
-        $routeName = $routeMatch->getMatchedRouteName();
+        // RouteMatch may be unavailable during background process.
+        $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;
         // Module Contribute can use the error store, so no issue here.
         $directMessage = $routeName === 'admin/default'
             && in_array($routeMatch->getParam('__CONTROLLER__'), ['item', 'item-set', 'media', 'annotation'])
