@@ -75,8 +75,6 @@ class ResourceTemplateForm extends Form
             ],
             'attributes' => [
                 'id' => 'properties',
-            ],
-            'attributes' => [
                 'class' => 'settings',
             ],
         ]);

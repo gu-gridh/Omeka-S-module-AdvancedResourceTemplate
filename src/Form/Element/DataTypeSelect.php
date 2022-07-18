@@ -5,6 +5,11 @@ namespace AdvancedResourceTemplate\Form\Element;
 use Laminas\Form\Element\Select;
 use Omeka\DataType\Manager as DataTypeManager;
 
+/**
+ * @see AdvancedResourceTemplate\Form\Element\DataTypeSelect
+ * @see BulkEdit\Form\Element\DataTypeSelect
+ * @see SearchSolr\Form\Element\DataTypeSelect
+ */
 class DataTypeSelect extends Select
 {
     protected $attributes = [
@@ -73,10 +78,5 @@ class DataTypeSelect extends Select
         $this->dataTypeManager = $dataTypeManager;
         $this->dataTypes = $dataTypeManager->getRegisteredNames();
         return $this;
-    }
-
-    public function getDataTypeManager(): DataTypeManager
-    {
-        return $this->dataTypeManager;
     }
 }

@@ -5,7 +5,9 @@ namespace AdvancedResourceTemplate\View\Helper;
 use Laminas\View\Helper\AbstractHelper;
 
 /**
- * Copied in \BulkExport\View\Helper\CustomVocabBaseType
+ * @see \AdvancedResourceTemplate\\View\Helper\CustomVocabBaseType
+ * @see \BulkEdit\View\Helper\CustomVocabBaseType
+ * @see \BulkExport\View\Helper\CustomVocabBaseType
  * Used in Contribute.
  */
 class CustomVocabBaseType extends AbstractHelper
