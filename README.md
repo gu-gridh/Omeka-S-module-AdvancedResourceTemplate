@@ -19,10 +19,6 @@ resources:
 
   ![Limit template to defined properties](data/images/closed_template.png)
 
-- Auto-completion with existing values:
-
-  ![Example of autocompletion](data/images/autocompletion.png)
-
 - Minimum/maximum length of a literal value
 
 - Minimum/maximum number of values:
@@ -30,13 +26,11 @@ resources:
   It allows to force to have only one value when needed, for example a main
   category or a publication date, or to limit the values to a specific number.
 
-  You need to take care of languages, that are all included for now.
-
-- Default values:
+- Default value:
 
   This option simplifies creation of resources manually.
 
-- Automatic value:
+- Automatic value (on save):
 
   This option allows to add a value to the resource. By construction, this value
   cannot be removed.
@@ -44,7 +38,33 @@ resources:
 - Locked values:
 
   This option is useful for identifiers. Note that an automatic value is always
-  a locked value, so this option is designed  for other values.
+  a locked value, so this option is designed  for other values. A locked value
+  can still be updated by the api.
+
+- Explode a value with a separator:
+
+  This option allows to let the user filling multiple values in one field, then
+  the values are exploded on save. For example, the property "dcterms:subject"
+  can use the ";" as separator, so when the user fills "alpha; beta", it will be
+  exploded into two values "alpha" and "beta".
+
+- Filter resources with a query:
+
+  For properties filled with an internal resource, the right sidebar searches in
+  all resources by default. The option allows to limit them with a query to find
+  them quickly. The query is the arguments of an standard advanced search request.
+
+- Auto-completion with existing values:
+
+  ![Example of autocompletion](data/images/autocompletion.png)
+
+- Other parameters:
+
+  An option is added to add new parameters to the property. It does nothing by
+  default, but can be used to pass informations about template properties to
+  complex themes. There is no format for the parameters for now, since they
+  should be managed by the theme or a specific module. It is recommended to use
+  keys values pairs separated by "=" or json.
 
 - Multiple fields with the same property:
 
@@ -52,7 +72,7 @@ resources:
   settings. For example, you may want to have a free subject and a subject from
   two thesaurus. They can be set as different data types of the same property,
   but as three template properties too, so each one has its own label and
-  settings.
+  settings (size, number, etc.).
 
   ![Example of multiple subjects with different settings](data/images/duplicate_properties.png)
 
@@ -60,10 +80,12 @@ resources:
 
   ![Example of language by template and property](data/images/advanced_language_settings.png)
 
-- Creation of a new resource during edition of a resource:
+- Creation of a new linked resource during edition of a resource:
 
   This is useful to create a new author of a resource when authors are managed
-  as resources.
+  as resources. An option allows to allow it or to forbid it for each property.
+  After creation, the new resource is automatically linked to the resource being
+  edited.
 
   ![Creation of a new resource via a pop-up](data/images/new_resource_during_edition.png)
 
@@ -111,7 +133,9 @@ Usage
 -----
 
 Simply update your resource templates with the new options and use them in the
-resource forms. Here are some details for some features.
+resource forms.
+
+Here are some details for some features.
 
 ### Default value
 
@@ -123,7 +147,7 @@ For a uri with a label, just separate the uri and the label with a space:
 https://example.com/my-id Label of the value
 ```
 
-For other data types that may be not managed, the default value can be set as a
+For other data types that may be more complex, the default value can be set as a
 json with all hidden sub-data that are in the Omeka resource form.
 
 For a uri with a label and a language (for value suggest):
@@ -132,7 +156,7 @@ For a uri with a label and a language (for value suggest):
     "@id": "https://example.com/my-id",
     "o:label": "Label of the value",
     "@value": "Value of the value (let empty)",
-    "@language": "fr"
+    "@language": "eng"
 }
 ```
 
@@ -140,9 +164,9 @@ For a linked resource, that is useful only for a better display:
 ```json
 {
     "display_title": "Title of my object",
-    "value_resource_id": "xxx",
+    "value_resource_id": "1",
     "value_resource_name": "items",
-    "url": "/admin/item/xxx",
+    "url": "/admin/item/1",
 }
 ```
 
@@ -161,8 +185,8 @@ template property. A check is done for validity, for example the id should
 exists when the data type is a resource.
 
 Some basic placeholders can be used with json dot notation and basic twig-like
-commands. The format is the same than the auto-filling (see below).  and will be improved with
-the [Bulk Import] in a future release.
+commands. The format is the same than the auto-filling (see below). A future
+release will integrate the improvements made for the module [Bulk Import].
 
 #### Template level
 
@@ -176,7 +200,6 @@ saving an item:
 
 ```
 ~ = o:resource_template = 1
-        o:resource_template = 1
 ~ = dcterms:identifier ^^literal {o:item.dcterms:creator.0..@value}_{o:item.o:template.o:label}_{{ index() }}
 ```
 
@@ -193,6 +216,7 @@ It will be improved with the [Bulk Import] format in a future release.
 
 For example, if the service returns an xml Marc like for [Colbert], the mapping
 can be a list of XPath and properties with some arguments:
+
 ```
 [idref:person] = IdRef Person
 /record/controlfield[@tag="003"] = dcterms:identifier ^^uri
@@ -213,6 +237,7 @@ it will be skipped. Don’t change it once defined, else you will have to check
 all resource templates that use it.
 
 For a json service, use the object notation:
+
 ```
 [geonames]
 ?username=demo
@@ -263,9 +288,9 @@ params should be added on four separate lines:
 - the path to the value to use as a label for each result, indicated with
   `{__label__}`. If absent, the first field will be used.
 
-
 For exemple, you can query another Omeka S service (try with "archives"), or the
 services above:
+
 ```
 [generic:json #Mall History] Omeka S demo Mall History
 http://dev.omeka.org/omeka-s-sandbox/api/items?site_id=4
@@ -312,8 +337,12 @@ TODO
 - [ ] Improve performance of the autofiller.
 - [ ] Export/import all templates together as spreadsheet.
 - [ ] Validate imported templates with the standard form?
-- [ ] Validate items with data (unique value, strict template, etc.).
+- [x] Validate items with data (unique value, strict template, etc.).
 - [ ] Finalize the review-import form with duplicated properties and custom vocabs.
+- [ ] Update from file.
+- [ ] Use the event and remove the specific template for resource-values.
+- [ ] Fix copy alternative labels when importing a template (for now should re-save template).
+- [ ] Select default custom vocabs when importing a template from the same server.
 
 
 Warning
@@ -364,7 +393,8 @@ Copyright
 
 These features were built for the future digital library [Manioc] of the
 Université des Antilles and Université de la Guyane, currently managed with
-[Greenstone]. Some other ones were built for the future digital library [Le Menestrel].
+[Greenstone]. Some other ones were built for the future digital library [Le Menestrel]
+and for the institutional repository of student works [Dante] of the [Université de Toulouse Jean-Jaurès].
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
@@ -393,5 +423,7 @@ Université des Antilles and Université de la Guyane, currently managed with
 [Manioc]: http://www.manioc.org
 [Greenstone]: http://www.greenstone.org
 [Le Menestrel]: http://www.menestrel.fr
+[Dante]: https://dante.univ-tlse2.fr
+[Université de Toulouse Jean-Jaurès]: https://www.univ-tlse2.fr
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"

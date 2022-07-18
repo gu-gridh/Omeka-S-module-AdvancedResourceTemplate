@@ -11,13 +11,104 @@ See [English readme].
 nouvelles options aux modèles de ressources afin de faciliter et d’améliorer
 l’édition des ressources :
 
-- auto-completion avec des valeurs existantes,
-- valeurs vérifiées,
-- champs multiples avec la même propriété,
-- sélection de la langue au niveau du modèle et pré-sélection de la langue,
-- création d’une nouvelle ressource durant l’édition d’une ressource,
-- remplissage automatique de plusieurs champs avec des données externes ([IdRef],
-  [Geonames] et services json ou xml).
+- Obligation de choisir une classe parmi une liste définie :
+
+  ![Obligation de choisir une classe parmi une liste définie](data/images/required_limited_class.png))
+
+- Limitation du formulaire à la liste de propriétés définie :
+
+  ![Limitation du formulaire à la liste de propriétés définie](data/images/closed_template.png)
+
+- Longueur minimale/maximale pour une valeur textuelle ;
+
+- Nombre minimum et maximum de valeurs :
+
+  Cette option permet de n’avoir qu’une seule valeur, par exemple une catégorie
+  principale ou une date de publication, ou de limiter le nombre de valeurs à un
+  nombre spécifique.
+
+- Valeur par défaut :
+
+  Cette option rend plus simple la création manuelle des ressouces.
+
+- Valeur automatique (lors de l’enregistrement) :
+
+  Cette option permet d’ajouter une valeur à la ressource. Par construction,
+  elle ne  peut pas être supprimée.
+
+- Valeur bloquée :
+
+  Cette option est utile pour les identifiants. Notez qu’une valeur automatique
+  est toujours une valeur bloquée. Cette option est donc conçue pour les autres
+  valeurs. Un evaleur bloquée peut toujours être mise à jour via l’api.
+
+- Éclater une valeur avec un séparateur :
+
+  Cette option permet à l’utilisateur d’entrer plusieurs valeurs dans un seul
+  champ et ces valeurs sont éclatées lors de l’enregistrement. Par exemple, la
+  propriété "dcterms:subject" peut utiliser le séparateur ";" et lorsque
+  l’utilisateur saisit "alpha ; beta", la chaîne sera éclatée en deux valeurs
+  "alpha" et "beta".
+
+- Filtrer les ressources avec une requête :
+
+  Pour les propriétés avec des ressources liées, la barre de droite recherche
+  par défaut dans toutes les ressources. Cette option permet de limiter la
+  recherche à un sous-ensemble pour les trouver plus rapidement. La requête à
+  indiquer correspond aux arguments d’une recherche avancée standard.
+
+- Auto-complétion avec des valeurs existantes :
+
+  ![Exemple d’auto-complétion](data/images/autocompletion.png)
+
+- Autres paramètres :
+
+  Cette option permet d’ajouter de nouveaux paramètre à la propriété. Elle ne
+  fait rien par défaut, mais peut être utilisée pour passer des informations à
+  propos des propriétés du modèle aux thèmes complexes. Aucun format n’est
+  imposé actuellemenet puisque c’est au thème ou à module spécifique de les
+  gérer. Néanmoins, il est recommandé d’utiliser soit une liste de clés/valeurs
+  séparées par "=" ou du json.
+
+- Plusieurs champs avec la même propriété :
+
+  Cette option permet de disposer de la même propriété plusieurs fois avec des
+  paramèters différents. Par exemple, dans le cas de la propriété "dcterms:subject"
+  qui aurait des sujets libres et des descripteurs provenant de plusieurs
+  thésaurus. Dans le modèle, la propriété peut être configurée pour avoir les
+  trois de données, mais il est aussi possible d’avoir trois propriétés avec
+  chacune un seul type de données, avec un libellé et des paramètres spécifiques
+  (taille, nombre, etc.).
+
+  ![Exemple de sujets multiples avec des paramètres différents](data/images/duplicate_properties.png)
+
+- Sélection de la langue et langue par défaut par modèle et par propriété, ou
+  aucune langue :
+
+  ![Exemple de langue par modèle et par propriété](data/images/advanced_language_settings.png)
+
+- Création d’une nouvelle ressource liée pendant l’édition d’une ressource :
+
+  Cette fonctionnalité rend possible par exemple la création d’un nouvel auteur
+  dans une nouvelle ressource lorsque les auteurs sont gérés en tant que
+  ressource. Une option permet de l’autoriser ou de l’interdir pour chaque
+  propriété. Après création, la nouvelle ressource est automatiquement liée à la
+  ressource en cours d’édition.
+
+  ![Création d’une nouvelle ressource liée via un pop-up](data/images/new_resource_during_edition.png)
+
+- Sélection des types de données par défaut :
+
+  ![Sélection des types de données par défaut](data/images/default_datatypes.png)
+
+- Remplissage automatique des valeurs avec des données externes ([IdRef], [Geonames]
+  et services json ou xml):
+
+  Voir ci-dessous.
+
+- Import et export des modèles en  tableur (csv/tsv):
+
+  ![Export des modèles en csv/tsv](data/images/export_spreadsheet.png)
 
 
 Installation
@@ -49,10 +140,83 @@ composer install --no-dev
 Utilisation
 -----------
 
-### Usage principal
-
 Mettez simplement à jour vos modèles de ressources avec les nouvelles options et
-utilisezèles dans les formulaires de ressources.
+utilisez les dans les formulaires de ressources.
+
+Ci-dessous quelques détails pour certaines fonctionnalités.
+
+### Valeur par défaut
+
+Par défaut, indiquez simplement la valeur à utiliser comme valeur par défaut.
+Lorsque la valeur est une ressource, la valeur est le numéro de la resource et
+lorsque c’est une uri, c’est l’uri.
+
+Pour une uri avec un libellé, séparez les avec une espace :
+```
+https://exemple.com/mon-id Libellé de la valeur
+```
+
+Pour les autres de types de données plus complexes, la valeur par défaut peut
+être indiquée au format json avec toutes les données cachées existant dans le
+formulaire de ressource Omeka.
+
+Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
+```json
+{
+    "@id": "https://exemple.com/mon-id",
+    "o:label": "Libellé de la valeur",
+    "@value": "Valeur de la valeur (laisser vide)",
+    "@language": "fra"
+}
+```
+
+Pour une ressource liée, le json sert seulement pour un meilleur affichage :
+```json
+{
+    "display_title": "Titre de mon objet",
+    "value_resource_id": "1",
+    "value_resource_name": "items",
+    "url": "/admin/item/1",
+}
+```
+
+### Valeur automatique
+
+Cette option peut être activée au niveau du modèle ou de chaque propriété. Le
+but est le même, mais lors de la création de l’item, les champs sont affichés
+dans le formulaire ou non.
+
+#### Au niveau d’une propriété
+
+La valeur indiquée dans le champ seera ajoutée à la ressource.
+
+La valeur peut être une simple chaîne ou la représentation json d’une valeur
+(commme dans l’api). Le type de valeur doit être l’un des types de données de la
+propriété. La valeur est contrôlée lors de l’enregistrement. Par exemple, l’id
+doit exister quand le type de données est une ressource.
+
+Quelques jokers simples peuvent être utilisées avec la dotation "json point" et
+quelques commandes basiques de type "twig". Le format est le même que pour
+l’auto-remplissage (voir ci-dessous).
+Some basic placeholders can be used with json dot notation and basic twig-like
+commands. The format is the same than the auto-filling (see below). Une version
+future intégrera les améliorations réalisées pour le module [Bulk Import].
+
+#### Au niveau du modèle
+
+Contrairement au niveau des propriétés, plusieurs valeurs peuvent être ajoutées,
+une par ligne.
+
+Pour les modèles, la propriété doit être indiquée et éventuellement les autres
+données (langue, visibilité).
+
+Par exemple, pour définir le modèle et un identifiant automatique pour un média
+lors de l’enregistrement d’un contenu :
+
+```
+~ = o:resource_template = 1
+~ = dcterms:identifier ^^literal {o:item.dcterms:creator.0..@value}_{o:item.o:template.o:label}_{{ index() }}
+```
 
 ### Remplissage automatique
 
@@ -61,12 +225,14 @@ les paramètres généraux, puis sélectionnez les dans les modèles de ressourc
 
 Le schéma de correspondance est un simple texte spécifiant les services et les
 correspondance. Elle utilise le même format que les modules [Export en lot],
-[Import en lot] et [Import de fichiers en lot].
+[Import en lot] et [Import de fichiers en lot]. Elle intégrera prochainement les
+améliorations réalisées pour le module [Bulk Import].
 
 #### Services intégrés
 
 Par exemple, si le service renvoie un xml Marc comme pour [Colbert], le schéma
 peut être une liste de XPath et de propriétés avec quelques arguments :
+
 ```
 [idref:person] = IdRef Personne
 /record/controlfield[@tag="003"] = dcterms:identifier ^^uri
@@ -87,6 +253,7 @@ n’est pas disponible, il sera ignoré. Ne le modifiez pas une fois définie, s
 vous devrez vérifier tous les modèles de ressources qui l’utilisent.
 
 Pour un service json, utilisez la notation objet :
+
 ```
 [geonames]
 ?username=demo
@@ -101,9 +268,12 @@ Notez que [geonames] nécessite un nom d’utilisateur (qui doit être le votre,
 mais il peut s’agir de "demo", "google" ou "johnsmith"). Testez le sur
 https://api.geonames.org/searchJSON?username=demo.
 
+Si la clé contient un `.` ou une `\`, le caractère doit être échappé avec une `\` :
+`\.` et `\\`.
+
 Plus largement, vous pouvez ajouter tout argument à la requête envoyée au
 service à distance : il suffit de les ajouter au format url encodée sur une
-ligne commençant par "?".
+ligne commençant par `?`.
 
 Il est également possible de formater les valeurs : il suffit d’ajouter `~` pour
 indiquer le format à utiliser et `{__value__}` pour préciser la valeur à partir
@@ -117,7 +287,7 @@ avec la date numérique `1789-08-04`, vous pouvez utiliser :
 /record/datafield[@tag="103"]/subfield[@code="b"] = dcterms:valid ^^numeric:timestamp ~ {{ value|trim|slice(1,4) }}-{{ value|trim|slice(5,2) }}-{{ value|trim|slice(7,2) }}
 ```
 
-Le filtre Twig commence avec deux `{` et un espace et finit avec un espace et
+Le filtre Twig commence avec deux `{` et une espace et finit avec une espace et
 deux `}`. Il ne fonctionne qu’avec la valeur `value` actuelle.
 
 #### Autres services
@@ -138,9 +308,9 @@ quatre lignes distinctes :
 - le chemin vers la valeur à utiliser comme libellé pour chaque résultat,
   indiqué par `{__label__}`. S’il est absent, le premier champ sera utilisé.
 
-
 Par exemple, vous pouvez interroger un autre service Omeka S (essayez avec
 "archives"), ou les services ci-dessus :
+
 ```
 [generic:json #Mall History] Omeka S demo Mall History
 http://dev.omeka.org/omeka-s-sandbox/api/items?site_id=4
@@ -181,11 +351,18 @@ TODO
 - [ ] Inclure tous les suggesteurs du module [Value Suggest].
 - [ ] Limiter l’autocomplétion aux ressources choisies.
 - [ ] Autocompléter avec des ressources, pas des valeurs.
+- [ ] Prendre en compte les langues avec un nombre de valeurs maximales.
 - [x] Utiliser twig pour des formats plus complexes.
 - [x] Créer une option de correspondance générique.
-- [ ] Améliorer la performance de l'autorempisseur.
+- [ ] Améliorer la performance de l’autorempisseur.
 - [ ] Importer/Exporter tous les modèles ensemble dans un tableur.
 - [ ] Valider les modèles importés avec le formulaire standard ?
+- [x] Valider les ressources avec des données (valeur unique, modèle strict, etc.)
+- [ ] Finaliser le formulaire de révision des imports pour les propriétés doublons et les vocabulaires personnalisés.
+- [ ] Mettre à jour à partir d’un fichier.
+- [ ] Utiliser un événement et supprimer le gabarit spécifique pour resource-values.
+- [ ] Corriger la copie des libellés alternatifs lorsqu’un modèle est importé (actuellement, le modèle doit être resauvé).
+- [ ] Choisir les vocabulaires personnalisés par défaut lorsque l’on importe du même serveur.
 
 
 Attention
@@ -241,16 +418,18 @@ connaissance de la licence CeCILL et que vous en acceptez les termes.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2020 (voir [Daniel-KM] sur GitLab)
+* Copyright Daniel Berthereau, 2020-2022 (voir [Daniel-KM] sur GitLab)
 * Library [jQuery-Autocomplete]: Copyright 2012 DevBridge et autres contributeurs
 
 Ces fonctionnalités sont destinées à la future bibliothèque numérique [Manioc]
-de l’Université des Antilles et Université de la Guyane, actuellement gérée avec
-[Greenstone].
+de l’Université des Antilles et de l’Université de la Guyane, actuellement gérée
+avec [Greenstone]. D’autres fonctionnalités ont été conçues pour la future
+bibliothèque numérique [Le Menestrel] ainsi que pour l’entrepôt institutionnel
+des travaux étudiants [Dante] de l’[Université de Toulouse Jean-Jaurès].
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
-[English readme]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
+[English readme]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/README.md
 [Omeka S]: https://omeka.org/s
 [installer un module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
@@ -274,5 +453,8 @@ de l’Université des Antilles et Université de la Guyane, actuellement géré
 [jQuery-Autocomplete]: https://www.devbridge.com/sourcery/components/jquery-autocomplete/
 [Manioc]: http://www.manioc.org
 [Greenstone]: http://www.greenstone.org
+[Le Menestrel]: http://www.menestrel.fr
+[Dante]: https://dante.univ-tlse2.fr
+[Université de Toulouse Jean-Jaurès]: https://www.univ-tlse2.fr
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
