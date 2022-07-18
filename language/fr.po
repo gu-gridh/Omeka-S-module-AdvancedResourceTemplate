@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-13 00:00+0000\n"
-"PO-Revision-Date: 2022-06-13 00:00+0000\n"
+"POT-Creation-Date: 2022-07-18 00:00+0000\n"
+"PO-Revision-Date: 2022-07-18 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -35,11 +35,11 @@ msgstr "Le service est vide."
 msgid "The template is empty."
 msgstr "Le modèle est vide."
 
-#: src/Form/ResourceTemplateDataFieldset.php:129
+#: src/Form/ResourceTemplateDataFieldset.php:139
 msgid "Select autofillers…"
 msgstr "Choisir des remplisseurs…"
 
-#: src/Form/ResourceTemplateDataFieldset.php:130
+#: src/Form/ResourceTemplateDataFieldset.php:140
 msgid "No configured autofiller."
 msgstr "Aucun remplisseur configuré."
 
@@ -117,21 +117,21 @@ msgstr ""
 "Les valeurs sont désormais vérifiées en fonction du modèle dans tous les "
 "cas, y compris pour les tâches en arrière-plan et les appels api."
 
-#: Module.php:282
+#: Module.php:288
 msgid "A class is required."
 msgstr "Une classe est requise."
 
-#: Module.php:288
+#: Module.php:294
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr "La classe doit être « %s »."
 
-#: Module.php:297
+#: Module.php:303
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr "La classe doit être l’une de \"%s\"."
 
-#: Module.php:326
+#: Module.php:332
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
@@ -140,7 +140,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus courte (%2$d caractères) que "
 "la taille minimale (%3$d caractères)."
 
-#: Module.php:336
+#: Module.php:342
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
@@ -149,7 +149,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus longue (%2$d caractères) que "
 "la taille maximale (%3$d caractères)."
 
-#: Module.php:361
+#: Module.php:367
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
@@ -158,7 +158,7 @@ msgstr ""
 "Le nombre de valeur (%1$d) pour la propriété « %2$s » est plus petit que le "
 "nombre minimum (%3$d)."
 
-#: Module.php:372
+#: Module.php:378
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
@@ -188,53 +188,57 @@ msgid "Limit to specified properties"
 msgstr "Limiter aux propriétés listées"
 
 #: src/Form/ResourceTemplateDataFieldset.php:48
+msgid "Hide value annotations"
+msgstr "Cacher les annotations de valeur"
+
+#: src/Form/ResourceTemplateDataFieldset.php:58
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:147
 msgid "Allow quick creation of a resource"
 msgstr "Autoriser la création rapide d’une ressource"
 
-#: src/Form/ResourceTemplateDataFieldset.php:63
+#: src/Form/ResourceTemplateDataFieldset.php:73
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:165
 msgid "Autocomplete with existing values"
 msgstr "Auto-compléter avec des valeurs existantes"
 
-#: src/Form/ResourceTemplateDataFieldset.php:66
+#: src/Form/ResourceTemplateDataFieldset.php:76
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:169
 msgid "Starts with"
 msgstr "Commence par"
 
-#: src/Form/ResourceTemplateDataFieldset.php:67
+#: src/Form/ResourceTemplateDataFieldset.php:77
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:170
 msgid "Contains"
 msgstr "Contient"
 
-#: src/Form/ResourceTemplateDataFieldset.php:79
+#: src/Form/ResourceTemplateDataFieldset.php:89
 msgid "Languages for values"
 msgstr "Langues pour les valeurs"
 
-#: src/Form/ResourceTemplateDataFieldset.php:90
+#: src/Form/ResourceTemplateDataFieldset.php:100
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:197
 msgid "Default language"
 msgstr "Langue par défaut"
 
-#: src/Form/ResourceTemplateDataFieldset.php:100
+#: src/Form/ResourceTemplateDataFieldset.php:110
 msgid "No language"
 msgstr "Pas de langue"
 
-#: src/Form/ResourceTemplateDataFieldset.php:110
+#: src/Form/ResourceTemplateDataFieldset.php:120
 msgid "Automatic values (on save)"
 msgstr "Valeurs automatiques (lors de l’enregistrement)"
 
-#: src/Form/ResourceTemplateDataFieldset.php:120
-#: src/Form/SettingsFieldset.php:35
+#: src/Form/ResourceTemplateDataFieldset.php:130
+#: src/Form/SettingsFieldset.php:48
 msgid "Autofillers"
 msgstr "Remplisseurs"
 
-#: src/Form/ResourceTemplateDataFieldset.php:137
+#: src/Form/ResourceTemplateDataFieldset.php:147
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:227
 msgid "More settings"
 msgstr "Autres paramètres"
 
-#: src/Form/ResourceTemplateDataFieldset.php:138
+#: src/Form/ResourceTemplateDataFieldset.php:148
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:228
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
@@ -248,10 +252,33 @@ msgid "Advanced Resource Template"
 msgstr "Modèle de ressources avancé"
 
 #: src/Form/SettingsFieldset.php:19
+msgid ""
+"Skip checking advanced template settings to allow to save an invalid record"
+msgstr ""
+"Ignorer la vérification des paramètres avancés des modèles afin de permettre "
+"d’enregistrer des notices invalides"
+
+#: src/Form/SettingsFieldset.php:20
+msgid ""
+"Disable the checking of the template settings. For example if a value is "
+"longer than the specified length, it will be saved anyway.\n"
+"This option should be used only during a migration process or to simplify a "
+"complex batch edition or import.\n"
+"It does not skip core checks, in particular required properties."
+msgstr ""
+"Désactiver la vérification des paramètres du modèle. Par exemple, si une "
+"valeur est plus longue que la longueur indiquée, la ressource sera "
+"enregistrée malgré tout.\n"
+"Cette option devrait être utilisée seulement pendant une migration ou pour "
+"simplifier un traitement en lot ou un import.\n"
+"Elle ne désactive pas les vérifications internes à Omeka, en particulier le "
+"contrôle des propriétés obligatoires."
+
+#: src/Form/SettingsFieldset.php:32
 msgid "Append properties to resource form"
 msgstr "Ajouter des propriétés au formulaire"
 
-#: src/Form/SettingsFieldset.php:20
+#: src/Form/SettingsFieldset.php:33
 msgid ""
 "When no template is selected in resource form, the property selector may be "
 "available or not to force to select a template.\n"
@@ -264,15 +291,15 @@ msgstr ""
 "Attention : vous devez indiquer chaque modèle de ressource ouvert ou fermé "
 "en accord avec ce paramètre."
 
-#: src/Form/SettingsFieldset.php:23
+#: src/Form/SettingsFieldset.php:36
 msgid "Allow"
 msgstr "Autoriser"
 
-#: src/Form/SettingsFieldset.php:24
+#: src/Form/SettingsFieldset.php:37
 msgid "Forbid"
 msgstr "Interdir"
 
-#: src/Form/SettingsFieldset.php:36
+#: src/Form/SettingsFieldset.php:49
 msgid "List of autofillers to use for this template."
 msgstr "Liste des remplisseurs à utiliser pour ce modèle."
 
@@ -478,6 +505,9 @@ msgstr "Configuration des remplisseurs manquante."
 #: config/module.config.php:164
 msgid "No results"
 msgstr "Pas de résultats"
+
+msgid "No %s found."
+msgstr "Aucun %s trouvé."
 
 #~ msgid "Value languages for properties"
 #~ msgstr "Langues pour les valeurs des propriétés"
