@@ -237,6 +237,12 @@ class Module extends AbstractModule
 
     public function validateEntityHydratePost(Event $event): void
     {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        if ($settings->get('advancedresourcetemplate_skip_checks')) {
+            return;
+        }
+
         /** @var \Omeka\Entity\Resource $entity */
         $entity = $event->getParam('entity');
 
@@ -264,7 +270,7 @@ class Module extends AbstractModule
         // added directly.
         // TODO Include the check in the resource form. Add a fake hidden element? Or fix api plugin (the form is static in plugin api, so it is removed when called somewhere else)? For now, just js (issue is only on the min/max numbers of values).
         /** @var \Omeka\Mvc\Status $status */
-        $status = $this->getServiceLocator()->get('Omeka\Status');
+        $status = $services->get('Omeka\Status');
         $routeMatch = $status->getRouteMatch();
         // RouteMatch may be unavailable during background process.
         $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;

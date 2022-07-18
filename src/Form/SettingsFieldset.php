@@ -13,6 +13,19 @@ class SettingsFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'advancedresourcetemplate_skip_checks',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Skip checking advanced template settings to allow to save an invalid record', // @translate
+                    'info' => 'Disable the checking of the template settings. For example if a value is longer than the specified length, it will be saved anyway.
+This option should be used only during a migration process or to simplify a complex batch edition or import.
+It does not skip core checks, in particular required properties.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_skip_checks',
+                ],
+            ])
+            ->add([
                 'name' => 'advancedresourcetemplate_closed_property_list',
                 'type' => Element\Radio::class,
                 'options' => [
