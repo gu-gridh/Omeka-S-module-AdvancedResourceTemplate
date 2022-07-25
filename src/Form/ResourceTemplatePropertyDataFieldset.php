@@ -2,6 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
+use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Omeka\Form\Element\ArrayTextarea;
@@ -93,9 +94,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'property_read_only',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Property disabled in form (editable only by api/job)', // @translate
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     // 'id' => 'property_read_only',
@@ -105,9 +107,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'locked_value',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Locked value once saved', // @translate
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     // 'id' => 'locked_value',

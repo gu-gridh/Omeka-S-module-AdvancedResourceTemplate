@@ -223,8 +223,8 @@ $(document).ready(function() {
         const inputLanguage = field.find('.values input.value-language');
         inputLanguage.attr('list', listName);
 
-        const noLanguage = !!(rtpData.use_language
-            && (rtpData.use_language === 'no' || (rtpData.use_language !== 'yes' && templateData && Number(templateData.no_language))));
+        const noLanguage = rtpData.use_language === 'no'
+            || ((!rtpData.use_language || rtpData.use_language === '') && templateData && templateData.no_language === 'yes');
         field.data('no-language', noLanguage);
         field.find('.inputs .values input.value-language').each(function() {
             initValueLanguage($(this), field);
@@ -616,7 +616,7 @@ $(document).ready(function() {
         }
         resourceClassSelect.val(resourceClassId);
 
-        if (templateData && Number(templateData.require_resource_class)) {
+        if (templateData && templateData.require_resource_class === 'yes') {
             resourceClassSelect.attr('require', 'require')
                 .closest('.field').addClass('required');
         } else {
@@ -794,7 +794,7 @@ $(document).ready(function() {
     $(document).on('o:template-applied', 'form.resource-form', function() {
         const templateData = $('#resource-values').data('template-data');
         const hasTemplate = $('#resource-template-select').val() != '';
-        if ((hasTemplate && templateData && templateData.closed_property_list == '1')
+        if ((hasTemplate && templateData && templateData.closed_property_list === 'yes')
             || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
         ) {
             sidebarPropertySelector.removeClass('always-open');
@@ -952,8 +952,7 @@ $(document).ready(function() {
         const isManagedResourceType = resourceType && resourceType !== 'media';
         const templateData = $('#resource-values').data('template-data');
         const templatePropertyData = sidebar.data('template-property-data');
-        const quickNewResourceTemplate = typeof templateData === 'object'
-            && (typeof templateData.quick_new_resource === 'undefined' || templateData.quick_new_resource !== 'no');
+        const quickNewResourceTemplate = templateData && templateData.quick_new_resource !== 'no';
         const quickNewResourceTemplateProperty = typeof templatePropertyData === 'object'
             ? (typeof templatePropertyData.quick_new_resource === 'undefined' || templatePropertyData.quick_new_resource === ''
                 ? quickNewResourceTemplate

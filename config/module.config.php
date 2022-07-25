@@ -55,6 +55,7 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\Element\OptionalCheckbox::class => Form\Element\OptionalCheckbox::class,
             Form\Element\OptionalMultiCheckbox::class => Form\Element\OptionalMultiCheckbox::class,
             Form\Element\OptionalSelect::class => Form\Element\OptionalSelect::class,
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,

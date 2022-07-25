@@ -23,9 +23,10 @@ class ResourceTemplateDataFieldset extends Fieldset
             // Force specified classes.
             ->add([
                 'name' => 'require_resource_class',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Require a class', // @translate
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'require_resource_class',
@@ -33,7 +34,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'closed_class_list',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Limit to specified classes', // @translate
                     'checked_value' => 'yes',
@@ -44,9 +45,10 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'closed_property_list',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Limit to specified properties', // @translate
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'closed_property_list',
@@ -54,13 +56,10 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'quick_new_resource',
-                'type' => Element\Radio::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Allow quick creation of a resource', // @translate
-                    'value_options' => [
-                        'yes' => 'Yes', // @translate
-                        'no' => 'No', // @translate
-                    ],
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'quick_new_resource',
@@ -106,9 +105,10 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'no_language',
-                'type' => Element\Checkbox::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'No language', // @translate
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'no_language',
@@ -116,32 +116,24 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'value_suggest_keep_original_label',
-                'type' => Element\Radio::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Value Suggest: keep original label', // @translate
-                    'value_options' => [
-                        'no' => 'No', // @translate
-                        'yes' => 'Yes', // @translate
-                    ],
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'value_suggest_keep_original_label',
-                    'value' => 'no',
                 ],
             ])
             ->add([
                 'name' => 'value_suggest_require_uri',
-                'type' => Element\Radio::class,
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Value Suggest: require uri', // @translate
-                    'value_options' => [
-                        'no' => 'No', // @translate
-                        'yes' => 'Yes', // @translate
-                    ],
+                    'checked_value' => 'yes',
                 ],
                 'attributes' => [
                     'id' => 'value_suggest_require_uri',
-                    'value' => 'no',
                 ],
             ])
             ->add([

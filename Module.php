@@ -282,7 +282,7 @@ class Module extends AbstractModule
 
         // Template level.
         $resourceClass = $entity->getResourceClass();
-        $requireClass = (bool) $template->dataValue('require_resource_class');
+        $requireClass = $template->dataValue('require_resource_class') === 'yes';
         if ($requireClass && !$resourceClass) {
             $message = new \Omeka\Stdlib\Message('A class is required.'); // @translate
             $errorStore->addError('o:resource_class', $message);

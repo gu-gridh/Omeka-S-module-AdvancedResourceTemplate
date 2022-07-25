@@ -90,3 +90,77 @@ SQL;
     );
     $messenger->addWarning($message);
 }
+
+if (version_compare((string) $oldVersion, '3.3.4.14', '<')) {
+    // Use "yes" for all simple parameters.
+    $qb = $connection->createQueryBuilder();
+    $qb
+        ->select('id', 'data')
+        ->from('resource_template_data', 'resource_template_data')
+    ;
+    $templateDatas = $connection->executeQuery($qb)->fetchAllKeyValue();
+    foreach ($templateDatas as $id => $templateData) {
+        $templateData = json_decode($templateData, true);
+        foreach ([
+            'require_resource_class',
+            'closed_class_list',
+            'closed_property_list',
+            'quick_new_resource',
+            'no_language',
+            'value_suggest_keep_original_label',
+            'value_suggest_require_uri',
+        ] as $key) {
+            if (array_key_exists($key, $templateData)) {
+                if (in_array($templateData[$key], [true, 1, '1', 'yes'], true)) {
+                    $templateData[$key] = 'yes';
+                } else {
+                    unset($templateData[$key]);
+                }
+            }
+        }
+        $quotedTemplateData = $connection->quote(json_encode($templateData));
+        $sql = <<<SQL
+UPDATE `resource_template_data`
+SET
+    `data` = $quotedTemplateData
+WHERE `id` = $id;
+SQL;
+        $connection->executeStatement($sql);
+    }
+
+    $qb = $connection->createQueryBuilder();
+    $qb
+        ->select('id', 'data')
+        ->from('resource_template_property_data', 'resource_template_property_data')
+    ;
+    $templatePropertyDatas = $connection->executeQuery($qb)->fetchAllKeyValue();
+    foreach ($templatePropertyDatas as $id => $templatePropertyData) {
+        $templatePropertyData = json_decode($templatePropertyData, true);
+        foreach ([
+            'property_read_only',
+            'locked_value',
+        ] as $key) {
+            if (array_key_exists($key, $templatePropertyData)) {
+                if (in_array($templatePropertyData[$key], [true, 1, '1', 'yes'], true)) {
+                    $templatePropertyData[$key] = 'yes';
+                } else {
+                    unset($templatePropertyData[$key]);
+                }
+            }
+        }
+        $quotedTemplatePropertyData = $connection->quote(json_encode($templatePropertyData));
+        $sql = <<<SQL
+UPDATE `resource_template_property_data`
+SET
+    `data` = $quotedTemplatePropertyData
+WHERE `id` = $id;
+SQL;
+        $connection->executeStatement($sql);
+    }
+
+    $messenger = new Messenger();
+    $message = new Message(
+        'New settings were added to the template.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
