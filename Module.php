@@ -281,32 +281,36 @@ class Module extends AbstractModule
         $messenger = $directMessage ? new \Omeka\Mvc\Controller\Plugin\Messenger() : null;
 
         // Template level.
+        $resourceClass = $entity->getResourceClass();
         $requireClass = (bool) $template->dataValue('require_resource_class');
-        if ($requireClass) {
-            $resourceClass = $entity->getResourceClass();
-            if (!$resourceClass) {
-                $errorStore->addError('o:resource_class', 'A class is required.'); // @translate
-            } else {
-                $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
-                if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
-                    if (count($suggestedClasses) === 1) {
-                        $message = new \Omeka\Stdlib\Message(
-                            'The class should be "%s".', // @translate
-                            key($suggestedClasses)
-                        );
-                        $errorStore->addError('o:resource_class', $message);
-                        if ($directMessage) {
-                            $messenger->addError($message);
-                        }
-                    } else {
-                        $message = new \Omeka\Stdlib\Message(
-                            'The class should be one of "%s".', // @translate
-                            implode('", "', array_keys($suggestedClasses))
-                        );
-                        $errorStore->addError('o:resource_class', $message);
-                        if ($directMessage) {
-                            $messenger->addError($message);
-                        }
+        if ($requireClass && !$resourceClass) {
+            $message = new \Omeka\Stdlib\Message('A class is required.'); // @translate
+            $errorStore->addError('o:resource_class', $message);
+            if ($directMessage) {
+                $messenger->addError($message);
+            }
+        }
+        $closedClassList = $template->dataValue('closed_class_list') === 'yes';
+        if ($closedClassList && $resourceClass) {
+            $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
+            if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
+                if (count($suggestedClasses) === 1) {
+                    $message = new \Omeka\Stdlib\Message(
+                        'The class should be "%s".', // @translate
+                        key($suggestedClasses)
+                    );
+                    $errorStore->addError('o:resource_class', $message);
+                    if ($directMessage) {
+                        $messenger->addError($message);
+                    }
+                } else {
+                    $message = new \Omeka\Stdlib\Message(
+                        'The class should be one of "%s".', // @translate
+                        implode('", "', array_keys($suggestedClasses))
+                    );
+                    $errorStore->addError('o:resource_class', $message);
+                    if ($directMessage) {
+                        $messenger->addError($message);
                     }
                 }
             }

@@ -32,6 +32,17 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'closed_class_list',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Limit to specified classes', // @translate
+                    'checked_value' => 'yes',
+                ],
+                'attributes' => [
+                    'id' => 'closed_class_list',
+                ],
+            ])
+            ->add([
                 'name' => 'closed_property_list',
                 'type' => Element\Checkbox::class,
                 'options' => [

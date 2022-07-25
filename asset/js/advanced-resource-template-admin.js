@@ -590,21 +590,22 @@ $(document).ready(function() {
         // it when the template is changed.
         const areResourceClassesStored = typeof $('#resource-values').data('resource_class_select') !== 'undefined';
         if (areResourceClassesStored) {
+            // Restore default select.
             resourceClassSelect.html($('#resource-values').data('resource_class_select'));
         } else {
             $('#resource-values').data('resource_class_select', $('#resource-values #resource-class-select').html());
         }
+        // Re-set the previous resource class id when the html is reset.
         resourceClassSelect.val(resourceClassId);
-
         if (hasTemplate
             && templateData
             && templateData.suggested_resource_class_ids
-            && templateData.suggested_resource_class_ids.length
+            && Object.keys(templateData.suggested_resource_class_ids).length
+            && templateData.closed_class_list === 'yes'
         ) {
-            templateData.suggested_resource_class_ids.map(Number);
             resourceClassSelect.find('option').each(function() {
                 const resClassId = Number($(this).val());
-                if (resClassId && !templateData.suggested_resource_class_ids.includes(resClassId)) {
+                if (resClassId && !Object.values(templateData.suggested_resource_class_ids).includes(resClassId)) {
                     $(this).remove();
                 }
             });

@@ -757,7 +757,8 @@
     /**
      * Apply the selected resource template to the form.
      *
-     * @param bool changeClass Whether to change the suggested class
+     * @param bool changeClass Whether to change the suggested class on new resource.
+     *   Also, the class may be changed if the new resource template requires a specific class.
      */
     var applyResourceTemplate = function(changeClass) {
         var templateSelect = $('#resource-template-select');
@@ -802,6 +803,9 @@
             var url = templateSelect.data('api-base-url') + '/' + templateId;
             $.get(url)
                 .done(function(data) {
+                    // Store global data of the template.
+                    $('#resource-values').data('template-data', data['o:data'] ? data['o:data'] : {});
+
                     if (changeClass) {
                         // Change the resource class.
                         var classSelect = $('#resource-class-select');
@@ -810,9 +814,6 @@
                             classSelect.trigger('chosen:updated');
                         }
                     }
-
-                    // Store global data of the template.
-                    $('#resource-values').data('template-data', data['o:data'] ? data['o:data'] : {});
 
                     data = prepareTemplateDataBefore(data);
 
@@ -888,6 +889,8 @@
         }
 
         // Adapt the form for the template, if any.
+        // The class is set for a new item (default omeka), or if the new template
+        // requires a class (option specific to the module Advanced Resource Template).
         var applyTemplateClass = $('body').hasClass('add');
         $.when(applyResourceTemplate(applyTemplateClass))
             .done(function () {
