@@ -167,6 +167,7 @@ return [
     'advancedresourcetemplate' => [
         'settings' => [
             'advancedresourcetemplate_resource_form_elements' => [
+                'metadata_description',
                 'language',
                 'visibility',
                 'value_annotation',

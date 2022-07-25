@@ -36,6 +36,11 @@
     .art-no-language .resource-form .input-body .value-language ~ textarea {
         padding-left: 12px;
     }
+    .art-no-metadata-description .resource-form .field-meta > a.collapse,
+    .art-no-metadata-description .resource-form .field-meta > a.expand,
+    .art-no-metadata-description .resource-form .field-meta > .collapsible {
+        display: none !important;
+    }
 
     .autocomplete-suggestions {
         border: 1px solid #999;

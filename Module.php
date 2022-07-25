@@ -414,6 +414,7 @@ class Module extends AbstractModule
 
         $setting = $plugins->get('setting');
         $classesElements = [
+            'art-no-metadata-description' => 'metadata_description',
             'art-no-language' => 'language',
             'art-no-visibility' => 'visibility',
             'art-no-value-annotation' => 'value_annotation',
