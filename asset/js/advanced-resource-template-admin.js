@@ -580,14 +580,20 @@ $(document).ready(function() {
     /**
      * Manage the button "more actions".
      */
-    function prepareMoreActions() {
-        if (!$('body').hasClass('art-no-more-action')) {
+    function prepareMoreActions(value) {
+        if (!$('body').hasClass('art-no-more-actions')) {
             return;
         }
-        $('.art-no-more-action .resource-form .input-footer .actions').each(function() {
-            $(this).append($(this).find('.more-actions li'));
-            $(this).find('.more-actions').remove();
-        });
+        if (value) {
+            const val = $(value);
+            val.find('.input-footer .actions').append(val.find('.more-actions li'));
+            val.find('.more-actions').remove();
+        } else {
+            $('.art-no-more-actions .resource-form .input-footer .actions').each(function() {
+                $(this).append($(this).find('.more-actions li'));
+                $(this).find('.more-actions').remove();
+            });
+        }
     }
 
     /**
@@ -878,7 +884,7 @@ $(document).ready(function() {
     });
 
     $(document).on('o:prepare-value', function(e, dataType, value, valueObj) {
-        prepareMoreActions();
+        prepareMoreActions(value);
 
         const term = value.data('term');
         var field = value.closest('.resource-values.field');

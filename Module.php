@@ -416,12 +416,17 @@ class Module extends AbstractModule
         $classesElements = [
             'art-no-visibility' => 'visibility',
             'art-no-value-annotation' => 'value_annotation',
+            'art-no-more-actions' => 'more_actions',
         ];
         $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
         $classes = array_diff($classesElements, $resourceFormElements);
         if (isset($classes['art-no-visibility']) || isset($classes['art-no-value-annotation'])) {
-            $classes['art-no-more-action'] = true;
+            $classes['art-no-more-actions'] = true;
         }
+        if (count($classes) === 1 && isset($classes['art-no-more-actions'])) {
+            $classes['art-direct-buttons'] = true;
+        }
+
         if (count($classes)) {
             $view->htmlElement('body')->appendAttribute('class', implode(' ', array_keys($classes)));
         }

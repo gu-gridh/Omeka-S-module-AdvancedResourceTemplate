@@ -169,6 +169,7 @@ return [
             'advancedresourcetemplate_resource_form_elements' => [
                 'visibility',
                 'value_annotation',
+                'more_actions',
             ],
             'advancedresourcetemplate_skip_checks' => false,
             'advancedresourcetemplate_closed_property_list' => '0',

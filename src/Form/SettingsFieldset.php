@@ -21,6 +21,7 @@ class SettingsFieldset extends Fieldset
                     'value_options' => [
                         'visibility' => 'Button Visibility', // @translate
                         'value_annotation' => 'Button Value annotation', // @translate
+                        'more_actions' => 'Button More actions', // @translate
                     ],
                     'use_hidden_element' => true,
                 ],
