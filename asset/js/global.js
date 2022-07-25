@@ -192,7 +192,7 @@ var Omeka = {
     },
 
     manageSelectedActions: function() {
-        var selectedOptions = $('#batch-form .batch-inputs .batch-selected');
+        var selectedOptions = $('#batch-form .batch-inputs [value$=selected]');
         if ($('.batch-edit td input[type="checkbox"]:checked').length > 0) {
             selectedOptions.removeAttr('disabled');
         } else {
@@ -261,14 +261,14 @@ var Omeka = {
                 resourceParent.removeClass('empty');
             }
         }
-    
+
         if (existingRowData.length > 0) {
             $.each(existingRowData, function() {
                 appendRow(this.id);
             });
             table.removeClass('empty');
         }
-    
+
         // Add the selected resource to the edit panel.
         $(selectorId + ' .selector-child').on('click', function(e) {
             e.stopPropagation();
@@ -323,7 +323,7 @@ var Omeka = {
     disableQueryTextInput: function() {
         var queryType = $(this);
         var queryText = queryType.siblings('.query-text');
-        queryText.prop('disabled', ['ex', 'nex', 'exs', 'nexs', 'exm', 'nexm', 'lex', 'nlex'].includes(queryType.val()));
+        queryText.prop('disabled', ['ex', 'nex', 'exs', 'nexs', 'exm', 'nexm', 'lex', 'nlex', 'tpl', 'ntpl', 'tpr', 'ntpr', 'tpu', 'ntpu'].includes(queryType.val()));
     },
 
     // Clean the search query of empty or otherwise unneeded inputs.
@@ -350,7 +350,7 @@ var Omeka = {
                     const match = inputName.match(/property\[(\d+)\]\[text\]/);
                     if (match) {
                         const propertyType = form.find(`[name="property[${match[1]}][type]"]`);
-                        if (['eq', 'neq', 'in', 'nin', 'res', 'nres', 'list', 'nlist', 'sw', 'nsw', 'ew', 'new', 'lres', 'nlres', 'gt', 'gte', 'lte', 'lt']
+                        if (['eq', 'neq', 'in', 'nin', 'res', 'nres', 'list', 'nlist', 'sw', 'nsw', 'ew', 'new', 'lres', 'nlres', 'tp', 'ntp', 'dtp', 'ndtp', 'gt', 'gte', 'lte', 'lt']
                             .includes(propertyType.val())
                         ) {
                             form.find(`[name="property[${match[1]}][joiner]"]`).prop('name', '');
