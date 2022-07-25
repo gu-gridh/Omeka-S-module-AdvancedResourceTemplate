@@ -166,8 +166,12 @@ return [
     ],
     'advancedresourcetemplate' => [
         'settings' => [
-            // The default autofillers are in /data/mapping/mappings.ini.
+            'advancedresourcetemplate_resource_form_elements' => [
+                'value_annotation',
+            ],
+            'advancedresourcetemplate_skip_checks' => false,
             'advancedresourcetemplate_closed_property_list' => '0',
+            // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
         ],
     ],

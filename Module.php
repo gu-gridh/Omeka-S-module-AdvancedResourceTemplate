@@ -397,19 +397,32 @@ class Module extends AbstractModule
 
     public function addAdminResourceHeaders(Event $event): void
     {
+        /** @var \Laminas\View\Renderer\PhpRenderer $view */
         $view = $event->getTarget();
 
-        $action = $view->params()->fromRoute('action');
+        $plugins = $view->getHelperPluginManager();
+        $params = $plugins->get('params');
+        $action = $params->fromRoute('action');
         if (!in_array($action, ['add', 'edit'])) {
             return;
         }
 
-        $isModal = $view->params()->fromQuery('window') === 'modal';
+        $isModal = $params->fromQuery('window') === 'modal';
         if ($isModal) {
             $view->htmlElement('body')->appendAttribute('class', 'modal');
         }
 
-        $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
+        $setting = $plugins->get('setting');
+        $classesElements = [
+            'art-no-value-annotation' => 'value_annotation',
+        ];
+        $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
+        $classes = array_diff($classesElements, $resourceFormElements);
+        if (count($classes)) {
+            $view->htmlElement('body')->appendAttribute('class', implode(' ', array_keys($classes)));
+        }
+
+        $assetUrl = $plugins->get('assetUrl');
         $view->headLink()->appendStylesheet($assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
         $view->headScript()
             ->appendScript(sprintf('var baseUrl = %s;', json_encode($view->basePath('/'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))

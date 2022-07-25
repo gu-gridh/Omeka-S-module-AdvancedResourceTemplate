@@ -13,6 +13,10 @@
         padding-left: 6px;
     }
 
+    .art-no-value-annotation .resource-form .input-footer .actions .value-annotation-annotate {
+        display: none;
+    }
+
     .autocomplete-suggestions {
         border: 1px solid #999;
         background: #fff;

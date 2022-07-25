@@ -2,6 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
+use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 
@@ -12,6 +13,20 @@ class SettingsFieldset extends Fieldset
     public function init(): void
     {
         $this
+            ->add([
+                'name' => 'advancedresourcetemplate_resource_form_elements',
+                'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,
+                'options' => [
+                    'label' => 'Elements of resource form to display', // @translate
+                    'value_options' => [
+                        'value_annotation' => 'Button Value annotation', // @translate
+                    ],
+                    'use_hidden_element' => true,
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_resource_form_elements',
+                ],
+            ])
             ->add([
                 'name' => 'advancedresourcetemplate_skip_checks',
                 'type' => Element\Checkbox::class,
@@ -46,7 +61,7 @@ Warning: you may have to set each resource template as open/close to addition ac
                 'type' => Element\Textarea::class,
                 'options' => [
                     'label' => 'Autofillers', // @translate
-                    'info' => 'List of autofillers to use for this template.', // @translate
+                    'info' => 'The autofillers should be set in selected templates params.', // @translate
                     'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate#autofilling',
                 ],
                 'attributes' => [
