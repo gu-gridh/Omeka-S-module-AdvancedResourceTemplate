@@ -414,11 +414,12 @@ class Module extends AbstractModule
 
         $setting = $plugins->get('setting');
         $classesElements = [
+            'art-no-visibility' => 'visibility',
             'art-no-value-annotation' => 'value_annotation',
         ];
         $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
         $classes = array_diff($classesElements, $resourceFormElements);
-        if (isset($classes['art-no-value-annotation'])) {
+        if (isset($classes['art-no-visibility']) || isset($classes['art-no-value-annotation'])) {
             $classes['art-no-more-action'] = true;
         }
         if (count($classes)) {

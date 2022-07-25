@@ -13,6 +13,7 @@
         padding-left: 6px;
     }
 
+    .art-no-visibility .resource-form .input-footer .actions .value-visibility,
     .art-no-value-annotation .resource-form .input-footer .actions .value-annotation-annotate {
         display: none;
     }
