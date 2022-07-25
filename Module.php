@@ -414,16 +414,20 @@ class Module extends AbstractModule
 
         $setting = $plugins->get('setting');
         $classesElements = [
+            'art-no-language' => 'language',
             'art-no-visibility' => 'visibility',
             'art-no-value-annotation' => 'value_annotation',
             'art-no-more-actions' => 'more_actions',
         ];
         $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
         $classes = array_diff($classesElements, $resourceFormElements);
+
         if (isset($classes['art-no-visibility']) || isset($classes['art-no-value-annotation'])) {
             $classes['art-no-more-actions'] = true;
-        }
-        if (count($classes) === 1 && isset($classes['art-no-more-actions'])) {
+        } elseif (isset($classes['art-no-more-actions'])
+            && !isset($classes['art-no-visibility'])
+            && !isset($classes['art-no-value-annotation'])
+        ) {
             $classes['art-direct-buttons'] = true;
         }
 

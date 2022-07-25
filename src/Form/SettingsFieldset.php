@@ -19,6 +19,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'label' => 'Elements of resource form to display', // @translate
                     'value_options' => [
+                        'language' => 'Button Language', // @translate
                         'visibility' => 'Button Visibility', // @translate
                         'value_annotation' => 'Button Value annotation', // @translate
                         'more_actions' => 'Button More actions', // @translate

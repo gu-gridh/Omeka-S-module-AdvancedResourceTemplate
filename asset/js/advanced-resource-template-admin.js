@@ -578,21 +578,20 @@ $(document).ready(function() {
     }
 
     /**
-     * Manage the button "more actions".
+     * Manage the display of the value input.
      */
-    function prepareMoreActions(value) {
-        if (!$('body').hasClass('art-no-more-actions')) {
-            return;
-        }
-        if (value) {
-            const val = $(value);
-            val.find('.input-footer .actions').append(val.find('.more-actions li'));
-            val.find('.more-actions').remove();
-        } else {
-            $('.art-no-more-actions .resource-form .input-footer .actions').each(function() {
-                $(this).append($(this).find('.more-actions li'));
-                $(this).find('.more-actions').remove();
-            });
+    function prepareValueDisplay(value) {
+        if ($('body').hasClass('art-no-more-actions')) {
+            if (value) {
+                const val = $(value);
+                val.find('.input-footer .actions').append(val.find('.more-actions li'));
+                val.find('.more-actions').remove();
+            } else {
+                $('.art-no-more-actions .resource-form .input-footer .actions').each(function() {
+                    $(this).append($(this).find('.more-actions li'));
+                    $(this).find('.more-actions').remove();
+                });
+            }
         }
     }
 
@@ -823,7 +822,7 @@ $(document).ready(function() {
             prepareAutofiller();
             $('#resource-values').data('is-loaded', $('#resource-template-select').val());
         }
-        prepareMoreActions();
+        prepareValueDisplay();
     });
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
@@ -841,7 +840,7 @@ $(document).ready(function() {
             $('form.resource-form #property-selector-button').show();
         }
 
-        prepareMoreActions();
+        prepareValueDisplay();
 
         prepareResourceClassSelect();
 
@@ -884,7 +883,7 @@ $(document).ready(function() {
     });
 
     $(document).on('o:prepare-value', function(e, dataType, value, valueObj) {
-        prepareMoreActions(value);
+        prepareValueDisplay(value);
 
         const term = value.data('term');
         var field = value.closest('.resource-values.field');

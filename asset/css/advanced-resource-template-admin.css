@@ -27,10 +27,14 @@
         height: 24px;
     }
 
+    .art-no-language .resource-form .input-body .value-language,
     .art-no-more-actions .resource-form .input-footer .actions .more-actions a,
     .art-no-visibility .resource-form .input-footer .actions .value-visibility,
     .art-no-value-annotation .resource-form .input-footer .actions .value-annotation-annotate {
         display: none;
+    }
+    .art-no-language .resource-form .input-body .value-language ~ textarea {
+        padding-left: 12px;
     }
 
     .autocomplete-suggestions {
