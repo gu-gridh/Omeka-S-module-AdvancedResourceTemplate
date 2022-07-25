@@ -19,6 +19,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'label' => 'Elements of resource form to display', // @translate
                     'value_options' => [
+                        'metadata_collapse' => 'Collapse Metadata description by default', // @translate
                         'metadata_description' => 'Button Metadata description', // @translate
                         'language' => 'Button Language', // @translate
                         'visibility' => 'Button Visibility', // @translate

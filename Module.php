@@ -407,12 +407,10 @@ class Module extends AbstractModule
             return;
         }
 
-        $isModal = $params->fromQuery('window') === 'modal';
-        if ($isModal) {
-            $view->htmlElement('body')->appendAttribute('class', 'modal');
-        }
-
         $setting = $plugins->get('setting');
+        $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
+
+        $classes = [];
         $classesElements = [
             'art-no-metadata-description' => 'metadata_description',
             'art-no-language' => 'language',
@@ -420,7 +418,7 @@ class Module extends AbstractModule
             'art-no-value-annotation' => 'value_annotation',
             'art-no-more-actions' => 'more_actions',
         ];
-        $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
+
         $classes = array_diff($classesElements, $resourceFormElements);
 
         if (isset($classes['art-no-visibility']) || isset($classes['art-no-value-annotation'])) {
@@ -431,15 +429,22 @@ class Module extends AbstractModule
         ) {
             $classes['art-direct-buttons'] = true;
         }
+        if (!isset($classes['art-no-metadata-description']) && in_array('metadata_collapse', $resourceFormElements)) {
+            $classes['art-metadata-collapse'] = true;
+        }
+
+        $isModal = $params->fromQuery('window') === 'modal';
+        if ($isModal) {
+            $classes[] = 'modal';
+        }
 
         if (count($classes)) {
-            $view->htmlElement('body')->appendAttribute('class', implode(' ', array_keys($classes)));
+            $plugins->get('htmlElement')('body')->appendAttribute('class', implode(' ', array_keys($classes)));
         }
 
         $assetUrl = $plugins->get('assetUrl');
-        $view->headLink()->appendStylesheet($assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
-        $view->headScript()
-            ->appendScript(sprintf('var baseUrl = %s;', json_encode($view->basePath('/'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)))
+        $plugins->get('headLink')->appendStylesheet($assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
+        $plugins->get('headScript')
             ->appendFile($assetUrl('vendor/jquery-autocomplete/jquery.autocomplete.min.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer'])
             ->appendFile($assetUrl('js/advanced-resource-template-admin.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer']);
     }

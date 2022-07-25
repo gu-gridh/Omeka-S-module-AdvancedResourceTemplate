@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+    const baseUrl = window.location.pathname.replace(/\/admin\/.*/, '/');
+
     // Initialize the sidebar according to the main option.
     const sidebarPropertySelector = $('#property-selector');
     if ($('form.resource-form').hasClass('closed-property-list on-load')) {
@@ -8,6 +10,16 @@ $(document).ready(function() {
         sidebarPropertySelector.removeClass('always-open');
         $('form.resource-form #property-selector-button').hide();
         Omeka.closeSidebar(sidebarPropertySelector);
+    }
+
+    function prepareFieldDisplay(field) {
+        if ($('body').hasClass('art-metadata-collapse')) {
+            if (field) {
+                field.find('.field-meta a.collapse').trigger('click');
+            } else {
+                $('.resource-form .field-meta a.collapse').trigger('click');
+            }
+        }
     }
 
     /**
@@ -823,6 +835,7 @@ $(document).ready(function() {
             $('#resource-values').data('is-loaded', $('#resource-template-select').val());
         }
         prepareValueDisplay();
+        prepareFieldDisplay();
     });
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
@@ -864,6 +877,7 @@ $(document).ready(function() {
             prepareFieldReadOnly($(field));
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
+            prepareFieldDisplay($(field));
         });
 
         if (typeof $('#resource-values').data('is-loaded') !== 'undefined') {
@@ -880,6 +894,7 @@ $(document).ready(function() {
         prepareFieldReadOnly(field);
         prepareFieldAutocomplete(field);
         prepareFieldLanguage(field);
+        prepareFieldDisplay(field);
     });
 
     $(document).on('o:prepare-value', function(e, dataType, value, valueObj) {
