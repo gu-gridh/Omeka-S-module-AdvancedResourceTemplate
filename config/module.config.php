@@ -46,7 +46,7 @@ return [
     ],
     'view_helpers' => [
         'factories' => [
-            // TODO To be removed with #omeka/omeka-s/1623.
+            // Used in AdvancedResourceTemplate, AdvancedSearch and BlockPlus.
             'assetUrl' => Service\ViewHelper\AssetUrlFactory::class,
             // Copy from AdvancedResourceTemplate. Copy in BulkExport and BulkEdit. Used in Contribute.
             'customVocabBaseType' => Service\ViewHelper\CustomVocabBaseTypeFactory::class,

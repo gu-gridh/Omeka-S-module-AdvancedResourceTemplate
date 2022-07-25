@@ -1,3 +1,8 @@
+/**
+ * Adapted for modules AdvancedResourceTemplate and AdvancedSearch.
+ * Contains fixes pulled on github.
+ */
+
 var Omeka = {
     openSidebar : function(sidebar) {
         sidebar.addClass('active');
@@ -72,27 +77,26 @@ var Omeka = {
             parent.find('li.selector-child').each(function() {
                 var child = $(this);
                 var label = child.data('child-search').toLowerCase();
-                if (label.indexOf(filter) > -1) {
+                if ((label.indexOf(filter) < 0) || (child.hasClass('added'))) {
+                    // Label doesn't contain the filter string. Hide the child.
+                    child.addClass('filter-hidden');
+                } else {
                     // Label contains the filter string. Show the child.
-                    child.show();
+                    child.removeClass('filter-hidden');
                     totalCount++;
                     count++;
-                } else {
-                    // Label doesn't contain the filter string. Hide the child.
-                    child.hide();
                 }
             });
             if (count > 0) {
-                parent.addClass('show');
-                parent.show();
+                parent.removeClass('empty');
             } else {
-                parent.removeClass('show');
-                parent.hide();
+                parent.addClass('empty');
             }
             parent.children('span.selector-child-count').text(count);
         });
         if (filter == '') {
             selector.find('li.selector-parent').removeClass('show');
+            $('.filter-match').removeClass('filter-match');
         }
         selector.find('span.selector-total-count').text(totalCount);
     },
@@ -188,7 +192,7 @@ var Omeka = {
     },
 
     manageSelectedActions: function() {
-        var selectedOptions = $('[value="update-selected"], [value="delete-selected"]');
+        var selectedOptions = $('#batch-form .batch-inputs .batch-selected');
         if ($('.batch-edit td input[type="checkbox"]:checked').length > 0) {
             selectedOptions.removeAttr('disabled');
         } else {
@@ -201,18 +205,19 @@ var Omeka = {
 
     initializeSelector : function(tableId, selectorId) {
         var table = $(tableId);
-        var existingRowData = table.data('existing-rows');
+        var existingRowData = table.data('existing-rows') || [];
         var rowTemplate = $($.parseHTML(table.data('rowTemplate')));
         var selector = $(selectorId);
-        var totalCount = $(selectorId).find('.selector-total-count');
-      
+        var totalCount = selector.find('.resources-available').data('all-resources-count');
+        var selectorCount = selector.find('.selector-total-count');
+
         var parentToggle = function(e) {
             e.stopPropagation();
             if ($(this).children('li')) {
                 $(this).toggleClass('show');
             }
         }
-        
+
         var appendRow = function(id) {
             if (table.find(".resource-id[value='" + id + "']").length) {
                 return;
@@ -228,23 +233,24 @@ var Omeka = {
             });
             selectorRow.addClass('added');
             table.append(tableRow).removeClass('empty').trigger('appendRow');
-            updateSiteCount(id);
+            updateResourceCount(id);
         }
-    
-        var updateSiteCount = function(id) {
-            var resource = $('[data-resource-id="' + id + '"]');
+
+        var updateResourceCount = function(id) {
+            var resource = selector.find('[data-resource-id="' + id + '"]');
             var resourceParent = resource.parents('.selector-parent');
             var childCount = resourceParent.find('.selector-child-count').first();
             if (resource.hasClass('added')) {
-                var newTotalCount = parseInt(totalCount.text()) - 1;
+                var newTotalCount = parseInt(selectorCount.text()) - 1;
                 var newChildCount = parseInt(childCount.text()) - 1;
             } else {
-                var newTotalCount = parseInt(totalCount.text()) + 1;
+                var newTotalCount = parseInt(selectorCount.text()) + 1;
                 var newChildCount = parseInt(childCount.text()) + 1;
             }
-            totalCount.text(newTotalCount);
+            selectorCount.text(newTotalCount);
             childCount.text(newChildCount);
-            if (newTotalCount == 0) {
+            var currentRows = table.find('.resource-row').length;
+            if (totalCount - currentRows == 0) {
                 selector.find('.resources-available').addClass('empty');
             } else {
                 selector.find('.resources-available').removeClass('empty');
@@ -256,7 +262,7 @@ var Omeka = {
             }
         }
     
-        if (existingRowData && existingRowData.length > 0) {
+        if (existingRowData.length > 0) {
             $.each(existingRowData, function() {
                 appendRow(this.id);
             });
@@ -274,14 +280,14 @@ var Omeka = {
             Omeka.scrollTo(table.find('.resource-row:last-child'));
         });
 
-        // Remove an item set from the edit panel.
+        // Remove a resource from the edit panel.
         table.on('click', '.o-icon-delete', function(e) {
             e.preventDefault();
             var row = $(this).closest('.resource-row');
             var resourceId = row.find('.resource-id').val();
             selector.find('[data-resource-id="' + resourceId + '"]').removeClass('added');
-            updateSiteCount(resourceId);
             row.remove();
+            updateResourceCount(resourceId);
             if ($('.resource-row').length < 1) {
                 table.addClass('empty');
             }
