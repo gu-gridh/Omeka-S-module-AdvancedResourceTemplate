@@ -584,7 +584,7 @@ $(document).ready(function() {
         const templateData = $('#resource-values').data('template-data');
         const hasTemplate = $('#resource-template-select').val() != '';
         const resourceClassSelect = $('#resource-values #resource-class-select');
-        const resourceClassId = resourceClassSelect.val();
+        const resourceClassId = Number(resourceClassSelect.val());
 
         // Store the default full list of resource classes to allow to restore 
         // it when the template is changed.
@@ -597,24 +597,39 @@ $(document).ready(function() {
         }
         // Re-set the previous resource class id when the html is reset.
         resourceClassSelect.val(resourceClassId);
+
+        const suggestedClasses = templateData && templateData.suggested_resource_class_ids ? templateData.suggested_resource_class_ids : {};
+        const countSuggestedClasses = Object.keys(suggestedClasses).length;
+
+        // Fill the classes according to the template.
         if (hasTemplate
-            && templateData
-            && templateData.suggested_resource_class_ids
-            && Object.keys(templateData.suggested_resource_class_ids).length
+            && countSuggestedClasses
             && templateData.closed_class_list === 'yes'
         ) {
             resourceClassSelect.find('option').each(function() {
                 const resClassId = Number($(this).val());
-                if (resClassId && !Object.values(templateData.suggested_resource_class_ids).includes(resClassId)) {
+                if (resClassId && !Object.values(suggestedClasses).includes(resClassId)) {
                     $(this).remove();
                 }
             });
         }
-        // Manage no template and bad template options.
+
+        // Manage no template and bad template options: at least one class.
         if (!hasTemplate || !resourceClassSelect.find('option').length) {
             resourceClassSelect.html($('#resource-values').data('resource_class_select'));
+            resourceClassSelect.val(resourceClassId);
         }
-        resourceClassSelect.val(resourceClassId);
+
+        // If the current resource class is not in the new list of options,
+        // set the first suggested one. This is the most common case when
+        // templates are used.
+        if (hasTemplate && !Object.values(suggestedClasses).includes(resourceClassId)) {
+            let resClassId = countSuggestedClasses
+                ? Object.values(suggestedClasses)[0]
+                // Manage non-advanced templates.
+                : (templateData['o:resource_class'] ? templateData['o:resource_class']['o:id'] : null);
+            resourceClassSelect.val(resClassId);
+        }
 
         if (templateData && templateData.require_resource_class === 'yes') {
             resourceClassSelect.attr('require', 'require')

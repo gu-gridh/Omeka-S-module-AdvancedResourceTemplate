@@ -803,8 +803,11 @@
             var url = templateSelect.data('api-base-url') + '/' + templateId;
             $.get(url)
                 .done(function(data) {
-                    // Store global data of the template.
-                    $('#resource-values').data('template-data', data['o:data'] ? data['o:data'] : {});
+                    // Store global data of the template,
+                    // included the resource class for non advanced templates..
+                    var templateData = data['o:data'] ? data['o:data'] : {};
+                    templateData['o:resource_class'] = data['o:resource_class'];
+                    $('#resource-values').data('template-data', templateData);
 
                     if (changeClass) {
                         // Change the resource class.
