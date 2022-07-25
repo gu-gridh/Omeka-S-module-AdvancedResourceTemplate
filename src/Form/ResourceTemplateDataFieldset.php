@@ -119,6 +119,21 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'value_suggest_require_uri',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Value Suggest: require uri', // @translate
+                    'value_options' => [
+                        'no' => 'No', // @translate
+                        'yes' => 'Yes', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'value_suggest_require_uri',
+                    'value' => 'no',
+                ],
+            ])
+            ->add([
                 'name' => 'automatic_values',
                 'type' => Element\Textarea::class,
                 'options' => [

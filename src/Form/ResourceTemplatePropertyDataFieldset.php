@@ -239,6 +239,24 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'value_suggest_require_uri',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Value Suggest: require uri', // @translate
+                    'value_options' => [
+                        '' => 'Use template setting', // @translate
+                        'no' => 'No', // @translate
+                        'yes' => 'Yes', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    // 'id' => 'value_suggest_require_uri',
+                    'class' => 'setting',
+                    'data-setting-key' => 'value_suggest_require_uri',
+                    'value' => '',
+                ],
+            ])
+            ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,
                 'options' => [

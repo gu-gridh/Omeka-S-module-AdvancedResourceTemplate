@@ -390,6 +390,12 @@
                         .val(value.find('.valuesuggest-input').prop('placeholder'))
                         .prop('disabled', false);
                 }
+                const valueSuggestRequireUri = rtpData.value_suggest_require_uri === 'yes'
+                    || (rtpData.value_suggest_require_uri !== 'no' && templateData.value_suggest_require_uri == 'yes');
+                if (valueSuggestRequireUri) {
+                    value.find(':input[data-value-key="@id"]')
+                        .prop('disabled', false);
+                }
             });
 
             // Check for a required resource class.
