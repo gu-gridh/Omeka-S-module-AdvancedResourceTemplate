@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-18 00:00+0000\n"
-"PO-Revision-Date: 2022-07-18 00:00+0000\n"
+"POT-Creation-Date: 2022-07-25 00:00+0000\n"
+"PO-Revision-Date: 2022-07-25 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.1\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: src/Autofiller/GenericAutofiller.php:59
 #: src/Autofiller/GenericAutofiller.php:105
@@ -35,11 +35,11 @@ msgstr "Le service est vide."
 msgid "The template is empty."
 msgstr "Le modèle est vide."
 
-#: src/Form/ResourceTemplateDataFieldset.php:139
+#: src/Form/ResourceTemplateDataFieldset.php:162
 msgid "Select autofillers…"
 msgstr "Choisir des remplisseurs…"
 
-#: src/Form/ResourceTemplateDataFieldset.php:140
+#: src/Form/ResourceTemplateDataFieldset.php:163
 msgid "No configured autofiller."
 msgstr "Aucun remplisseur configuré."
 
@@ -117,21 +117,34 @@ msgstr ""
 "Les valeurs sont désormais vérifiées en fonction du modèle dans tous les "
 "cas, y compris pour les tâches en arrière-plan et les appels api."
 
-#: Module.php:288
+#: data/scripts/upgrade.php:166
+msgid "New settings were added to the template."
+msgstr "De nouveaux paramètres ont été ajoutés aux modèles."
+
+#: data/scripts/upgrade.php:170
+#, php-format
+msgid ""
+"New settings were added to the %1$smain settings%2$s to simplify resource "
+"form."
+msgstr ""
+"De nouvelles options ont été ajoutées aux %1$sparamètres généraux%2$s pour "
+"simplifier le formulaire des ressources."
+
+#: Module.php:287
 msgid "A class is required."
 msgstr "Une classe est requise."
 
-#: Module.php:294
+#: Module.php:299
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr "La classe doit être « %s »."
 
-#: Module.php:303
+#: Module.php:308
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr "La classe doit être l’une de \"%s\"."
 
-#: Module.php:332
+#: Module.php:336
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
@@ -140,7 +153,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus courte (%2$d caractères) que "
 "la taille minimale (%3$d caractères)."
 
-#: Module.php:342
+#: Module.php:346
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
@@ -149,7 +162,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus longue (%2$d caractères) que "
 "la taille maximale (%3$d caractères)."
 
-#: Module.php:367
+#: Module.php:371
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
@@ -158,7 +171,7 @@ msgstr ""
 "Le nombre de valeur (%1$d) pour la propriété « %2$s » est plus petit que le "
 "nombre minimum (%3$d)."
 
-#: Module.php:378
+#: Module.php:382
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
@@ -183,31 +196,31 @@ msgstr "Fichier du modèle de ressource (json, csv, tsv)"
 msgid "Require a class"
 msgstr "Requiert une classe"
 
-#: src/Form/ResourceTemplateDataFieldset.php:38
+#: src/Form/ResourceTemplateDataFieldset.php:39
+msgid "Limit to specified classes"
+msgstr "Limiter aux classes listées"
+
+#: src/Form/ResourceTemplateDataFieldset.php:50
 msgid "Limit to specified properties"
 msgstr "Limiter aux propriétés listées"
 
-#: src/Form/ResourceTemplateDataFieldset.php:48
-msgid "Hide value annotations"
-msgstr "Cacher les annotations de valeur"
-
-#: src/Form/ResourceTemplateDataFieldset.php:58
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:147
+#: src/Form/ResourceTemplateDataFieldset.php:61
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:150
 msgid "Allow quick creation of a resource"
 msgstr "Autoriser la création rapide d’une ressource"
 
 #: src/Form/ResourceTemplateDataFieldset.php:73
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:165
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:168
 msgid "Autocomplete with existing values"
 msgstr "Auto-compléter avec des valeurs existantes"
 
 #: src/Form/ResourceTemplateDataFieldset.php:76
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:169
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:172
 msgid "Starts with"
 msgstr "Commence par"
 
 #: src/Form/ResourceTemplateDataFieldset.php:77
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:170
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:173
 msgid "Contains"
 msgstr "Contient"
 
@@ -216,7 +229,7 @@ msgid "Languages for values"
 msgstr "Langues pour les valeurs"
 
 #: src/Form/ResourceTemplateDataFieldset.php:100
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:197
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:200
 msgid "Default language"
 msgstr "Langue par défaut"
 
@@ -224,22 +237,32 @@ msgstr "Langue par défaut"
 msgid "No language"
 msgstr "Pas de langue"
 
-#: src/Form/ResourceTemplateDataFieldset.php:120
+#: src/Form/ResourceTemplateDataFieldset.php:121
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:230
+msgid "Value Suggest: keep original label"
+msgstr "Value Suggest : conserver le libellé original"
+
+#: src/Form/ResourceTemplateDataFieldset.php:132
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:248
+msgid "Value Suggest: require uri"
+msgstr "Value Suggest : uri obligatoire"
+
+#: src/Form/ResourceTemplateDataFieldset.php:143
 msgid "Automatic values (on save)"
 msgstr "Valeurs automatiques (lors de l’enregistrement)"
 
-#: src/Form/ResourceTemplateDataFieldset.php:130
-#: src/Form/SettingsFieldset.php:48
+#: src/Form/ResourceTemplateDataFieldset.php:153
+#: src/Form/SettingsFieldset.php:69
 msgid "Autofillers"
 msgstr "Remplisseurs"
 
-#: src/Form/ResourceTemplateDataFieldset.php:147
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:227
+#: src/Form/ResourceTemplateDataFieldset.php:170
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:266
 msgid "More settings"
 msgstr "Autres paramètres"
 
-#: src/Form/ResourceTemplateDataFieldset.php:148
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:228
+#: src/Form/ResourceTemplateDataFieldset.php:171
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:267
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
 "pairs or json."
@@ -247,18 +270,46 @@ msgstr ""
 "Permet de passer certains paramètres généralement pour le thème et via des "
 "paires clés-valeurs ou json."
 
-#: src/Form/SettingsFieldset.php:10
+#: src/Form/SettingsFieldset.php:11
 msgid "Advanced Resource Template"
 msgstr "Modèle de ressources avancé"
 
-#: src/Form/SettingsFieldset.php:19
+#: src/Form/SettingsFieldset.php:21
+msgid "Elements of resource form to display"
+msgstr "Éléments de la ressource à afficher"
+
+#: src/Form/SettingsFieldset.php:23
+msgid "Collapse Metadata description by default"
+msgstr "Plier la description des métadonnées par défaut"
+
+#: src/Form/SettingsFieldset.php:24
+msgid "Button Metadata description"
+msgstr "Bouton Description des métadonnées"
+
+#: src/Form/SettingsFieldset.php:25
+msgid "Button Language"
+msgstr "Bouton Langue"
+
+#: src/Form/SettingsFieldset.php:26
+msgid "Button Visibility"
+msgstr "Bouton Visibilité"
+
+#: src/Form/SettingsFieldset.php:27
+msgid "Button Value annotation"
+msgstr "Bouton Annoter la valeur"
+
+#: src/Form/SettingsFieldset.php:28
+msgid "Button More actions"
+msgstr "Bouton Autres actions"
+
+#: src/Form/SettingsFieldset.php:40
 msgid ""
 "Skip checking advanced template settings to allow to save an invalid record"
 msgstr ""
 "Ignorer la vérification des paramètres avancés des modèles afin de permettre "
 "d’enregistrer des notices invalides"
 
-#: src/Form/SettingsFieldset.php:20
+#: src/Form/SettingsFieldset.php:41
 msgid ""
 "Disable the checking of the template settings. For example if a value is "
 "longer than the specified length, it will be saved anyway.\n"
@@ -274,11 +325,11 @@ msgstr ""
 "Elle ne désactive pas les vérifications internes à Omeka, en particulier le "
 "contrôle des propriétés obligatoires."
 
-#: src/Form/SettingsFieldset.php:32
+#: src/Form/SettingsFieldset.php:53
 msgid "Append properties to resource form"
 msgstr "Ajouter des propriétés au formulaire"
 
-#: src/Form/SettingsFieldset.php:33
+#: src/Form/SettingsFieldset.php:54
 msgid ""
 "When no template is selected in resource form, the property selector may be "
 "available or not to force to select a template.\n"
@@ -291,74 +342,77 @@ msgstr ""
 "Attention : vous devez indiquer chaque modèle de ressource ouvert ou fermé "
 "en accord avec ce paramètre."
 
-#: src/Form/SettingsFieldset.php:36
+#: src/Form/SettingsFieldset.php:57
 msgid "Allow"
 msgstr "Autoriser"
 
-#: src/Form/SettingsFieldset.php:37
+#: src/Form/SettingsFieldset.php:58
 msgid "Forbid"
 msgstr "Interdir"
 
-#: src/Form/SettingsFieldset.php:49
-msgid "List of autofillers to use for this template."
-msgstr "Liste des remplisseurs à utiliser pour ce modèle."
+#: src/Form/SettingsFieldset.php:70
+msgid "The autofillers should be set in selected templates params."
+msgstr ""
+"Les autoremplisseurs doivent être indiquées dans les paramètres des modèles."
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:18
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:19
 msgid "Minimum length (characters)"
 msgstr "Longueur minimale (caractères)"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:32
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:33
 msgid "Maximum length (characters)"
 msgstr "Longueur maximale (caractères)"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:46
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
 msgid "Minimum number of values (when required)"
 msgstr "Nombre minimal de valeurs (si requis)"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:60
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
 msgid "Maximum number of values"
 msgstr "Nombre maximal de valeurs"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:74
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:75
 msgid "Default value"
 msgstr "Valeur par défaut"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:86
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:87
 msgid "Automatic value (on save)"
 msgstr "Valeur automatique (lors de l’enregistrement)"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:98
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:99
 msgid "Property disabled in form (editable only by api/job)"
 msgstr ""
 "Propriété désactivée dans le formulaire (éditable seulement par api/tâche)"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:110
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:112
 msgid "Locked value once saved"
 msgstr "Valeur bloquée une fois enregistrée"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:122
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:125
 msgid "Separator to split a literal value"
 msgstr "Séparateur pour éclater une valeur textuelle"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:134
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:137
 msgid "Filter linked resources with a query"
 msgstr "Filtrer les ressources liées avec une requête"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:135
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:138
 msgid "Use url arguments of a standard advanced search query"
 msgstr "Utiliser les arguments d’une url de recherche avancée standard"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:149
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:167
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:211
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:152
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:170
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:214
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:232
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:250
 msgid "Use template setting"
 msgstr "Utiliser le paramètre du modèle"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:184
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:187
 msgid "Suggested languages"
 msgstr "Langues suggérées"
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:209
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:212
 msgid "Use language"
 msgstr "Utilise la langue"
 
@@ -502,12 +556,15 @@ msgstr "Géonames"
 msgid "Missing autofiller configuration."
 msgstr "Configuration des remplisseurs manquante."
 
-#: config/module.config.php:164
+#: config/module.config.php:165
 msgid "No results"
 msgstr "Pas de résultats"
 
 msgid "No %s found."
 msgstr "Aucun %s trouvé."
+
+#~ msgid "List of autofillers to use for this template."
+#~ msgstr "Liste des remplisseurs à utiliser pour ce modèle."
 
 #~ msgid "Value languages for properties"
 #~ msgstr "Langues pour les valeurs des propriétés"
