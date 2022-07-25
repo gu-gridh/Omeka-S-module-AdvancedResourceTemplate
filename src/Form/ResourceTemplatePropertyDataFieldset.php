@@ -221,6 +221,24 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'value_suggest_keep_original_label',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Value Suggest: keep original label', // @translate
+                    'value_options' => [
+                        '' => 'Use template setting', // @translate
+                        'no' => 'No', // @translate
+                        'yes' => 'Yes', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    // 'id' => 'value_suggest_keep_original_label',
+                    'class' => 'setting',
+                    'data-setting-key' => 'value_suggest_keep_original_label',
+                    'value' => '',
+                ],
+            ])
+            ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,
                 'options' => [

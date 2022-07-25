@@ -375,6 +375,23 @@
             var thisForm = $(this);
             var errors = [];
 
+            // Manage value suggest options from Advanced resource template.
+            // TODO Add an event before submit.
+            const templateData = $('#resource-values').data('template-data');
+            $('#properties .resource-values.field').find('.values > .value[data-data-type^="valuesuggest"]').each(function () {
+                const value = $(this);
+                const field = value.closest('.resource-values.field');
+                const rtpData = field.data('template-property-data');
+                const valueSuggestKeepOriginalLabel = rtpData.value_suggest_keep_original_label === 'yes'
+                    || (rtpData.value_suggest_keep_original_label !== 'no' && templateData.value_suggest_keep_original_label == 'yes');
+                if (valueSuggestKeepOriginalLabel) {
+                    value.find(':input[data-value-key="o:label"]')
+                        // .val(value.find(':input[data-value-key="@value"]').val())
+                        .val(value.find('.valuesuggest-input').prop('placeholder'))
+                        .prop('disabled', false);
+                }
+            });
+
             // Check for a required resource class.
             var resourceClassSelect = $('#resource-values #resource-class-select');
             var resourceClassId = Number(resourceClassSelect.val());
