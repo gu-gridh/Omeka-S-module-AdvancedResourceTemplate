@@ -408,7 +408,14 @@ class Module extends AbstractModule
         }
 
         $setting = $plugins->get('setting');
-        $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements') ?: [];
+        $resourceFormElements = $setting('advancedresourcetemplate_resource_form_elements', [
+            'metadata_collapse',
+            'metadata_description',
+            'language',
+            'visibility',
+            'value_annotation',
+            'more_actions',
+        ]) ?: [];
 
         $classes = [];
         $classesElements = [

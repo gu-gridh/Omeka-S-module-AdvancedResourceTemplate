@@ -16,8 +16,8 @@ use Omeka\Stdlib\Message;
  * @var \Omeka\Api\Manager $api
  */
 $services = $serviceLocator;
-// $settings = $services->get('Omeka\Settings');
-// $config = require dirname(__DIR__, 2) . '/config/module.config.php';
+$settings = $services->get('Omeka\Settings');
+$config = require dirname(__DIR__, 2) . '/config/module.config.php';
 $connection = $services->get('Omeka\Connection');
 // $entityManager = $services->get('Omeka\EntityManager');
 $plugins = $services->get('ControllerPluginManager');
@@ -158,9 +158,18 @@ SQL;
         $connection->executeStatement($sql);
     }
 
+    $settings->set('advancedresourcetemplate_resource_form_elements',
+        $config['advancedresourcetemplate']['settings']['advancedresourcetemplate_resource_form_elements']);
+
     $messenger = new Messenger();
     $message = new Message(
         'New settings were added to the template.' // @translate
     );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'New settings were added to the %1$smain settings%2$s to simplify resource form.', // @translate
+        '<a href="' . $plugins->get('url')->fromRoute('admin/default', ['controller' => 'setting', 'action' => 'browse']) . '#advanded-resource-template">', '</a>'
+    );
+    $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }

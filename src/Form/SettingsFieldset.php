@@ -13,6 +13,7 @@ class SettingsFieldset extends Fieldset
     public function init(): void
     {
         $this
+            ->setAttribute('id', 'advanded-resource-template')
             ->add([
                 'name' => 'advancedresourcetemplate_resource_form_elements',
                 'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,

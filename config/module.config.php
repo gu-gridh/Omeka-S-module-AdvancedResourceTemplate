@@ -48,7 +48,7 @@ return [
         'factories' => [
             // Used in AdvancedResourceTemplate, AdvancedSearch and BlockPlus.
             'assetUrl' => Service\ViewHelper\AssetUrlFactory::class,
-            // Copy from AdvancedResourceTemplate. Copy in BulkExport and BulkEdit. Used in Contribute.
+            // Copy from AdvancedResourceTemplate. Copy in BulkExport, BulkEdit and BulkImport. Used in Contribute.
             'customVocabBaseType' => Service\ViewHelper\CustomVocabBaseTypeFactory::class,
             'dataType' => Service\ViewHelper\DataTypeFactory::class,
         ],
@@ -172,7 +172,7 @@ return [
                 'language',
                 'visibility',
                 'value_annotation',
-                'more_actions',
+                // 'more_actions',
             ],
             'advancedresourcetemplate_skip_checks' => false,
             'advancedresourcetemplate_closed_property_list' => '0',
