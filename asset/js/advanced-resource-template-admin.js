@@ -578,6 +578,19 @@ $(document).ready(function() {
     }
 
     /**
+     * Manage the button "more actions".
+     */
+    function prepareMoreActions() {
+        if (!$('body').hasClass('art-no-more-action')) {
+            return;
+        }
+        $('.art-no-more-action .resource-form .input-footer .actions').each(function() {
+            $(this).append($(this).find('.more-actions li'));
+            $(this).find('.more-actions').remove();
+        });
+    }
+
+    /**
      * Manage the options for the resource class select.
      */
     function prepareResourceClassSelect() {
@@ -804,6 +817,7 @@ $(document).ready(function() {
             prepareAutofiller();
             $('#resource-values').data('is-loaded', $('#resource-template-select').val());
         }
+        prepareMoreActions();
     });
 
     $(document).on('o:template-applied', 'form.resource-form', function() {
@@ -820,6 +834,8 @@ $(document).ready(function() {
             sidebarPropertySelector.addClass('always-open');
             $('form.resource-form #property-selector-button').show();
         }
+
+        prepareMoreActions();
 
         prepareResourceClassSelect();
 
@@ -862,6 +878,8 @@ $(document).ready(function() {
     });
 
     $(document).on('o:prepare-value', function(e, dataType, value, valueObj) {
+        prepareMoreActions();
+
         const term = value.data('term');
         var field = value.closest('.resource-values.field');
         if (!field.length) {
@@ -871,6 +889,7 @@ $(document).ready(function() {
                 return;
             }
         }
+
         const rtpData = field.data('template-property-data');
         if (!rtpData) {
             return;
