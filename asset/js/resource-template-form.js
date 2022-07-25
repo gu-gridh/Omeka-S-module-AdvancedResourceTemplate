@@ -9,7 +9,7 @@ var descriptionPropertyTemplate = $('<span class="description-property-cell">' +
 
 // Improve the display of the main advanced settings.
 $('.resource-templates.edit fieldset.settings > div.field').wrapAll('<div class="collapsible" style="overflow: inherit;"/>');
-$('.resource-templates.edit fieldset.settings legend').after(`<a href="#" class="expand" aria-label="${Omeka.jsTranslate('Expand')}"></a>`);
+$('.resource-templates.edit fieldset.settings legend').wrapAll(`<a href="#" class="expand" aria-label="${Omeka.jsTranslate('Expand')}"></a>`);
 
 // Mark the title and description properties.
 $('#properties li[data-property-id="' + titleProperty.val() + '"] .actions').before(titlePropertyTemplate);

@@ -108,7 +108,7 @@
         cursor: pointer;
         float: right;
     }
-    .quick-add-resource:before {
+    .quick-add-resource::before {
         margin-right: 6px;
     }
     .quick-add-resource:hover:not(.inactive) {
@@ -166,6 +166,13 @@
       margin-left: 0;
     }
 
+    form > .settings > a::after {
+        margin-left: 12px;
+    }
+    form > .settings > a > legend {
+        display: inline-block;
+    }
+
     #page-action-menu {
         display: inline-block;
         position: relative;
@@ -188,7 +195,7 @@
         margin: 12px 0;
     }
 
-    #page-action-menu ul:before {
+    #page-action-menu ul::before {
         content: "";
         position: absolute;
         bottom: calc(100% - 1px);
@@ -200,7 +207,7 @@
         border-right: 6px solid transparent;
     }
 
-    #page-action-menu ul:after {
+    #page-action-menu ul::after {
         content: "";
         position: absolute;
         bottom: calc(100% - 1px);
@@ -228,7 +235,7 @@
       position: relative;
     }
 
-    #page-action-menu ul li:hover:before {
+    #page-action-menu ul li:hover::before {
         content: "";
         position: absolute;
         left: 0;
@@ -252,12 +259,12 @@
         text-align: left;
     }
 
-    #page-action-menu .expand:after {
+    #page-action-menu .expand::after {
         content: "\f0d7";
     }
 
-    #page-action-menu .expand:after,
-    #page-action-menu .collapse:after {
+    #page-action-menu .expand::after,
+    #page-action-menu .collapse::after {
         margin-left: 6px;
     }
 
