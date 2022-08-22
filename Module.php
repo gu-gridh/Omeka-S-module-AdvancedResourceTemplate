@@ -574,7 +574,6 @@ class Module extends AbstractModule
         $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
         $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
-
         $newResourceData = $mapper
             ->setMapping($mapping['automatic_values']['mapping'])
             ->setIsSimpleExtract(false)

@@ -635,7 +635,7 @@
             draggable: '.value',
             handle: '.sortable-handle'
         });
-console.log(field);
+
         field.trigger('o:property-added');
         return field;
     };

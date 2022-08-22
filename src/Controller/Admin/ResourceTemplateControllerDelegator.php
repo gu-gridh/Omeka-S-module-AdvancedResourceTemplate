@@ -392,7 +392,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             if (trim((string) $v) === 'null') {
                 return 'null';
             }
-            if (mb_substr($k, 0, 19) === 'Template data list:' || mb_substr($k, 0, 19) === 'Template data list:' ) {
+            if (mb_substr($k, 0, 19) === 'Template data list:' || mb_substr($k, 0, 19) === 'Template data list:') {
                 return array_filter(array_map('trim', explode('|', $v)), 'strlen') ?: [];
             }
             if ($v === '' || $v === null || $v === []) {
@@ -845,7 +845,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         // Manage flat arrays (multiselect) as list to allow to separate them
         // from scalar values during import.
         $templateDataHeaders = $template->data();
-        array_walk($templateDataHeaders, function(&$v, $k) use ($isFlatArray) {
+        array_walk($templateDataHeaders, function (&$v, $k) use ($isFlatArray): void {
             $v = is_array($v) && count($v) && $isFlatArray($v) && json_encode($v) === json_encode(array_values($v))
                 ? 'Template data list: ' . $k
                 : 'Template data: ' . $k;
@@ -1359,7 +1359,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
 
     protected function appendCsvRow($stream, array $fields, string $type = 'csv'): void
     {
-        $type ==='tsv'
+        $type === 'tsv'
             ? fputcsv($stream, $fields, "\t", chr(0), chr(0))
             : fputcsv($stream, $fields);
     }

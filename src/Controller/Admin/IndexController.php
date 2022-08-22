@@ -152,14 +152,14 @@ class IndexController extends AbstractRestfulController
             return $this->returnError(['suggestions' => $this->translate('The template is empty.')]); // @translate
         }
 
-        /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
         try {
             // Resource template does not support search by id, so use read().
+            /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
             $template = $this->api()->read('resource_templates', ['id' => $query['template']])->getContent();
         } catch (NotFoundException $e) {
             return $this->returnError(['suggestions' => $this->translate(new Message(
                 'The template "%s" is not available.', // @translate
-                $template
+                $query['template']
             ))]);
         }
 

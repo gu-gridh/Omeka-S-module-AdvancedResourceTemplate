@@ -6,7 +6,7 @@ use Laminas\Form\Form;
 
 class ResourceTemplateImportForm extends Form
 {
-    public function init()
+    public function init(): void
     {
         $this->add([
             'name' => 'file',
