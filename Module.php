@@ -153,12 +153,7 @@ class Module extends AbstractModule
         );
         // For simplicity, some modules that use resource form are added here.
         $sharedEventManager->attach(
-            'Omeka\Controller\Admin\Annotation',
-            'view.layout',
-            [$this, 'addAdminResourceHeaders']
-        );
-        $sharedEventManager->attach(
-            \Article\Controller\Admin\ArticleController::class,
+            \Annotate\Controller\Admin\AnnotationController::class,
             'view.layout',
             [$this, 'addAdminResourceHeaders']
         );
