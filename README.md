@@ -70,11 +70,53 @@ resources:
 
   This option allows to have multiple times the same property with different
   settings. For example, you may want to have a free subject and a subject from
-  two thesaurus. They can be set as different data types of the same property,
-  but as three template properties too, so each one has its own label and
-  settings (size, number, etc.).
+  two thesaurus. They can be set as different data types of the same property
+  (core improvement since Omeka S v3, as for subject ("sujet") in the example
+  below), but as multple template properties too, so each one has its own label
+  and settings (size, number, etc.), as for spatial cover ("couverture spatiale")
+  in the example below.
+  **Warning**: for compatibility with core and modules and because they are
+  variants of the same property, the template properties are kept gathered
+  according to the original term in the resource template. So, in the example
+  below, it is not possible to include another template property between the two
+  spatial covers.
 
   ![Example of multiple subjects with different settings](data/images/duplicate_properties.png)
+
+- Group properties under a label:
+
+  When values and properties are numerous, the module allows to group them under
+  a label. For example, you can group the Dublin Core properties like that:
+
+  ```
+  # Descriptive metadata
+  dcterms:title
+  dcterms:description
+  dcterms:type
+  dcterms:source
+  dcterms:relation
+
+  # Indexing metadata
+  dcterms:coverage
+  dcterms:subject
+
+  # Intellectual property metadata
+  dcterms:creator
+  dcterms:contributor
+  dcterms:publisher
+  dcterms:rights
+
+  # Instantiation metadata
+  dcterms:date
+  dcterms:format
+  dcterms:identifier
+  dcterms:language
+  ```
+
+  Here, the record is divided under four group labels.
+  When some properties have multiple fields, you can group them more precisely
+  appending the property label after a `/`, for example : `dcterms:subject/Sujets Rameau`
+  and `dcterms:subject/Sujets libres`.
 
 - Language selection and default by template and by property, or no language:
 
@@ -340,7 +382,7 @@ TODO
 - [x] Validate items with data (unique value, strict template, etc.).
 - [ ] Finalize the review-import form with duplicated properties and custom vocabs.
 - [ ] Update from file.
-- [ ] Use the event and remove the specific template for resource-values.
+- [x] Use the event and remove the specific template for resource-values.
 - [ ] Fix copy alternative labels when importing a template (for now should re-save template).
 - [ ] Select default custom vocabs when importing a template from the same server.
 
