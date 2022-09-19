@@ -164,6 +164,41 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'groups',
+                'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
+                'options' => [
+                    'label' => 'Groups', // @translate
+                    'info' => 'Allow to get properties by group for display. This is a list of group names and properties for each of them. May need a specific theme template.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'groups',
+                    'rows' => 5,
+                    'placeholder' => '# Descriptive metadata
+dcterms:title
+dcterms:description
+dcterms:type
+dcterms:source
+dcterms:relation
+
+# Indexing metadata
+dcterms:coverage
+dcterms:subject
+
+# Intellectual property metadata
+dcterms:creator
+dcterms:contributor
+dcterms:publisher
+dcterms:rights
+
+# Instantiation metadata
+dcterms:date
+dcterms:format
+dcterms:identifier
+dcterms:language
+',
+                ],
+            ])
+            ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,
                 'options' => [

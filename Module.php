@@ -428,6 +428,7 @@ class Module extends AbstractModule
      * - resource: added to each property to simplify view template because it
      *   is not passed by default
      * - duplicated properties with a specific label and comments
+     * - groups of properties, managed in overridden view template resource-values
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
      */
@@ -438,26 +439,61 @@ class Module extends AbstractModule
          * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
          * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation[] $templateProperties
          * @var array $values
+         * @var array $groups
          */
         $resource = $event->getTarget();
         $template = $resource->resourceTemplate();
-        $templateProperties = $template ? $template->resourceTemplateProperties() : [];
         $values = $event->getParam('values');
+        if ($template) {
+            $groups = $template->dataValue('groups', []);
+            $templateProperties = $template->resourceTemplateProperties();
+        } else {
+            $groups = [];
+            $templateProperties = [];
+        }
 
         $newValues = count($templateProperties)
-            ? $this->prepareResourceValues($resource, $templateProperties, $values)
-            : $this->prependResourceToValues($resource, $values);
+            ? $this->prepareResourceAndGroupsValues($resource, $templateProperties, $values, $groups)
+            : $this->prependResourceAndGroupsToValues($resource, $values, $groups);
 
         $event->setParam('values', $newValues);
     }
 
-    protected function prependResourceToValues(
+    /**
+     * Prepend keys "resouce" and "group" to display values.
+     *
+     * Warning: Duplicate properties are not managed here.
+     */
+    protected function prependResourceAndGroupsToValues(
         AbstractResourceEntityRepresentation $resource,
-        array $values
+        array $values,
+        array $groups
     ): array {
-        foreach ($values as &$propertyData) {
+        if (!$groups) {
+            foreach ($values as $term => &$propertyData) {
+                $propertyData = [
+                    'resource' => $resource,
+                    'group' => null,
+                    'term' => $term,
+                ] + $propertyData;
+            }
+            unset($propertyData);
+            return $values;
+        }
+
+        // Here, there is no duplicate labels,
+        foreach ($values as $term => &$propertyData) {
+            $currentGroup = null;
+            foreach ($groups as $groupLabel => $termLabels) {
+                if (in_array($term, $termLabels)) {
+                    $currentGroup = $groupLabel;
+                    break;
+                }
+            }
             $propertyData = [
                 'resource' => $resource,
+                'group' => $currentGroup,
+                'term' => $term,
             ] + $propertyData;
         }
         unset($propertyData);
@@ -474,10 +510,11 @@ class Module extends AbstractModule
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
      */
-    protected function prepareResourceValues(
+    protected function prepareResourceAndGroupsValues(
         AbstractResourceEntityRepresentation $resource,
         array $templateProperties,
-        array $values
+        array $values,
+        array $groups
     ): array {
         // The process should take care of values appended to a resource that
         // have a data type that is not specified in template properties, in
@@ -515,7 +552,7 @@ class Module extends AbstractModule
         }
 
         if (!$hasMultipleLabels) {
-            return $this->prependResourceToValues($resource, $values);
+            return $this->prependResourceAndGroupsToValues($resource, $values, $groups);
         }
 
         // Prepare values to display when specific labels are defined for some
@@ -540,20 +577,50 @@ class Module extends AbstractModule
             }
         }
 
+        foreach ($values as $term => &$propertyData) {
+            $currentGroup = null;
+            foreach ($groups as $groupLabel => $termLabels) {
+                if (in_array($term, $termLabels)) {
+                    $currentGroup = $groupLabel;
+                    break;
+                }
+            }
+            $propertyData = [
+                'resource' => $resource,
+                'group' => $currentGroup,
+                'term' => $term,
+            ] + $propertyData;
+        }
+        unset($propertyData);
+
         $newValues = [];
+        $hasGroups = !empty($groups);
+        $currentGroup = null;
         foreach ($valuesWithLabel as $term => $propData) {
-            $index = 0;
             foreach ($propData as $dataTypeLabel => $propertyData) {
-                $termKey = empty($index) ? $term : "$term/$index";
+                $termLabel = "$term/$dataTypeLabel";
+                if ($hasGroups) {
+                    $currentGroup = null;
+                    foreach ($groups as $groupLabel => $termLabels) {
+                        foreach ($termLabels as $termLab) {
+                            $simpleTerm = strpos($termLab, '/') === false;
+                            if ($termLab === ($simpleTerm ? $term : $termLabel)) {
+                                $currentGroup = $groupLabel;
+                                break 2;
+                            }
+                        }
+                    }
+                }
                 unset($propertyData['values']);
                 $propertyData['resource'] = $resource;
+                $propertyData['group'] = $currentGroup;
                 $propertyData['term'] = $term;
+                $propertyData['term_label'] = $termLabel;
                 $propertyData['property'] = $values[$term]['property'];
                 $propertyData['alternate_label'] = $dataTypeLabel;
                 $propertyData['alternate_comment'] = $dataTypesLabelsToComments[$dataTypeLabel];
                 $propertyData['values'] = $valuesWithLabel[$term][$dataTypeLabel]['values'];
-                $newValues[$termKey] = $propertyData;
-                ++$index;
+                $newValues[$termLabel] = $propertyData;
             }
         }
 

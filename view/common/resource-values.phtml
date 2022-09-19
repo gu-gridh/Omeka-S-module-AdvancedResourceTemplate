@@ -1,0 +1,79 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array $values
+ * @var array $templateProperties
+ */
+
+// Wrap the core template view/common/resource-values with group labels, if any.
+
+if (!$values) return;
+
+// This path should be updated to override it.
+$mainViewTemplate = OMEKA_PATH . '/application/view/common/resource-values.phtml';
+
+/**
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+ * @var array $groups
+ */
+$firstPropertyData = reset($values);
+$resource = $firstPropertyData['resource'];
+$template = $resource->resourceTemplate();
+$groups = $template ? $template->dataValue('groups', []) : null;
+if (!$template || !$groups) {
+    include $mainViewTemplate;
+    return;
+}
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+
+/* // Can be used to optimize the included main view template when not using the core one.
+ if ($this->status()->isSiteRequest()) {
+    $siteSetting = $plugins->get('siteSetting');
+    $labelInfo = $siteSetting('property_label_information');
+    $showLocale = (bool) $siteSetting('show_locale_label', true);
+    $filterLocale = $siteSetting('filter_locale_values');
+    $lang = $this->lang();
+    $showValueAnnotations = (bool) $siteSetting('show_value_annotations', false);
+} else {
+    $setting = $plugins->get('setting');
+    $labelInfo = $setting('property_label_information');
+    $showLocale = true;
+    $filterLocale = false;
+    $lang = null;
+    $showValueAnnotations = true;
+}
+*/
+?>
+
+<div class="property-groups">
+    <?php
+    $sourceValues = $values;
+    foreach (array_keys($groups) as $groupLabel):
+        $valuesGroup = array_filter($sourceValues, function ($v) use ($groupLabel) {
+            return $v['group'] === $groupLabel;
+        });
+        $sourceValues = array_filter($sourceValues, function ($v) use ($groupLabel) {
+            return $v['group'] !== $groupLabel;
+        });
+        if (count($valuesGroup)):
+            $values = $valuesGroup;
+        ?>
+    <div class="property-group">
+        <h3><?= $escape($groupLabel) ?></h3>
+        <?php include $mainViewTemplate; ?>
+    </div>
+        <?php endif;
+    endforeach;
+    // Display metadata that are not in any group.
+    if (count($sourceValues)):
+        $values = $sourceValues; ?>
+    <div class="property-group">
+        <h3><?= $escape($translate('Other metadata')) ?></h3>
+        <?php include $mainViewTemplate; ?>
+    </div>
+    <?php endif; ?>
+</div>
