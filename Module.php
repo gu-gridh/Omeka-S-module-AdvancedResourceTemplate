@@ -8,10 +8,12 @@ if (!class_exists(\Generic\AbstractModule::class)) {
         : __DIR__ . '/src/Generic/AbstractModule.php';
 }
 
+use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
 use Generic\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class Module extends AbstractModule
 {
@@ -422,8 +424,48 @@ class Module extends AbstractModule
     /**
      * Prepare specific data to display the list of the resource values data.
      *
-     * In particular, this event allows to use the labels specific to a data
-     * type when a template has different labels and settings for the same term.
+     * Specific data passed to display values for this module are:
+     * - resource: added to each property to simplify view template because it
+     *   is not passed by default
+     * - duplicated properties with a specific label and comments
+     *
+     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
+     */
+    public function handleResourceDisplayValues(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation[] $templateProperties
+         * @var array $values
+         */
+        $resource = $event->getTarget();
+        $template = $resource->resourceTemplate();
+        $templateProperties = $template ? $template->resourceTemplateProperties() : [];
+        $values = $event->getParam('values');
+
+        $newValues = count($templateProperties)
+            ? $this->prepareResourceValues($resource, $templateProperties, $values)
+            : $this->prependResourceToValues($resource, $values);
+
+        $event->setParam('values', $newValues);
+    }
+
+    protected function prependResourceToValues(
+        AbstractResourceEntityRepresentation $resource,
+        array $values
+    ): array {
+        foreach ($values as &$propertyData) {
+            $propertyData = [
+                'resource' => $resource,
+            ] + $propertyData;
+        }
+        unset($propertyData);
+        return $values;
+    }
+
+    /**
+     * Prepare duplicate properties with specific labels and comments.
      *
      * In that case, modify the key "term" as term + index, and update label and
      * comment, so the template "common/resource-values" will be able to display
@@ -432,25 +474,11 @@ class Module extends AbstractModule
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
      */
-    public function handleResourceDisplayValues(Event $event): void
-    {
-        /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
-        $resource = $event->getTarget();
-        $values = $event->getParam('values');
-
-        // Early return when there is no specificity in the template.
-
-        $template = $resource->resourceTemplate();
-        if (!$template) {
-            return;
-        }
-
-        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation[] $templateProperties */
-        $templateProperties = $template->resourceTemplateProperties();
-        if (count($templateProperties) < 2) {
-            return;
-        }
-
+    protected function prepareResourceValues(
+        AbstractResourceEntityRepresentation $resource,
+        array $templateProperties,
+        array $values
+    ): array {
         // The process should take care of values appended to a resource that
         // have a data type that is not specified in template properties, in
         // particular the default ones (literal, resource, uri). It may fix bad
@@ -487,7 +515,7 @@ class Module extends AbstractModule
         }
 
         if (!$hasMultipleLabels) {
-            return;
+            return $this->prependResourceToValues($resource, $values);
         }
 
         // Prepare values to display when specific labels are defined for some
@@ -518,6 +546,7 @@ class Module extends AbstractModule
             foreach ($propData as $dataTypeLabel => $propertyData) {
                 $termKey = empty($index) ? $term : "$term/$index";
                 unset($propertyData['values']);
+                $propertyData['resource'] = $resource;
                 $propertyData['term'] = $term;
                 $propertyData['property'] = $values[$term]['property'];
                 $propertyData['alternate_label'] = $dataTypeLabel;
@@ -528,7 +557,7 @@ class Module extends AbstractModule
             }
         }
 
-        $event->setParam('values', $newValues);
+        return $newValues;
     }
 
     public function addAdminResourceHeaders(Event $event): void
