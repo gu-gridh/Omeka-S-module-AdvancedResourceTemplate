@@ -173,3 +173,11 @@ SQL;
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.3.4.15', '<')) {
+    $messenger = new Messenger();
+    $message = new Message(
+        'It’s now possible to group a long list of template properties.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
