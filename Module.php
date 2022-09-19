@@ -136,25 +136,32 @@ class Module extends AbstractModule
         );
 
         // Display values according to options of the resource template.
+        // For compatibility with other modules (HideProperties, Internationalisation)
+        // that use the term as key in the list of displayed values, the event
+        // should be triggered lastly.
         $sharedEventManager->attach(
             \Omeka\Api\Representation\ItemRepresentation::class,
             'rep.resource.display_values',
-            [$this, 'handleResourceDisplayValues']
+            [$this, 'handleResourceDisplayValues'],
+            -100
         );
         $sharedEventManager->attach(
             \Omeka\Api\Representation\ItemSetRepresentation::class,
             'rep.resource.display_values',
-            [$this, 'handleResourceDisplayValues']
+            [$this, 'handleResourceDisplayValues'],
+            -100
         );
         $sharedEventManager->attach(
             \Omeka\Api\Representation\MediaRepresentation::class,
             'rep.resource.display_values',
-            [$this, 'handleResourceDisplayValues']
+            [$this, 'handleResourceDisplayValues'],
+            -100
         );
         $sharedEventManager->attach(
             \Annotate\Api\Representation\AnnotationRepresentation::class,
             'rep.resource.display_values',
-            [$this, 'handleResourceDisplayValues']
+            [$this, 'handleResourceDisplayValues'],
+            -100
         );
 
         // Add css/js to some admin pages.
