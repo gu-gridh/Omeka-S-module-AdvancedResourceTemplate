@@ -135,6 +135,28 @@ class Module extends AbstractModule
             [$this, 'validateEntityHydratePost']
         );
 
+        // Display values according to options of the resource template.
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ItemRepresentation::class,
+            'rep.resource.display_values',
+            [$this, 'handleResourceDisplayValues']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ItemSetRepresentation::class,
+            'rep.resource.display_values',
+            [$this, 'handleResourceDisplayValues']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\MediaRepresentation::class,
+            'rep.resource.display_values',
+            [$this, 'handleResourceDisplayValues']
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Representation\AnnotationRepresentation::class,
+            'rep.resource.display_values',
+            [$this, 'handleResourceDisplayValues']
+        );
+
         // Add css/js to some admin pages.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
@@ -388,6 +410,101 @@ class Module extends AbstractModule
                 // TODO Check language (but they are suggested languages).
             }
         }
+    }
+
+    /**
+     * Prepare specific data to display the list of the resource values data.
+     *
+     * In particular, this event allows to use the labels specific to a data
+     * type when a template has different labels and settings for the same term.
+     *
+     * In that case, modify the key "term" as term + index, and update label, so
+     * the template "common/resource-values" will be able to display them as
+     * standard ones.
+     *
+     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
+     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
+     */
+    public function handleResourceDisplayValues(Event $event): void
+    {
+        /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
+        $resource = $event->getTarget();
+        $values = $event->getParam('values');
+
+        // Early return when there is no specificity in the template.
+
+        $template = $resource->resourceTemplate();
+        if (!$template) {
+            return;
+        }
+
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation[] $templateProperties */
+        $templateProperties = $template->resourceTemplateProperties();
+        if (count($templateProperties) < 2) {
+            return;
+        }
+
+        // The process should take care of values appended to a resource that
+        // have a data type that is not specified in template properties, in
+        // particular the default ones (literal, resource, uri). It may fix bad
+        // imports too, or resources with a template that was updated later.
+
+        $services = $this->getServiceLocator();
+        $translate = $services->get('ViewHelperManager')->get('translate');
+
+        // Check and prepare values when a property have multiple labels.
+        $dataTypesLabels = [];
+        $hasMultipleLabels = false;
+        foreach ($templateProperties as $rtp) {
+            $property = $rtp->property();
+            $term = $property->term();
+            $defaultLabel = $translate($property->label());
+            foreach ($rtp->data() ?: [$rtp] as $rtpData) {
+                $rtpDataTypes = $rtpData->dataTypes();
+                $label = $rtpData->alternateLabel() ?: $defaultLabel;
+                $dataTypesLabels[$term]['default'] = $defaultLabel;
+                $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpDataTypes, $label));
+            }
+            $hasMultipleLabels = $hasMultipleLabels
+                || count(array_unique($dataTypesLabels[$term])) > 1;
+        }
+
+        if (!$hasMultipleLabels) {
+            return;
+        }
+
+        // Prepare values to display when specific labels are defined for some
+        // data types for some properties.
+        // So add a key with the prepared label for the data type.
+        $valuesWithLabel = [];
+        foreach ($values as $term => $propertyData) {
+            foreach ($propertyData['values'] as $value) {
+                $dataType = $value->type();
+                $dataTypeLabel = $dataTypesLabels[$term][$dataType]
+                    ?? $dataTypesLabels[$term]['default']
+                    // Manage properties appended to a resource that are not in
+                    // the template for various reasons.
+                    ?? $translate($propertyData['property']->label());
+                $valuesWithLabel[$term][$dataTypeLabel]['values'][] = $value;
+            }
+        }
+
+        $newValues = [];
+        foreach ($valuesWithLabel as $term => $propData) {
+            $index = 0;
+            foreach ($propData as $dataTypeLabel => $propertyData) {
+                $termKey = empty($index) ? $term : "$term/$index";
+                unset($propertyData['values']);
+                $propertyData['term'] = $term;
+                $propertyData['property'] = $values[$term]['property'];
+                $propertyData['alternate_label'] = $dataTypeLabel;
+                $propertyData['values'] = $valuesWithLabel[$term][$dataTypeLabel]['values'];
+                $newValues[$termKey] = $propertyData;
+                ++$index;
+            }
+        }
+
+        $event->setParam('values', $newValues);
     }
 
     public function addAdminResourceHeaders(Event $event): void
