@@ -425,9 +425,9 @@ class Module extends AbstractModule
      * In particular, this event allows to use the labels specific to a data
      * type when a template has different labels and settings for the same term.
      *
-     * In that case, modify the key "term" as term + index, and update label, so
-     * the template "common/resource-values" will be able to display them as
-     * standard ones.
+     * In that case, modify the key "term" as term + index, and update label and
+     * comment, so the template "common/resource-values" will be able to display
+     * them as standard ones.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
@@ -459,18 +459,28 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $translate = $services->get('ViewHelperManager')->get('translate');
 
+        // TODO Check if this process can be simplified (three double loops, even if loops are small and for one resource a time).
+
+        // The alternate comments are included too, even if they are not
+        // displayed in the default resource template.
+
         // Check and prepare values when a property have multiple labels.
         $dataTypesLabels = [];
+        $dataTypesComments = [];
         $hasMultipleLabels = false;
         foreach ($templateProperties as $rtp) {
             $property = $rtp->property();
             $term = $property->term();
             $defaultLabel = $translate($property->label());
+            $defaultComment = $translate($property->comment());
             foreach ($rtp->data() ?: [$rtp] as $rtpData) {
                 $rtpDataTypes = $rtpData->dataTypes();
                 $label = $rtpData->alternateLabel() ?: $defaultLabel;
                 $dataTypesLabels[$term]['default'] = $defaultLabel;
                 $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpDataTypes, $label));
+                $comment = $rtpData->alternateComment() ?: $defaultComment;
+                $dataTypesComments[$term]['default'] = $defaultComment;
+                $dataTypesComments[$term] = array_merge($dataTypesComments[$term], array_fill_keys($rtpDataTypes, $comment));
             }
             $hasMultipleLabels = $hasMultipleLabels
                 || count(array_unique($dataTypesLabels[$term])) > 1;
@@ -484,15 +494,21 @@ class Module extends AbstractModule
         // data types for some properties.
         // So add a key with the prepared label for the data type.
         $valuesWithLabel = [];
+        $dataTypesLabelsToComments = [];
         foreach ($values as $term => $propertyData) {
+            /** @var \Omeka\Api\Representation\PropertyRepresentation $property */
+            $property = $propertyData['property'];
             foreach ($propertyData['values'] as $value) {
                 $dataType = $value->type();
                 $dataTypeLabel = $dataTypesLabels[$term][$dataType]
                     ?? $dataTypesLabels[$term]['default']
                     // Manage properties appended to a resource that are not in
                     // the template for various reasons.
-                    ?? $translate($propertyData['property']->label());
+                    ?? $translate($property->label());
                 $valuesWithLabel[$term][$dataTypeLabel]['values'][] = $value;
+                $dataTypesLabelsToComments[$dataTypeLabel] = $dataTypesComments[$term][$dataType]
+                    ?? $dataTypesComments[$term]['default']
+                    ?? $translate($property->comment());
             }
         }
 
@@ -505,6 +521,7 @@ class Module extends AbstractModule
                 $propertyData['term'] = $term;
                 $propertyData['property'] = $values[$term]['property'];
                 $propertyData['alternate_label'] = $dataTypeLabel;
+                $propertyData['alternate_comment'] = $dataTypesLabelsToComments[$dataTypeLabel];
                 $propertyData['values'] = $valuesWithLabel[$term][$dataTypeLabel]['values'];
                 $newValues[$termKey] = $propertyData;
                 ++$index;
