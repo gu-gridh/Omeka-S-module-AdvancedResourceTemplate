@@ -538,14 +538,19 @@ class Module extends AbstractModule
             $term = $property->term();
             $defaultLabel = $translate($property->label());
             $defaultComment = $translate($property->comment());
+            $dataTypesLabels[$term]['default'] = $defaultLabel;
+            $dataTypesComments[$term]['default'] = $defaultComment;
             foreach ($rtp->data() ?: [$rtp] as $rtpData) {
                 $rtpDataTypes = $rtpData->dataTypes();
                 $label = $rtpData->alternateLabel() ?: $defaultLabel;
-                $dataTypesLabels[$term]['default'] = $defaultLabel;
-                $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpDataTypes, $label));
                 $comment = $rtpData->alternateComment() ?: $defaultComment;
-                $dataTypesComments[$term]['default'] = $defaultComment;
-                $dataTypesComments[$term] = array_merge($dataTypesComments[$term], array_fill_keys($rtpDataTypes, $comment));
+                if (count($rtpDataTypes)) {
+                    $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpDataTypes, $label));
+                    $dataTypesComments[$term] = array_merge($dataTypesComments[$term], array_fill_keys($rtpDataTypes, $comment));
+                } else {
+                    $dataTypesLabels[$term]['default'] = $label;
+                    $dataTypesComments[$term]['default'] = $comment;
+                }
             }
             $hasMultipleLabels = $hasMultipleLabels
                 || count(array_unique($dataTypesLabels[$term])) > 1;
