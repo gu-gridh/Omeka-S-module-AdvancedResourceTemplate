@@ -13,6 +13,61 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
         return $json;
     }
 
+    /**
+     * List of labels used by this property.
+     *
+     * By design, labels are unique.
+     *
+     * The translated label of the property is added when none is set.
+     */
+    public function labels(): array
+    {
+        $result = [];
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
+        $default = $translator->translate($this->property()->label());
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $result[] = $rtpData->alternateLabel() ?: $default;
+        }
+        return array_unique($result);
+    }
+
+    /**
+     * List of comments used by this property.
+     *
+     * The translated comment of the property is added when none is set.
+     */
+    public function comments(): array
+    {
+        $result = [];
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
+        $default = $translator->translate($this->property()->comment());
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $result[] = $rtpData->alternateComment() ?: $default;
+        }
+        return array_unique($result);
+    }
+
+    /**
+     * Associative list of labels and comments used by this property.
+     *
+     * By design, labels are unique, but not comments.
+     *
+     * The translated label and comment of the property are added when no set.
+     */
+    public function labelsAndComments(): array
+    {
+        $result = [];
+        $property = $this->property();
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
+        $defaultLabel = $translator->translate($property->label());
+        $defaultComment = $translator->translate($property->comment());
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $result[$rtpData->alternateLabel() ?: $defaultLabel]
+                = $rtpData->alternateComment() ?: $defaultComment;
+        }
+        return $result;
+    }
+
     public function alternateLabels(): array
     {
         $result = [];
@@ -27,6 +82,81 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
         $result = [];
         foreach ($this->data() ?: [$this] as $rtpData) {
             $result[] = $rtpData->alternateComment();
+        }
+        return $result;
+    }
+
+    /**
+     * Associative list of labels by data type.
+     *
+     * There may be only one template property without label. If any, it uses
+     * the key "default".
+     */
+    public function labelsByDataType(): array
+    {
+        $result = [];
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $rtpDataTypes = $rtpData->dataTypes();
+            $alternate = $rtpData->alternateLabel();
+            if (!$alternate) {
+                $translator = $this->getServiceLocator()->get('MvcTranslator');
+                $alternate = $translator->translate($this->property()->label());
+            }
+            if (count($rtpDataTypes)) {
+                $result = array_merge($result, array_fill_keys($rtpDataTypes, $alternate));
+            } else {
+                $result['default'] = $alternate;
+            }
+        }
+        return $result;
+    }
+
+    public function commentsByDataType(): array
+    {
+        $result = [];
+        // There may be multiple template property without specific comment.
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
+        $alternateComment = $translator->translate($this->property()->comment());
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $rtpDataTypes = $rtpData->dataTypes();
+            $alternate = $rtpData->alternateComment() ?: $alternateComment;
+            if (count($rtpDataTypes)) {
+                $result = array_merge($result, array_fill_keys($rtpDataTypes, $alternate));
+            } else {
+                $result['default'] = $alternate;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * List labels and commens by data type.
+     *
+     * By design, labels are unique, but not comments.
+     *
+     * There may be only one template property without label. If any, it uses
+     * the key "default".
+     */
+    public function labelsAndCommentsByDataType(): array
+    {
+        $result = [];
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $rtpDataTypes = $rtpData->dataTypes();
+            $label = $rtpData->alternateLabel();
+            if (!$label) {
+                $label = $translator->translate($this->property()->label());
+            }
+            $comment = $rtpData->alternateComment() ?: $translator->translate($this->property()->comment());
+            $labelAndComment = [
+                'label' => $label,
+                'comment' => $comment,
+            ];
+            if (count($rtpDataTypes)) {
+                $result = array_merge($result, array_fill_keys($rtpDataTypes, $labelAndComment));
+            } else {
+                $result['default'] = $labelAndComment;
+            }
         }
         return $result;
     }

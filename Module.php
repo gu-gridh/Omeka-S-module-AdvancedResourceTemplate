@@ -504,8 +504,8 @@ class Module extends AbstractModule
      * Prepare duplicate properties with specific labels and comments.
      *
      * In that case, modify the key "term" as term + index, and update label and
-     * comment, so the template "common/resource-values" will be able to display
-     * them as standard ones.
+     * comment, so the default template "common/resource-values" will be able to
+     * display them as standard ones.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
@@ -530,30 +530,14 @@ class Module extends AbstractModule
         // displayed in the default resource template.
 
         // Check and prepare values when a property have multiple labels.
-        $dataTypesLabels = [];
-        $dataTypesComments = [];
+        $labelsAndComments = [];
         $hasMultipleLabels = false;
         foreach ($templateProperties as $rtp) {
             $property = $rtp->property();
             $term = $property->term();
-            $defaultLabel = $translate($property->label());
-            $defaultComment = $translate($property->comment());
-            $dataTypesLabels[$term]['default'] = $defaultLabel;
-            $dataTypesComments[$term]['default'] = $defaultComment;
-            foreach ($rtp->data() ?: [$rtp] as $rtpData) {
-                $rtpDataTypes = $rtpData->dataTypes();
-                $label = $rtpData->alternateLabel() ?: $defaultLabel;
-                $comment = $rtpData->alternateComment() ?: $defaultComment;
-                if (count($rtpDataTypes)) {
-                    $dataTypesLabels[$term] = array_merge($dataTypesLabels[$term], array_fill_keys($rtpDataTypes, $label));
-                    $dataTypesComments[$term] = array_merge($dataTypesComments[$term], array_fill_keys($rtpDataTypes, $comment));
-                } else {
-                    $dataTypesLabels[$term]['default'] = $label;
-                    $dataTypesComments[$term]['default'] = $comment;
-                }
-            }
+            $labelsAndComments[$term] = $rtp->labelsAndCommentsByDataType();
             $hasMultipleLabels = $hasMultipleLabels
-                || count(array_unique($dataTypesLabels[$term])) > 1;
+                || count($rtp->labels()) > 1;
         }
 
         if (!$hasMultipleLabels) {
@@ -570,14 +554,14 @@ class Module extends AbstractModule
             $property = $propertyData['property'];
             foreach ($propertyData['values'] as $value) {
                 $dataType = $value->type();
-                $dataTypeLabel = $dataTypesLabels[$term][$dataType]
-                    ?? $dataTypesLabels[$term]['default']
+                $dataTypeLabel = $labelsAndComments[$term][$dataType]['label']
+                    ?? $labelsAndComments[$term]['default']['label']
                     // Manage properties appended to a resource that are not in
                     // the template for various reasons.
                     ?? $translate($property->label());
                 $valuesWithLabel[$term][$dataTypeLabel]['values'][] = $value;
-                $dataTypesLabelsToComments[$dataTypeLabel] = $dataTypesComments[$term][$dataType]
-                    ?? $dataTypesComments[$term]['default']
+                $dataTypesLabelsToComments[$dataTypeLabel] = $labelsAndComments[$term][$dataType]['comment']
+                    ?? $labelsAndComments[$term]['default']['comment']
                     ?? $translate($property->comment());
             }
         }
