@@ -121,7 +121,7 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
     }
 
     /**
-     * @return array List of data type names and labels.
+     * @return array List of data type names and default labels.
      */
     public function dataTypeLabels(): array
     {

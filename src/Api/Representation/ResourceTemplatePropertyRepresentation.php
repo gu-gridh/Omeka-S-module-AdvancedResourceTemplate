@@ -13,6 +13,24 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
         return $json;
     }
 
+    public function alternateLabels(): array
+    {
+        $result = [];
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $result[] = $rtpData->alternateLabel();
+        }
+        return $result;
+    }
+
+    public function alternateComments(): array
+    {
+        $result = [];
+        foreach ($this->data() ?: [$this] as $rtpData) {
+            $result[] = $rtpData->alternateComment();
+        }
+        return $result;
+    }
+
     /**
      * Get all the template data associated to the current template property.
      *
