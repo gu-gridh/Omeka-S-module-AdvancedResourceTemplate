@@ -758,7 +758,7 @@ $(document).ready(function() {
     function autofill(values) {
         Object.keys(values).forEach(function(term) {
             values[term].forEach(function(value) {
-                const field = $('.resource-values.field[data-property-term="' + term + '"]').filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
+                var field = $('.resource-values.field[data-property-term="' + term + '"]').filter(function() { return $.inArray(value.type, $(this).data('data-types').split(',')) > -1; });
                 if (!field.length) {
                     field = makeNewField(term);
                 }
