@@ -940,7 +940,7 @@ class Module extends AbstractModule
         $fieldNameToProperty = $services->get('ControllerPluginManager')->get('fieldNameToProperty');
         $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
-        // TODO Use mapper transformSource from module Bulk Import (json dot notation or jmespath + basic twig).
+        // TODO Use mapper metaMapper from module Bulk Import (json dot notation or jmespath + basic twig).
 
         // Only the main rdf data is checked for transformation.
 

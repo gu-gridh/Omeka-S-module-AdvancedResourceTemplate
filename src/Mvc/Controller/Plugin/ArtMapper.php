@@ -13,7 +13,7 @@ use Omeka\Mvc\Controller\Plugin\Translate;
  * Extract data from a string with a mapping.
  *
  * @deprecated Use Bulk Import transform source.
- * @todo Merge with \BulkImport\Mvc\Controller\Plugin\TransformSource.
+ * @todo Merge with \BulkImport\Mvc\Controller\Plugin\MetaMapper.
  */
 class ArtMapper extends AbstractPlugin
 {
@@ -545,7 +545,7 @@ class ArtMapper extends AbstractPlugin
      * ]
      * ```
      *
-     * @see \BulkImport\Mvc\Controller\Plugin\TransformSource::flatArray()
+     * @see \BulkImport\Mvc\Controller\Plugin\MetaMapper::flatArray()
      * @see \ValueSuggestAny\Suggester\JsonLd\JsonLdSuggester::flatArray()
      * @todo Factorize flatArray() between modules.
      */
