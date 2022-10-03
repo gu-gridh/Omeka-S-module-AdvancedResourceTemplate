@@ -67,6 +67,7 @@ return [
             Form\Element\OptionalPropertySelect::class => Service\Form\Element\OptionalPropertySelectFactory::class,
             Form\Element\OptionalResourceTemplateSelect::class => Service\Form\Element\OptionalResourceTemplateSelectFactory::class,
             Form\Element\OptionalRoleSelect::class => Service\Form\Element\OptionalRoleSelectFactory::class,
+            Form\Element\PropertySelect::class => Service\Form\Element\PropertySelectFactory::class,
             Form\ResourceTemplateDataFieldset::class => Service\Form\ResourceTemplateDataFieldsetFactory::class,
             'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,

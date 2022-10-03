@@ -2,8 +2,6 @@
 
 namespace AdvancedResourceTemplate\Form\Element;
 
-use Omeka\Form\Element\PropertySelect;
-
 class OptionalPropertySelect extends PropertySelect
 {
     /**
