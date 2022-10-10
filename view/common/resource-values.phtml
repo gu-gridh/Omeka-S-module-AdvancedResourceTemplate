@@ -3,25 +3,17 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var array $values
  * @var array $templateProperties
+ * Options:
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
  */
 
 // Wrap the core template view/common/resource-values with group labels, if any.
 
-if (!$values) return;
-
 // This path should be updated to override it.
 $mainViewTemplate = OMEKA_PATH . '/application/view/common/resource-values.phtml';
 
-/**
- * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
- * @var array $groups
- */
-$firstPropertyData = reset($values);
-$resource = $firstPropertyData['resource'];
-$template = $resource->resourceTemplate();
-$groups = $template ? $template->dataValue('groups', []) : null;
-if (!$template || !$groups) {
+// When the module AdvancedResourceTemplate is not available, use default template.
+if (!$values || !class_exists('AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation')) {
     include $mainViewTemplate;
     return;
 }
@@ -30,13 +22,14 @@ $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
 
-/* // Can be used to optimize the included main view template when not using the core one.
- if ($this->status()->isSiteRequest()) {
+/*
+// Can be used to optimize the included main view template when not using the core one.
+if ($this->status()->isSiteRequest()) {
     $siteSetting = $plugins->get('siteSetting');
     $labelInfo = $siteSetting('property_label_information');
     $showLocale = (bool) $siteSetting('show_locale_label', true);
-    $filterLocale = $siteSetting('filter_locale_values');
-    $lang = $this->lang();
+    $filterLocale = (bool) $siteSetting('filter_locale_values');
+    $lang = $plugins->get('lang')();
     $showValueAnnotations = (bool) $siteSetting('show_value_annotations', false);
 } else {
     $setting = $plugins->get('setting');
@@ -47,6 +40,23 @@ $translate = $plugins->get('translate');
     $showValueAnnotations = true;
 }
 */
+
+/**
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+ * @var array $groups
+ */
+if (empty($resource)) {
+    $firstPropertyData = reset($values);
+    $resource = $firstPropertyData['resource'];
+}
+$template = $resource->resourceTemplate();
+$groups = $template ? $template->dataValue('groups', []) : null;
+
+if (!$template || !$groups) {
+    include $mainViewTemplate;
+    return;
+}
 ?>
 
 <div class="property-groups">
