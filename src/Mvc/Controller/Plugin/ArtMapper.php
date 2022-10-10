@@ -12,7 +12,8 @@ use Omeka\Mvc\Controller\Plugin\Translate;
 /**
  * Extract data from a string with a mapping.
  *
- * @deprecated Use Bulk Import transform source.
+ * @deprecated Use Bulk Import meta mapper.
+ * @see \BulkImport\Mvc\Controller\Plugin\MetaMapper
  * @todo Merge with \BulkImport\Mvc\Controller\Plugin\MetaMapper.
  */
 class ArtMapper extends AbstractPlugin
@@ -437,19 +438,19 @@ class ArtMapper extends AbstractPlugin
         $matches = [];
         $target['twig'] = array_fill_keys($target['twig'], '');
         foreach ($target['twig'] as $query => &$output) {
-            $v = $value;
+            $v = (string) $value;
             $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
             unset($filters[0]);
             foreach ($filters as $filter) switch ($filter) {
                 case 'abs':
-                    $v = is_numeric($v) ? abs($v) : $v;
+                    $v = is_numeric($v) ? (string) abs($v) : $v;
                     break;
                 case 'capitalize':
                     $v = ucfirst($v);
                     break;
                 case 'e':
                 case 'escape':
-                    $v = htmlspecialchars($v);
+                    $v = htmlspecialchars((string) $v, ENT_COMPAT | ENT_HTML5);
                     break;
                 case 'first':
                     $v = mb_substr($v, 0, 1);
@@ -458,7 +459,7 @@ class ArtMapper extends AbstractPlugin
                     $v = mb_substr($v, -1);
                     break;
                 case 'length':
-                    $v = mb_strlen($v);
+                    $v = (string) mb_strlen($v);
                     break;
                 case 'lower':
                     $v = mb_strtolower($v);

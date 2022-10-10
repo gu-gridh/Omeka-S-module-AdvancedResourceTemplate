@@ -33,6 +33,11 @@ use Doctrine\DBAL\Connection;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\DataType\Manager as DataTypeManager;
 
+/**
+ * @deprecated Replace with bulk helper (partially).
+ *
+ * @see \BulkImport\Mvc\Controller\Plugin\Bulk
+ */
 class MapperHelper extends AbstractPlugin
 {
     /**
