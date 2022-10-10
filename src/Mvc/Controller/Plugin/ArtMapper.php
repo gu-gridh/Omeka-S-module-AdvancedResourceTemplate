@@ -431,84 +431,448 @@ class ArtMapper extends AbstractPlugin
     /**
      * Convert a value into another value via twig filters.
      *
-     * Only some filters are managed basically on value.
+     * Only some common filters and some filter arguments are managed, and some
+     * special functions for dates and index uris.
+     *
+     * @todo Check for issues with separators or parenthesis included in values.
+     * @todo Separate preparation and process.
+     * @fixme The args extractor does not manage escaped quote and double quote in arguments.
+     *
+     * Adapted from BulkImport.
+     * @see \BulkImport\Mvc\Controller\Plugin\MetaMapper::twig()
      */
     protected function twig($value, $target): string
     {
-        $matches = [];
-        $target['twig'] = array_fill_keys($target['twig'], '');
-        foreach ($target['twig'] as $query => &$output) {
-            $v = (string) $value;
-            $filters = array_filter(array_map('trim', explode('|', mb_substr($query, 3, -3))));
-            unset($filters[0]);
-            foreach ($filters as $filter) switch ($filter) {
+        // For adaptation with BulkImport.
+
+        // Full pattern and list of queries.
+        $pattern = $target['pattern'] ?? '';
+        $twig = $target['twig'] ?? [];
+        if (!$pattern || !$twig) {
+            return $value;
+        }
+
+        $twigVars = [
+            'value' => $value,
+        ];
+        $patternVars = 'value|';
+        $twigHasReplace = [];
+        $replace = $target['replace'] ?? [];
+
+        // Copy from BulkImport.
+
+        $extractList = function (string $args, array $keys = []) use ($patternVars, $twigVars): array {
+            $matches = [];
+            preg_match_all('~\s*(?<args>' . $patternVars . '"[^"]*?"|\'[^\']*?\'|[+-]?(?:\d*\.)?\d+)\s*,?\s*~', $args, $matches);
+            $args = array_map(function ($arg) use ($twigVars) {
+                // If this is a var, take it, else this is a string or a number,
+                // so remove the quotes if any.
+                return $twigVars['{{ ' . $arg . ' }}'] ?? (is_numeric($arg)? $arg : mb_substr($arg, 1, -1));
+            }, $matches['args']);
+            $countKeys = count($keys);
+            return $countKeys
+                ? array_combine($keys, count($args) >= $countKeys ? array_slice($args, 0, $countKeys) : array_pad($args, $countKeys, ''))
+                : $args;
+        };
+
+        $extractAssociative = function (string $args) use ($patternVars, $twigVars): array {
+            // TODO Improve the regex to extract keys and values directly.
+            $matches = [];
+            preg_match_all('~\s*(?<args>' . $patternVars . '"[^"]*?"|\'[^\']*?\'|[+-]?(?:\d*\.)?\d+)\s*,?\s*~', $args, $matches);
+            $output = [];
+            foreach (array_chunk($matches['args'], 2) as $keyValue) {
+                if (count($keyValue) === 2) {
+                    // The key cannot be a value, but may be numeric.
+                    $key = is_numeric($keyValue[0])? $keyValue[0] : mb_substr($keyValue[0], 1, -1);
+                    $value = $twigVars['{{ ' . $keyValue[1] . ' }}'] ?? (is_numeric($keyValue[1])? $keyValue[1] : mb_substr($keyValue[1], 1, -1));
+                    $output[$key] = $value;
+                }
+            }
+            return $output;
+        };
+
+        /**
+         * @param mixed $v Value to process, generally a string but may be an array.
+         * @param string $filter The full function with arguments, like "slice(1, 4)".
+         * @return string|array
+         */
+        $twigProcess = function ($v, string $filter) use ($twigVars, $extractList, $extractAssociative) {
+            $matches = [];
+            if (preg_match('~\s*(?<function>[a-zA-Z0-9_]+)\s*\(\s*(?<args>.*?)\s*\)\s*~U', $filter, $matches) > 0) {
+                $function = $matches['function'];
+                $args = $matches['args'];
+            } else {
+                $function = $filter;
+                $args = '';
+            }
+            // Most of the time, a string is required, but a function can return
+            // an array. Only some functions can manage an array.
+            $w = (string) (is_array($v) ? reset($v) : $v);
+            switch ($function) {
                 case 'abs':
-                    $v = is_numeric($v) ? (string) abs($v) : $v;
+                    $v = is_numeric($w) ? (string) abs($w) : $w;
                     break;
+
                 case 'capitalize':
-                    $v = ucfirst($v);
+                    $v = ucfirst($w);
                     break;
+
+                case 'date':
+                    $format = $args;
+                    try {
+                        $v = $format === ''
+                            ? @strtotime($w)
+                            : @date($format, @strtotime($w));
+                    } catch (\Exception $e) {
+                        // Nothing: keep value.
+                    }
+                    break;
+
                 case 'e':
                 case 'escape':
-                    $v = htmlspecialchars((string) $v, ENT_COMPAT | ENT_HTML5);
+                    $v = htmlspecialchars($w, ENT_COMPAT | ENT_HTML5);
                     break;
+
                 case 'first':
-                    $v = mb_substr($v, 0, 1);
+                    $v = is_array($v) ? $w : mb_substr($v, 0, 1);
                     break;
+
+                case 'format':
+                    $arga = $extractList($args);
+                    if ($arga) {
+                        try {
+                            $v = @vsprintf($w, $arga);
+                        } catch (\Exception $e) {
+                            // Nothing: keep value.
+                        }
+                    }
+                    break;
+
+                // The twig filter is "join", but here "implode" is a function.
+                case 'implode':
+                    $arga = $extractList($args);
+                    if (count($arga)) {
+                        $delimiter = array_shift($arga);
+                        $v = implode($delimiter, $arga);
+                    } else {
+                        $v = '';
+                    }
+                    break;
+
+                // Implode only real values, not empty string.
+                case 'implodev':
+                    $arga = $extractList($args);
+                    if (count($arga)) {
+                        $arga = array_filter($arga, 'strlen');
+                        // The string avoids strict type issue with empty array.
+                        $delimiter = (string) array_shift($arga);
+                        $v = implode($delimiter, $arga);
+                    } else {
+                        $v = '';
+                    }
+                    break;
+
                 case 'last':
-                    $v = mb_substr($v, -1);
+                    $v = is_array($v) ? (string) end($v) : mb_substr((string) $v, -1);
                     break;
+
                 case 'length':
-                    $v = (string) mb_strlen($v);
+                    $v = (string) (is_array($v) ? count($v) : mb_strlen((string) $v));
                     break;
+
                 case 'lower':
-                    $v = mb_strtolower($v);
+                    $v = mb_strtolower($w);
                     break;
+
+                case 'replace':
+                    $arga = $extractAssociative($args);
+                    if ($arga) {
+                        $v = str_replace(array_keys($arga), array_values($arga), $w);
+                    }
+                    break;
+
+                case 'slice':
+                    $arga = $extractList($args);
+                    $start = (int) ($arga[0] ?? 0);
+                    $length = (int) ($arga[1] ?? 1);
+                    $v = is_array($v)
+                        ? array_slice($v, $start, $length, !empty($arga[2]))
+                        : mb_substr($w, $start, $length);
+                    break;
+
+                case 'split':
+                    $arga = $extractList($args);
+                    $delimiter = $arga[0] ?? '';
+                    $limit = (int) ($arga[1] ?? 1);
+                    $v = strlen($delimiter)
+                        ? explode($delimiter, $w, $limit)
+                        : str_split($w, $limit);
+                    break;
+
                 case 'striptags':
-                    $v = strip_tags($v);
+                    $v = strip_tags($w);
                     break;
+
+                case 'table':
+                    // table() (included).
+                    $first = mb_substr($args, 0, 1);
+                    if ($first === '{') {
+                        $table = $extractAssociative(trim(mb_substr($args, 1, -1)));
+                        if ($table) {
+                            $v = $table[$w] ?? $w;
+                        }
+                    }
+                    // table() (named).
+                    else {
+                        $name = $first === '"' || $first === "'" ? mb_substr($args, 1, -1) : $args;
+                        $v = $this->tables[$name][$w] ?? $w;
+                    }
+                    break;
+
                 case 'title':
-                    $v = ucwords($v);
+                    $v = ucwords($w);
                     break;
+
                 case 'trim':
-                    $v = trim($v);
+                    $arga = $extractList($args);
+                    $characterMask = $arga[0] ?? '';
+                    if (!strlen($characterMask)) {
+                        $characterMask = " \t\n\r\0\x0B";
+                    }
+                    $side = $arga[1] ?? '';
+                    // Side is "both" by default.
+                    if ($side === 'left') {
+                        $v = ltrim($w, $characterMask);
+                    } elseif ($side === 'right') {
+                        $v = rtrim($w, $characterMask);
+                    } else {
+                        $v = trim($w, $characterMask);
+                    }
                     break;
+
                 case 'upper':
-                    $v = mb_strtoupper($v);
+                    $v = mb_strtoupper($w);
                     break;
+
                 case 'url_encode':
-                    $v = rawurlencode($v);
+                    $v = rawurlencode($w);
                     break;
-                case preg_match('~date\s*\(\s*["|\'](?<format>[^"\']+?)["|\']\s*\)~', $filter, $matches) > 0:
-                    try {
-                        $v = @date($matches['format'], @strtotime($v));
-                    } catch (\Exception $e) {
-                        // Nothing.
+
+                // Special filters and functions to manage common values.
+
+                case 'dateIso':
+                    // "d1605110512" => "1605-11-05T12" (date iso).
+                    // "[1984]-" => kept.
+                    // Missing numbers may be set as "u", but this is not
+                    // manageable as iso 8601.
+                    // The first character may be a space to manage Unimarc.
+                    $v = $w;
+                    if (mb_strlen($v) && mb_strpos($v, 'u') === false) {
+                        $firstChar = mb_substr($v, 0, 1);
+                        if (in_array($firstChar, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+', 'c', 'd', ' '])) {
+                            if (in_array($firstChar, ['-', '+', 'c', 'd', ' '])) {
+                                $d = $firstChar === '-' || $firstChar === 'c' ? '-' : '';
+                                $v = mb_substr($v, 1);
+                            } else {
+                                $d = '';
+                            }
+                            $v = $d
+                                . mb_substr($v, 0, 4) . '-' . mb_substr($v, 4, 2) . '-' . mb_substr($v, 6, 2)
+                                . 'T' . mb_substr($v, 8, 2) . ':' . mb_substr($v, 10, 2) . ':' . mb_substr($v, 12, 2);
+                            $v = rtrim($v, '-:T |#');
+                        }
                     }
                     break;
-                case preg_match('~format\s*\(\s*(?<args>.*?)\s*\)~', $filter, $matches) > 0:
-                    $args = $matches['args'];
-                    preg_match_all('~\s*(?<args>__value__|"[^"]*?"|\'[^\']*?\')\s*,?\s*~', $args, $matches);
-                    $args = array_map(function ($v) {
-                        return $v === '__value__' ? $v : mb_substr($v, 1, -1);
-                    }, $matches['args']);
-                    try {
-                        $v = @vsptintf($v, $args);
-                    } catch (\Exception $e) {
-                        // Nothing.
+
+                case 'dateSql':
+                    // Unimarc 005.
+                    // "19850901141236.0" => "1985-09-01 14:12:36" (date sql).
+                    $v = trim($w);
+                    $v = mb_substr($v, 0, 4) . '-' . mb_substr($v, 4, 2) . '-' . mb_substr($v, 6, 2)
+                        . ' ' . mb_substr($v, 8, 2) . ':' . mb_substr($v, 10, 2) . ':' . mb_substr($v, 12, 2);
+                    break;
+
+                case 'isbdName':
+                    // isbdName(a, b, c, d, f, g, k, o, p, 5) (function).
+                    /* Unimarc 700 et suivants :
+                    $a Élément d’entrée
+                    $b Partie du nom autre que l’élément d’entrée
+                    $c Eléments ajoutés aux noms autres que les dates
+                    $d Chiffres romains
+                    $f Dates
+                    $g Développement des initiales du prénom
+                    $k Qualificatif pour l’attribution
+                    $o Identifiant international du nom
+                    $p Affiliation / adresse
+                    $5 Institution à laquelle s’applique la zone
+                     */
+                    $arga = $extractList($args, ['a', 'b', 'c', 'd', 'f', 'g', 'k', 'o', 'p', '5']);
+                    // @todo Improve isbd for names.
+                    $v = $arga['a']
+                        . ($arga['b'] ? ', ' . $arga['b'] : '')
+                        . ($arga['g'] ? ' (' . $arga['g'] . ')' : '')
+                        . ($arga['d'] ? ', ' . $arga['d'] : '')
+                        . (
+                            $arga['f']
+                            ? ' (' . $arga['f']
+                                . ($arga['c'] ? ' ; ' . $arga['c'] : '')
+                                . ($arga['k'] ? ' ; ' . $arga['k'] : '')
+                                . ')'
+                            : (
+                                $arga['c']
+                                    ? (' (' . $arga['c'] . ($arga['k'] ? ' ; ' . $arga['k'] : '') . ')')
+                                    : ($arga['k'] ? ' (' . $arga['k'] . ')' : '')
+                            )
+                        )
+                        . ($arga['o'] ? ' {' . $arga['o'] . '}' : '')
+                        . ($arga['p'] ? ', ' . $arga['p'] : '')
+                        . ($arga['5'] ? ', ' . $arga['5'] : '')
+                    ;
+                    break;
+
+                case 'isbdNameColl':
+                    // isbdNameColl(a, b, c, d, e, f, g, h, o, p, r, 5) (function).
+                    /* Unimarc 710/720/740 et suivants :
+                    $a Élément d’entrée
+                    $b Subdivision
+                    $c Élément ajouté au nom ou qualificatif
+                    $d Numéro de congrès et/ou numéro de session de congrès
+                    $e Lieu du congrès
+                    $f Date du congrès
+                    $g Élément rejeté
+                    $h Partie du nom autre que l’élément d’entrée et autre que l’élément rejeté
+                    $o Identifiant international du nom
+                    $p Affiliation / adresse
+                    $r Partie ou rôle joué
+                    $5 Institution à laquelle s’applique la zone
+                    // Pour mémoire.
+                    $3 Identifiant de la notice d’autorité
+                    $4 Code de fonction
+                     */
+                    $arga = $extractList($args, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'o', 'p', 'r', '5']);
+                    // @todo Improve isbd for organizations.
+                    $v = $arga['a']
+                        . ($arga['b'] ? ', ' . $arga['b'] : '')
+                        . ($arga['g']
+                            ? ' (' . $arga['g'] . ($arga['h'] ? ' ; ' . $arga['h'] . '' : '') . ')'
+                            : ($arga['h'] ? ' (' . $arga['h'] . ')' : ''))
+                        . ($arga['d'] ? ', ' . $arga['d'] : '')
+                        . ($arga['e'] ? ', ' . $arga['e'] : '')
+                        . (
+                            $arga['f']
+                                ? ' (' . $arga['f']
+                                    . ($arga['c'] ? ' ; ' . $arga['c'] : '')
+                                    . ')'
+                                : ($arga['c'] ? (' (' . $arga['c'] . ')') : '')
+                        )
+                        . ($arga['o'] ? ' {' . $arga['o'] . '}' : '')
+                        . ($arga['p'] ? ', ' . $arga['p'] : '')
+                        . ($arga['r'] ? ', ' . $arga['r'] : '')
+                        . ($arga['5'] ? ', ' . $arga['5'] : '')
+                    ;
+                    break;
+
+                case 'isbdMark':
+                    /* Unimarc 716 :
+                    $a Élément d’entrée
+                    $c Qualificatif
+                    $f Dates
+                      */
+                    // isbdMark(a, b, c) (function).
+                    $arga = $extractList($args, ['a', 'b', 'c']);
+                    // @todo Improve isbd for marks.
+                    $v = $arga['a']
+                        . ($arga['b'] ? ', ' . $arga['b'] : '')
+                        . ($arga['c'] ? (' (' . $arga['c'] . ')') : '')
+                    ;
+                    break;
+
+                case 'unimarcIndex':
+                    $arga = $extractList($args);
+                    $index = $arga[0] ?? '';
+                    if ($index) {
+                        // Unimarc Index uri (filter or function).
+                        $code = count($arga) === 1 ? $w : ($arga[1] ?? '');
+                        // Unimarc Annexe G.
+                        // @link https://www.transition-bibliographique.fr/wp-content/uploads/2018/07/AnnexeG-5-2007.pdf
+                        switch ($index) {
+                            case 'unimarc/a':
+                                $v = 'Unimarc/A : ' . $code;
+                                break;
+                            case 'rameau':
+                                $v = 'https://data.bnf.fr/ark:/12148/cb' . $code . $this->noidCheckBnf('cb' . $code);
+                                break;
+                            default:
+                                $v = $index . ' : ' . $code;
+                                break;
+                        }
                     }
                     break;
-                case preg_match('~slice\s*\(\s*(?<start>-?\d+)\s*,\s*(?<length>-?\d+\s*)\s*\)~', $filter, $matches) > 0:
-                    $v = mb_substr($v, (int) $matches['start'], (int) $matches['length']);
+
+                case 'unimarcCoordinates':
+                    // "w0241207" => "W 24°12’7”".
+                    // Hemisphere "+" / "-" too.
+                    $v = $w;
+                    $firstChar = mb_strtoupper(mb_substr($v, 0, 1));
+                    $mappingChars = ['+' => 'N', '-' => 'S', 'W' => 'W', 'E' => 'E', 'N' => 'N', 'S' => 'S'];
+                    $v = ($mappingChars[$firstChar] ?? '?') . ' '
+                        . intval(mb_substr($v, 1, 3)) . '°'
+                        . intval(mb_substr($v, 4, 2)) . '’'
+                        . intval(mb_substr($v, 6, 2)) . '”';
                     break;
+
+                case 'unimarcCoordinatesHexa':
+                    $v = $w;
+                    $v = mb_substr($v, 0, 2) . '°' . mb_substr($v, 2, 2) . '’' . mb_substr($v, 4, 2) . '”';
+                    break;
+
+                case 'unimarcTimeHexa':
+                    // "150027" => "15h0m27s".
+                    $v = $w;
+                    $h = (int) trim(mb_substr($v, 0, 2));
+                    $m = (int) trim(mb_substr($v, 2, 2));
+                    $s = (int) trim(mb_substr($v, 4, 2));
+                    $v = ($h ? $h . 'h' : '')
+                        . ($m ? $m . 'm' : ($h && $s ? '0m' : ''))
+                        . ($s ? $s . 's' : '');
+                    break;
+
+                // This is not a reserved keyword, so check for a variable.
+                case 'value':
                 default:
-                    // Nothing.
+                    $v = $twigVars['{{ ' . $filter . ' }}'] ?? $twigVars[$filter] ?? $v;
                     break;
             }
-            $output = $v;
+            return is_array($v)
+                ? $v
+                : (string) $v;
+        };
+
+        $twigReplace = [];
+        $twigPatterns = array_flip($twig);
+        $hasReplace = !empty($replace);
+        foreach ($twig as $query) {
+            $hasReplaceQuery = $hasReplace && !empty($twigHasReplace[$twigPatterns[$query]]);
+            $v = '';
+            $filters = array_filter(array_map('trim', explode('|', mb_substr((string) $query, 3, -3))));
+            // The first filter may not be a filter, but a variable. A variable
+            // cannot be a reserved keyword.
+            foreach ($filters as $filter) {
+                $v = $hasReplaceQuery
+                    ? $twigProcess($v, str_replace(array_keys($replace), array_values($replace), $filter))
+                    : $twigProcess($v, $filter);
+            }
+            // A twig pattern may return an array.
+            if (is_array($v)) {
+                $v = (string) reset($v);
+            }
+            if ($hasReplaceQuery) {
+                $twigReplace[str_replace(array_keys($replace), array_values($replace), $query)] = $v;
+            } else {
+                $twigReplace[$query] = $v;
+            }
         }
-        unset($output);
-        return str_replace(array_keys($target['twig']), array_values($target['twig']), $target['pattern']);
+        return str_replace(array_keys($twigReplace), array_values($twigReplace), $pattern);
     }
 
     protected function normalizeMapping(array $mapping): array
