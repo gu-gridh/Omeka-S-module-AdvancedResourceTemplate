@@ -381,7 +381,9 @@
             $('#properties .resource-values.field').find('.values > .value[data-data-type^="valuesuggest"]').each(function () {
                 const value = $(this);
                 const field = value.closest('.resource-values.field');
-                const rtpData = field.data('template-property-data');
+                const rtpData = field.data('template-property-data')
+                    ? field.data('template-property-data')
+                    : { value_suggest_keep_original_label: 'no', value_suggest_require_uri: 'no' };
                 const valueSuggestKeepOriginalLabel = rtpData.value_suggest_keep_original_label === 'yes'
                     || (rtpData.value_suggest_keep_original_label !== 'no' && templateData.value_suggest_keep_original_label == 'yes');
                 if (valueSuggestKeepOriginalLabel) {
