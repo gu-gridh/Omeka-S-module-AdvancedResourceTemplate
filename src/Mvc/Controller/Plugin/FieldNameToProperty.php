@@ -26,6 +26,8 @@ class FieldNameToProperty extends AbstractPlugin
      * property id is not checked, but the term is required. If present, the
      * pattern must be the last part.
      *
+     * @see \BulkImport\Mvc\Controller\Plugin\AutomapFields
+     *
      * @param string $field
      * @return array|null
      */
@@ -66,8 +68,8 @@ class FieldNameToProperty extends AbstractPlugin
                     $base['is_public'] = false;
                 }
             } elseif (mb_substr($part, 0, 2) === '^^') {
-                if (preg_match('~^(?<type>[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][\w-]*|[a-zA-Z][\w-]*|)~', trim(mb_substr($part, 2)), $matches)) {
-                    $base['type'] = $matches['type'];
+                if (preg_match('~^(?<datatype>(?:[a-zA-Z][\w;]*:[\w\p{L}][\w\p{L}:;\s-]*?|[a-zA-Z][\w;\s-]*)+)~', trim(mb_substr($part, 2)), $matches)) {
+                    $base['type'] = $matches['datatype'];
                 }
             } elseif (in_array($part, ['{__label__}', '{list}'])) {
                 $base = [];
