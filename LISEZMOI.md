@@ -74,13 +74,54 @@ l’édition des ressources :
 
   Cette option permet de disposer de la même propriété plusieurs fois avec des
   paramèters différents. Par exemple, dans le cas de la propriété "dcterms:subject"
-  qui aurait des sujets libres et des descripteurs provenant de plusieurs
-  thésaurus. Dans le modèle, la propriété peut être configurée pour avoir les
-  trois de données, mais il est aussi possible d’avoir trois propriétés avec
+  qui aurait des sujets libres et des descripteurs provenant de deux thésaurus.
+  Dans le modèle, la propriété peut être configurée pour avoir les trois types
+  de données, mais il est aussi possible d’avoir trois propriétés avec
   chacune un seul type de données, avec un libellé et des paramètres spécifiques
-  (taille, nombre, etc.).
+  (taille, nombre, etc.), comme dans l’exemple plus bas.
+  **Attention** : pour conserver la compatibilité avec le cœur et les aues
+  modules et parce qu’il peut y avoir des variantes de la même propriété, les
+  propriétés sont maintenues ensemble dans le modèle. Dans l’exemple ci-dessous,
+  il n’est donc pas possible d’insérer une propriété entre deux couvertures
+  spatiales.
 
   ![Exemple de sujets multiples avec des paramètres différents](data/images/duplicate_properties.png)
+
+- Groupe de propriétés avec un libellé :
+
+  Quand les valeurs et les propriétés sont nombreuses, le module permet de les
+  grouper sous un titre. Par exemple, vous pouvez grouper les propriétés du
+  Dublin Coe comme cela :
+
+  ```
+  # Métadonnées descriptives
+  dcterms:title
+  dcterms:description
+  dcterms:type
+  dcterms:source
+  dcterms:relation
+
+  # Métadonnées d’indexation
+  dcterms:coverage
+  dcterms:subject
+
+  # Métadonnées de propriété intellectuelle
+  dcterms:creator
+  dcterms:contributor
+  dcterms:publisher
+  dcterms:rights
+
+  # Métadonnées d’instanciation
+  dcterms:date
+  dcterms:format
+  dcterms:identifier
+  dcterms:language
+  ```
+
+  Ici, la notice est divisée en quatre groupe. Quand une propriété a plusieurs
+  sous-champs, vous pouvez les groupes plus précisément en ajoutant le nom de la
+  propriété dans le modèle après un ^`/`, par exemple : `dcterms:subject/Sujets Rameau`
+  et `dcterms:subject/Sujets libres`.
 
 - Sélection de la langue et langue par défaut par modèle et par propriété, ou
   aucune langue :
@@ -197,10 +238,8 @@ doit exister quand le type de données est une ressource.
 
 Quelques jokers simples peuvent être utilisées avec la dotation "json point" et
 quelques commandes basiques de type "twig". Le format est le même que pour
-l’auto-remplissage (voir ci-dessous).
-Some basic placeholders can be used with json dot notation and basic twig-like
-commands. The format is the same than the auto-filling (see below). Une version
-future intégrera les améliorations réalisées pour le module [Bulk Import].
+l’auto-remplissage (voir ci-dessous). Une version future intégrera les
+améliorations réalisées pour le module [Bulk Import].
 
 #### Au niveau du modèle
 
@@ -231,16 +270,20 @@ améliorations réalisées pour le module [Bulk Import].
 #### Services intégrés
 
 Par exemple, si le service renvoie un xml Marc comme pour [Colbert], le schéma
-peut être une liste de XPath et de propriétés avec quelques arguments :
+peut être une liste de XPath et de propriétés avec quelques arguments (ici avec
+l’ontologie [bio], conçue pour gérer les informations biographiques) :
 
 ```
-[idref:person] = IdRef Personne
-/record/controlfield[@tag="003"] = dcterms:identifier ^^uri
+[idref:person] = IdRef Person
+/record/controlfield[@tag="003"] = bibo:identifier
 /record/datafield[@tag="900"]/subfield[@code="a"] = dcterms:title
-/record/datafield[@tag="200"]/subfield[@code="a"] = foaf:lastName
+/record/datafield[@tag="200"]/subfield[@code="a"] = foaf:familyName
 /record/datafield[@tag="200"]/subfield[@code="b"] = foaf:firstName
 /record/datafield[@tag="200"]/subfield[@code="f"] = dcterms:date
-/record/datafield[@tag="340"]/subfield[@code="a"] = dcterms:description @fra
+/record/datafield[@tag="103"]/subfield[@code="a"] = bio:birth ^^numeric:timestamp ~ {{ value|dateIso }}
+/record/datafield[@tag="103"]/subfield[@code="b"] = bio:death ^^numeric:timestamp ~ {{ value|dateIso }}
+/record/datafield[@tag="340"]/subfield[@code="a"] = bio:olb @fra
+/record/datafield[@tag="200"]/subfield[@code="c"] = bio:position @fra
 ```
 
 La première ligne contient la clé et le libellé du schéma, qui seront énumérées
@@ -339,7 +382,7 @@ https://www.idref.fr/Sru/Solr
 /doc/arr[@name="nom_t"] = foaf:lastName
 /doc/arr[@name="prenom_t"] = foaf:firstName
 /doc/date[@name="datenaissance_dt"] = dcterms:date ^^numeric:timestamp
-/doc/str[@name="ppn_z"] = dcterms:identifier ^^uri ~ https://idref.fr/{__value__}
+/doc/str[@name="ppn_z"] = bibo:uri ^^uri ~ https://idref.fr/{__value__}
 ```
 
 
@@ -360,7 +403,7 @@ TODO
 - [x] Valider les ressources avec des données (valeur unique, modèle strict, etc.)
 - [ ] Finaliser le formulaire de révision des imports pour les propriétés doublons et les vocabulaires personnalisés.
 - [ ] Mettre à jour à partir d’un fichier.
-- [ ] Utiliser un événement et supprimer le gabarit spécifique pour resource-values.
+- [x] Utiliser un événement et supprimer le gabarit spécifique pour resource-values.
 - [ ] Corriger la copie des libellés alternatifs lorsqu’un modèle est importé (actuellement, le modèle doit être resauvé).
 - [ ] Choisir les vocabulaires personnalisés par défaut lorsque l’on importe du même serveur.
 
@@ -444,6 +487,7 @@ des travaux étudiants [Dante] de l’[Université de Toulouse Jean-Jaurès].
 [Import en lot]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
 [Import de fichiers en lot]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Value Suggest]: https://github.com/omeka-s-modules/ValueSuggest
+[bio]: https://vocab.org/bio
 [questions du module]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html

@@ -70,11 +70,10 @@ resources:
 
   This option allows to have multiple times the same property with different
   settings. For example, you may want to have a free subject and a subject from
-  two thesaurus. They can be set as different data types of the same property
-  (core improvement since Omeka S v3, as for subject ("sujet") in the example
-  below), but as multple template properties too, so each one has its own label
-  and settings (size, number, etc.), as for spatial cover ("couverture spatiale")
-  in the example below.
+  two thesaurus. They can be set as different data types of the same property,
+  but as multple template properties too, so each one has its own label and
+  settings (size, number, etc.), as for spatial cover ("couverture spatiale") in
+  the example below.
   **Warning**: for compatibility with core and modules and because they are
   variants of the same property, the template properties are kept gathered
   according to the original term in the resource template. So, in the example
@@ -257,16 +256,20 @@ It will be improved with the [Bulk Import] format in a future release.
 #### Integrated services
 
 For example, if the service returns an xml Marc like for [Colbert], the mapping
-can be a list of XPath and properties with some arguments:
+can be a list of XPath and properties with some arguments (here with the
+specialized ontology [bio] to manage biographic metadata):
 
 ```
 [idref:person] = IdRef Person
-/record/controlfield[@tag="003"] = dcterms:identifier ^^uri
+/record/controlfield[@tag="003"] = bibo:uri ^^uri
 /record/datafield[@tag="900"]/subfield[@code="a"] = dcterms:title
-/record/datafield[@tag="200"]/subfield[@code="a"] = foaf:lastName
+/record/datafield[@tag="200"]/subfield[@code="a"] = foaf:familyName
 /record/datafield[@tag="200"]/subfield[@code="b"] = foaf:firstName
 /record/datafield[@tag="200"]/subfield[@code="f"] = dcterms:date
-/record/datafield[@tag="340"]/subfield[@code="a"] = dcterms:description @fra
+/record/datafield[@tag="103"]/subfield[@code="a"] = bio:birth ^^numeric:timestamp ~ {{ value|dateIso }}
+/record/datafield[@tag="103"]/subfield[@code="b"] = bio:death ^^numeric:timestamp ~ {{ value|dateIso }}
+/record/datafield[@tag="340"]/subfield[@code="a"] = bio:olb @fra
+/record/datafield[@tag="200"]/subfield[@code="c"] = bio:position @fra
 ```
 
 The first line contains the key and the label of the mapping, that will be
@@ -361,7 +364,7 @@ https://www.idref.fr/Sru/Solr
 /doc/arr[@name="nom_t"] = foaf:lastName
 /doc/arr[@name="prenom_t"] = foaf:firstName
 /doc/date[@name="datenaissance_dt"] = dcterms:date ^^numeric:timestamp
-/doc/str[@name="ppn_z"] = dcterms:identifier ^^uri ~ https://idref.fr/{__value__}
+/doc/str[@name="ppn_z"] = bibo:uri ^^uri ~ https://idref.fr/{__value__}
 ```
 
 
@@ -455,6 +458,7 @@ and for the institutional repository of student works [Dante] of the [Universit√
 [Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
 [Bulk Import Files]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Value Suggest]: https://github.com/omeka-s-modules/ValueSuggest
+[bio]: https://vocab.org/bio
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
