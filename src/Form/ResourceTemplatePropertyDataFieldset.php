@@ -93,16 +93,16 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'property_read_only',
+                'name' => 'unique_value',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
-                    'label' => 'Property disabled in form (editable only by api/job)', // @translate
+                    'label' => 'Unique value', // @translate
                     'checked_value' => 'yes',
                 ],
                 'attributes' => [
-                    // 'id' => 'property_read_only',
+                    // 'id' => 'unique_value',
                     'class' => 'setting',
-                    'data-setting-key' => 'property_read_only',
+                    'data-setting-key' => 'unique_value',
                 ],
             ])
             ->add([
@@ -116,6 +116,19 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                     // 'id' => 'locked_value',
                     'class' => 'setting',
                     'data-setting-key' => 'locked_value',
+                ],
+            ])
+            ->add([
+                'name' => 'property_read_only',
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'options' => [
+                    'label' => 'Property disabled in form (editable only by api/job)', // @translate
+                    'checked_value' => 'yes',
+                ],
+                'attributes' => [
+                    // 'id' => 'property_read_only',
+                    'class' => 'setting',
+                    'data-setting-key' => 'property_read_only',
                 ],
             ])
             ->add([

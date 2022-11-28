@@ -278,17 +278,18 @@ class Module extends AbstractModule
             return;
         }
 
-        /** @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter */
+        /**
+         * @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter
+         * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Stdlib\ErrorStore $errorStore
+         * @var \Doctrine\DBAL\Connection $connection
+         */
         $adapter = $event->getTarget();
-
-        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $adapter->getAdapter('resource_templates')->getRepresentation($templateEntity);
-
-        /** @var \Omeka\Api\Request $request */
         // $request = $event->getParam('request');
-
-        /** @var \Omeka\Stdlib\ErrorStore $errorStore */
         $errorStore = $event->getParam('errorStore');
+        $connection = $services->get('Omeka\Connection');
 
         // Because the form doesn't contain the properties, that are added
         // dynamically, and because the resource controllers don't include the
@@ -300,11 +301,11 @@ class Module extends AbstractModule
         $routeMatch = $status->getRouteMatch();
         // RouteMatch may be unavailable during background process.
         $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;
-        // Module Contribute can use the error store, so no issue here.
+        // Module Contribute can use the error store so don't output issue here.
         $directMessage = $routeName === 'admin/default'
             && in_array($routeMatch->getParam('__CONTROLLER__'), ['item', 'item-set', 'media', 'annotation'])
             && in_array($routeMatch->getParam('action'), ['add', 'edit']);
-        $messenger = $directMessage ? new \Omeka\Mvc\Controller\Plugin\Messenger() : null;
+        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
 
         // Template level.
         $resourceClass = $entity->getResourceClass();
@@ -347,6 +348,7 @@ class Module extends AbstractModule
         // Some checks can be done simpler via representation.
         /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
         $resource = $adapter->getRepresentation($entity);
+        $resourceId = (int) $resource->id();
 
         // Property level.
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
@@ -380,14 +382,11 @@ class Module extends AbstractModule
                     }
                 }
 
-                // TODO Fix api($form) to manage the minimum number of values in admin resource form.
-                if ($directMessage) {
-                    continue;
-                }
-
                 $minValues = (int) $rtpData->dataValue('min_values');
                 $maxValues = (int) $rtpData->dataValue('max_values');
-                if ($minValues || $maxValues) {
+                // TODO Fix api($form) to manage the minimum number of values in admin resource form.
+                // The check for directMessage is to be removed with the fix.
+                if (!$directMessage && ($minValues || $maxValues)) {
                     // The number of values may be specific for each type.
                     $isRequired = $rtpData->isRequired();
                     $values = $resource->value($term, ['all' => true, 'type' => $rtpData->dataTypes()]);
@@ -413,6 +412,65 @@ class Module extends AbstractModule
                             $messenger->addError($message);
                         }
                         break;
+                    }
+                }
+
+                $uniqueValue = (bool) $rtpData->dataValue('unique_value');
+                if ($uniqueValue) {
+                    $values = $resource->value($term, ['all' => true]);
+                    if ($values) {
+                        $sqlWhere = [];
+                        // Get all values by main type in one query.
+                        $bind = [
+                            'resource_id' => $resourceId,
+                            'property_id' => $templateProperty->property()->id(),
+                        ];
+                        $types = [
+                            'resource_id' => \Doctrine\DBAL\Types\Types::INTEGER,
+                            'property_id' => \Doctrine\DBAL\Types\Types::INTEGER,
+                        ];
+                        foreach ($values as $value) {
+                            if ($k = $value->valueResource()) {
+                                $bind['resource'][] = $k->id();
+                            } elseif ($k = $value->uri()) {
+                                $bind['uri'][] = $k;
+                            } else {
+                                $bind['literal'][] = $value->value();
+                            }
+                        }
+                        if (isset($bind['resource'])) {
+                            $sqlWhere[] = 'value.value_resource_id IN (:resource)';
+                            $types['resource'] = $connection::PARAM_INT_ARRAY;
+                        }
+                        if (isset($bind['uri'])) {
+                            $sqlWhere[] = 'value.uri IN (:uri)';
+                            $types['uri'] = $connection::PARAM_STR_ARRAY;
+                        }
+                        if (isset($bind['literal'])) {
+                            $sqlWhere[] = 'value.value IN (:literal)';
+                            $types['literal'] = $connection::PARAM_STR_ARRAY;
+                        }
+                        $sqlWhere = implode(' OR ', $sqlWhere);
+                        $sql = <<<SQL
+SELECT value.resource_id
+FROM value
+WHERE value.resource_id != :resource_id
+    AND value.property_id = :property_id
+    AND ($sqlWhere)
+LIMIT 1;
+SQL;
+                        $resId = $connection->executeQuery($sql, $bind, $types)->fetchOne();
+                        if ($resId) {
+                            $message = new \Omeka\Stdlib\Message(
+                                'The value for term "%1$s" should be unique, but already set for resource #%2$s.', // @translate
+                                $term, $resId
+                            );
+                            $errorStore->addError($term, $message);
+                            if ($directMessage) {
+                                $messenger->addError($message);
+                            }
+                            break;
+                        }
                     }
                 }
 
