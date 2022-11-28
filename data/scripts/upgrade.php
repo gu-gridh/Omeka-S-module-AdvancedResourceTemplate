@@ -2,26 +2,26 @@
 
 namespace AdvancedResourceTemplate;
 
-use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
 
 /**
  * @var Module $this
- * @var \Laminas\ServiceManager\ServiceLocatorInterface $serviceLocator
+ * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
  * @var string $newVersion
  * @var string $oldVersion
  *
  * @var \Doctrine\DBAL\Connection $connection
  * @var \Doctrine\ORM\EntityManager $entityManager
  * @var \Omeka\Api\Manager $api
+ * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
-$services = $serviceLocator;
-$settings = $services->get('Omeka\Settings');
-$config = require dirname(__DIR__, 2) . '/config/module.config.php';
-$connection = $services->get('Omeka\Connection');
-// $entityManager = $services->get('Omeka\EntityManager');
 $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
+$config = require dirname(dirname(__DIR__)) . '/config/module.config.php';
+$settings = $services->get('Omeka\Settings');
+$connection = $services->get('Omeka\Connection');
+$messenger = $plugins->get('messenger');
+// $entityManager = $services->get('Omeka\EntityManager');
 
 if (version_compare((string) $oldVersion, '3.3.3.3', '<')) {
     $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
@@ -80,7 +80,6 @@ SQL;
         $connection->executeStatement($sql);
     }
 
-    $messenger = new Messenger();
     $message = new Message(
         'New settings were added to the resource templates.' // @translate
     );
@@ -161,7 +160,6 @@ SQL;
     $settings->set('advancedresourcetemplate_resource_form_elements',
         $config['advancedresourcetemplate']['settings']['advancedresourcetemplate_resource_form_elements']);
 
-    $messenger = new Messenger();
     $message = new Message(
         'New settings were added to the template.' // @translate
     );
@@ -175,7 +173,6 @@ SQL;
 }
 
 if (version_compare((string) $oldVersion, '3.3.4.15', '<')) {
-    $messenger = new Messenger();
     $message = new Message(
         'It’s now possible to group a long list of template properties.' // @translate
     );
