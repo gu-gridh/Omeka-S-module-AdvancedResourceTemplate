@@ -181,8 +181,11 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 'resource:media',
                 'uri',
                 // DataTypeGeometry
-                'geometry:geography',
-                'geometry:geometry',
+                'geography',
+                'geometry',
+                'geography:coordinates',
+                'geometry:coordinates',
+                'geometry:position',
                 // DataTypeRdf.
                 'boolean',
                 'html',
