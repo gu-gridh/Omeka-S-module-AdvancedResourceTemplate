@@ -93,7 +93,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
                 $params = array_filter(array_map('trim', explode("\n", trim($meta))), 'strlen');
                 $list = [];
                 foreach ($params as $keyValue) {
-                    list($key, $value) = strpos($keyValue, '=') === false
+                    [$key, $value] = strpos($keyValue, '=') === false
                     ? [$keyValue, null]
                     : array_map('trim', explode('=', $keyValue, 2));
                     if ($key !== '') {

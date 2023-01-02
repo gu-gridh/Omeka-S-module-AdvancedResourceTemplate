@@ -467,7 +467,7 @@ class ArtMapper extends AbstractPlugin
             $args = array_map(function ($arg) use ($twigVars) {
                 // If this is a var, take it, else this is a string or a number,
                 // so remove the quotes if any.
-                return $twigVars['{{ ' . $arg . ' }}'] ?? (is_numeric($arg)? $arg : mb_substr($arg, 1, -1));
+                return $twigVars['{{ ' . $arg . ' }}'] ?? (is_numeric($arg) ? $arg : mb_substr($arg, 1, -1));
             }, $matches['args']);
             $countKeys = count($keys);
             return $countKeys
@@ -483,8 +483,8 @@ class ArtMapper extends AbstractPlugin
             foreach (array_chunk($matches['args'], 2) as $keyValue) {
                 if (count($keyValue) === 2) {
                     // The key cannot be a value, but may be numeric.
-                    $key = is_numeric($keyValue[0])? $keyValue[0] : mb_substr($keyValue[0], 1, -1);
-                    $value = $twigVars['{{ ' . $keyValue[1] . ' }}'] ?? (is_numeric($keyValue[1])? $keyValue[1] : mb_substr($keyValue[1], 1, -1));
+                    $key = is_numeric($keyValue[0]) ? $keyValue[0] : mb_substr($keyValue[0], 1, -1);
+                    $value = $twigVars['{{ ' . $keyValue[1] . ' }}'] ?? (is_numeric($keyValue[1]) ? $keyValue[1] : mb_substr($keyValue[1], 1, -1));
                     $output[$key] = $value;
                 }
             }

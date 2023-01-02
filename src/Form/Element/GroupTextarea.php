@@ -78,7 +78,7 @@ class GroupTextarea extends Textarea implements InputProviderInterface
                 // Set a default group name when missing.
                 $groupName = sprintf('Group %d', $id); // $translate
             }
-            $groupsArray[$groupName][] =$cleanString;
+            $groupsArray[$groupName][] = $cleanString;
         }
 
         return $groupsArray;

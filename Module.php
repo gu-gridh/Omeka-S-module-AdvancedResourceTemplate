@@ -8,7 +8,6 @@ if (!class_exists(\Generic\AbstractModule::class)) {
         : __DIR__ . '/src/Generic/AbstractModule.php';
 }
 
-use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
 use Generic\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
