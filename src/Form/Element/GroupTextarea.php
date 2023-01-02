@@ -13,7 +13,7 @@ class GroupTextarea extends Textarea implements InputProviderInterface
         return $this;
     }
 
-    public function getInputSpecification()
+    public function getInputSpecification(): array
     {
         return [
             'name' => $this->getName(),
