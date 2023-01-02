@@ -445,7 +445,7 @@ and for the institutional repository of student works [Dante] of the [Universit√
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [Lisez-moi]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/LISEZMOI.md
 [Omeka S]: https://omeka.org/s
-[Installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
+[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
 [IdRef]: https://www.idref.fr

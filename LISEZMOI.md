@@ -408,10 +408,10 @@ TODO
 - [ ] Choisir les vocabulaires personnalisés par défaut lorsque l’on importe du même serveur.
 
 
-Attention
----------
+Avertissement
+-------------
 
-Utilisez-le à vos propres risques.
+À utiliser à vos propres risques.
 
 Il est toujours recommandé de sauvegarder vos fichiers et vos bases de données
 et de vérifier vos archives régulièrement afin de pouvoir les reconstituer si
@@ -474,7 +474,7 @@ des travaux étudiants [Dante] de l’[Université de Toulouse Jean-Jaurès].
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [English readme]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/README.md
 [Omeka S]: https://omeka.org/s
-[installer un module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
+[installer un module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
 [IdRef]: https://www.idref.fr
