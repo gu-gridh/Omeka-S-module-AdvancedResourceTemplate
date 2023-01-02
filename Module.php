@@ -426,8 +426,8 @@ class Module extends AbstractModule
                             'property_id' => $templateProperty->property()->id(),
                         ];
                         $types = [
-                            'resource_id' => \Doctrine\DBAL\Types\Types::INTEGER,
-                            'property_id' => \Doctrine\DBAL\Types\Types::INTEGER,
+                            'resource_id' => \Doctrine\DBAL\ParameterType::INTEGER,
+                            'property_id' => \Doctrine\DBAL\ParameterType::INTEGER,
                         ];
                         foreach ($values as $value) {
                             if ($k = $value->valueResource()) {
