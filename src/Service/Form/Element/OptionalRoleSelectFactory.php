@@ -13,7 +13,7 @@ class OptionalRoleSelectFactory implements FactoryInterface
         $acl = $services->get('Omeka\Acl');
         $roles = $acl->getRoleLabels();
 
-        $element = new OptionalRoleSelect;
+        $element = new OptionalRoleSelect(null, $options ?? []);
         return $element
             ->setValueOptions($roles)
             ->setEmptyOption('Select role…'); // @translate
