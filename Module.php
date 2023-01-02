@@ -767,17 +767,20 @@ SQL;
         $autofillers = $settings->get('advancedresourcetemplate_autofillers') ?: [];
         $value = $this->autofillersToString($autofillers);
 
-        $event
-            ->getTarget()
-            ->get('advancedresourcetemplate')
+        $fieldset = version_compare(\Omeka\Module::VERSION, '4', '<')
+            ? $event->getTarget()->get('advancedresourcetemplate')
+            : $event->getTarget();
+        $fieldset
             ->get('advancedresourcetemplate_autofillers')
             ->setValue($value);
     }
 
     public function handleMainSettingsFilters(Event $event): void
     {
-        $event->getParam('inputFilter')
-            ->get('advancedresourcetemplate')
+        $inputFilter = version_compare(\Omeka\Module::VERSION, '4', '<')
+            ? $event->getParam('inputFilter')->get('advancedresourcetemplate')
+            : $event->getParam('inputFilter');
+        $inputFilter
             ->add([
                 'name' => 'advancedresourcetemplate_autofillers',
                 'required' => false,
