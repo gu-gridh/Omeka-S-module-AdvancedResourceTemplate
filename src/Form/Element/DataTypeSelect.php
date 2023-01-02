@@ -42,7 +42,7 @@ class DataTypeSelect extends Select
         return $inputSpecification;
     }
 
-    public function getValueOptions()
+    public function getValueOptions(): array
     {
         $options = [];
         $optgroupOptions = [];

@@ -24,7 +24,7 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         $this->resource = $rtpData;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         // This is not a json-ld resource, so no need to encapsulate it.
         return $this->data();

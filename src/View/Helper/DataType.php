@@ -2,7 +2,7 @@
 
 namespace AdvancedResourceTemplate\View\Helper;
 
-use Laminas\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
+use Laminas\Form\FormElementManager;
 use Omeka\DataType\Manager as DataTypeManager;
 
 /**

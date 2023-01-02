@@ -50,7 +50,7 @@ $this->headScript()
 </ul>
 
 <?php $templateSettings = $form->get('o:data'); ?>
-<?php echo $this->formCollection($templateSettings, count($templateSettings->getElements())); // Don't display advanced settings label if empty. ?>
+<?php echo $this->formCollection($templateSettings, (bool) count($templateSettings->getElements())); // Don't display advanced settings label if empty. ?>
 
 <?php $this->trigger("view.$action.form.after", ['form' => $form]); ?>
 

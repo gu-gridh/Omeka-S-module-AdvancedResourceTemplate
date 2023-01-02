@@ -6,7 +6,7 @@ use AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData;
 
 class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\ResourceTemplatePropertyRepresentation
 {
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $json = parent::jsonSerialize();
         $json['o:data'] = $this->data();

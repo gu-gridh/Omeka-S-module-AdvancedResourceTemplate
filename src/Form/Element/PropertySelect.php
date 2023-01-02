@@ -18,7 +18,7 @@ class PropertySelect extends AbstractVocabularyMemberSelect
      * {@inheritDoc}
      * @see \Laminas\Form\Element\Select::getInputSpecification()
      */
-    public function getValueOptions()
+    public function getValueOptions(): array
     {
         $applyTemplates = $this->getOption('apply_templates');
         $applyTemplates = is_array($applyTemplates) ? $applyTemplates : false;
