@@ -438,7 +438,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2020-2022 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2020-2023 (see [Daniel-KM] on GitLab)
 * Library [jQuery-Autocomplete]: Copyright 2012 DevBridge and other contributors
 
 These features were built for the future digital library [Manioc] of the

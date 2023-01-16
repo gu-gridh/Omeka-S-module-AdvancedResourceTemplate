@@ -56,7 +56,6 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
             && isset($data['o:resource_template_property'])
             && is_array($data['o:resource_template_property'])
         ) {
-
             // Get a resource template property by property ID.
             $getResTemProp = function ($propertyId, $resTemProps) {
                 foreach ($resTemProps as $resTemProp) {
