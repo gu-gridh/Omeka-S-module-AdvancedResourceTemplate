@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var array $values
+ * @var array|\AppendIterator $values
  * @var array $templateProperties
  */
 
@@ -57,15 +57,18 @@ $translate = $plugins->get('translate');
 
 <div class="property-groups">
     <?php
+    // $values is an AppendIterator: array_filter(), count(), etc. cannot be used.
     $sourceValues = $values;
     foreach (array_keys($groups) as $groupLabel):
-        $valuesGroup = array_filter($sourceValues, function ($v) use ($groupLabel) {
-            return $v['group'] === $groupLabel;
-        });
-        $sourceValues = array_filter($sourceValues, function ($v) use ($groupLabel) {
-            return $v['group'] !== $groupLabel;
-        });
-        if (count($valuesGroup)):
+        $valuesGroup = new \AppendIterator();
+        $sourceValuesFiltered = new \AppendIterator();
+        foreach ($sourceValues as $term => $propertyData) {
+            $propertyData['group'] === $groupLabel
+                ? $valuesGroup->append(new \ArrayIterator([$term => $propertyData]))
+                : $sourceValuesFiltered->append(new \ArrayIterator([$term => $propertyData]));
+        }
+        $sourceValues = $sourceValuesFiltered;
+        if ($valuesGroup->key() !== null):
             $values = $valuesGroup;
         ?>
     <div class="property-group">
@@ -75,7 +78,7 @@ $translate = $plugins->get('translate');
         <?php endif;
     endforeach;
     // Display metadata that are not in any group.
-    if (count($sourceValues)):
+    if ($sourceValues->key()):
         $values = $sourceValues; ?>
     <div class="property-group">
         <h3><?= $escape($translate('Other metadata')) ?></h3>

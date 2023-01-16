@@ -140,6 +140,8 @@ class Module extends AbstractModule
         // For compatibility with other modules (HideProperties, Internationalisation)
         // that use the term as key in the list of displayed values, the event
         // should be triggered lastly.
+        // Anyway, this is now an iterator that keeps the same key for multiple
+        // values.
         $sharedEventManager->attach(
             \Omeka\Api\Representation\ItemRepresentation::class,
             'rep.resource.display_values',
@@ -562,9 +564,12 @@ SQL;
     /**
      * Prepare duplicate properties with specific labels and comments.
      *
-     * In that case, modify the key "term" as term + index, and update label and
-     * comment, so the default template "common/resource-values" will be able to
-     * display them as standard ones.
+     * In that case, convert the array into an IteratorIterator, so the key
+     * (term) stays the same, but there are more values with it.
+     *
+     * In the previous version, the key "term" was modified as term + index,
+     * and the label and comment were updated, so the default template "common/resource-values"
+     * was wrapped and was able to display values as standard ones.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
@@ -574,7 +579,7 @@ SQL;
         array $templateProperties,
         array $values,
         array $groups
-    ): array {
+    ): iterable {
         // The process should take care of values appended to a resource that
         // have a data type that is not specified in template properties, in
         // particular the default ones (literal, resource, uri). It may fix bad
@@ -600,7 +605,7 @@ SQL;
         }
 
         if (!$hasMultipleLabels) {
-            return $this->prependResourceAndGroupsToValues($resource, $values, $groups);
+            return $this->prependGroupsToValues($resource, $values, $groups);
         }
 
         // Prepare values to display when specific labels are defined for some
@@ -640,7 +645,9 @@ SQL;
         }
         unset($propertyData);
 
-        $newValues = [];
+        // Instead of an array, use an iterator to keep the same term for
+        // multiple propertyDatas.
+        $newValues = new \AppendIterator();
         $hasGroups = !empty($groups);
         $currentGroup = null;
         foreach ($valuesWithLabel as $term => $propData) {
@@ -658,6 +665,7 @@ SQL;
                         }
                     }
                 }
+                // Unset values to keep it at the end of the array.
                 unset($propertyData['values']);
                 $propertyData['group'] = $currentGroup;
                 $propertyData['term'] = $term;
@@ -666,7 +674,7 @@ SQL;
                 $propertyData['alternate_label'] = $dataTypeLabel;
                 $propertyData['alternate_comment'] = $dataTypesLabelsToComments[$dataTypeLabel];
                 $propertyData['values'] = $valuesWithLabel[$term][$dataTypeLabel]['values'];
-                $newValues[$termLabel] = $propertyData;
+                $newValues->append(new \ArrayIterator([$term => $propertyData]));
             }
         }
 
