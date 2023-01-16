@@ -482,10 +482,12 @@ SQL;
      * Prepare specific data to display the list of the resource values data.
      *
      * Specific data passed to display values for this module are:
-     * - resource: added to each property to simplify view template because it
-     *   is not passed by default
-     * - duplicated properties with a specific label and comments
      * - groups of properties, managed in overridden view template resource-values
+     * - term, like the key
+     * - duplicated properties with a specific label and comments
+     *
+     * Some of the complexity of the module is needed to kept compatibility
+     * with core, even if the module is removed.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
      */
@@ -510,18 +512,20 @@ SQL;
         }
 
         $newValues = count($templateProperties)
-            ? $this->prepareResourceAndGroupsValues($resource, $templateProperties, $values, $groups)
-            : $this->prependResourceAndGroupsToValues($resource, $values, $groups);
+            ? $this->prepareGroupsValues($resource, $templateProperties, $values, $groups)
+            : $this->prependGroupsToValues($resource, $values, $groups);
 
         $event->setParam('values', $newValues);
     }
 
     /**
-     * Prepend keys "resouce" and "group" to display values.
+     * Prepend keys "group" and "term" to display values.
+     *
+     * Manage the rare case where there is a template without property.
      *
      * Warning: Duplicate properties are not managed here.
      */
-    protected function prependResourceAndGroupsToValues(
+    protected function prependGroupsToValues(
         AbstractResourceEntityRepresentation $resource,
         array $values,
         array $groups
@@ -529,7 +533,6 @@ SQL;
         if (!$groups) {
             foreach ($values as $term => &$propertyData) {
                 $propertyData = [
-                    'resource' => $resource,
                     'group' => null,
                     'term' => $term,
                 ] + $propertyData;
@@ -548,7 +551,6 @@ SQL;
                 }
             }
             $propertyData = [
-                'resource' => $resource,
                 'group' => $currentGroup,
                 'term' => $term,
             ] + $propertyData;
@@ -567,7 +569,7 @@ SQL;
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::displayValues()
      */
-    protected function prepareResourceAndGroupsValues(
+    protected function prepareGroupsValues(
         AbstractResourceEntityRepresentation $resource,
         array $templateProperties,
         array $values,
@@ -632,7 +634,6 @@ SQL;
                 }
             }
             $propertyData = [
-                'resource' => $resource,
                 'group' => $currentGroup,
                 'term' => $term,
             ] + $propertyData;
@@ -658,7 +659,6 @@ SQL;
                     }
                 }
                 unset($propertyData['values']);
-                $propertyData['resource'] = $resource;
                 $propertyData['group'] = $currentGroup;
                 $propertyData['term'] = $term;
                 $propertyData['term_label'] = $termLabel;

@@ -1,10 +1,9 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
  * @var array $values
  * @var array $templateProperties
- * Options:
- * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
  */
 
 // Wrap the core template view/common/resource-values with group labels, if any.
@@ -13,14 +12,13 @@
 $mainViewTemplate = OMEKA_PATH . '/application/view/common/resource-values.phtml';
 
 // When the module AdvancedResourceTemplate is not available, use default template.
+// Normally useless, except when copied in a theme.
 if (!$values || !class_exists('AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation')) {
     include $mainViewTemplate;
     return;
 }
 
 $plugins = $this->getHelperPluginManager();
-$escape = $plugins->get('escapeHtml');
-$translate = $plugins->get('translate');
 
 /*
 // Can be used to optimize the included main view template when not using the core one.
@@ -42,28 +40,19 @@ if ($this->status()->isSiteRequest()) {
 */
 
 /**
- * @todo To be removed with https://github.com/omeka/omeka-s/pull/1958
- * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
  * @var array $groups
  */
-if (empty($resource)) {
-    $firstPropertyData = reset($values) ?: [];
-    if (isset($firstPropertyData['resource'])) {
-        $resource = $firstPropertyData['resource'];
-    } elseif ($firstPropertyValues = $firstPropertyData['values']) {
-        $resource = (reset($firstPropertyValues))->resource();
-    } else {
-        $resource = null;
-    }
-}
-$template = $resource ? $resource->resourceTemplate() : null;
+$template = $resource->resourceTemplate();
 $groups = $template ? $template->dataValue('groups', []) : null;
 
 if (!$template || !$groups) {
     include $mainViewTemplate;
     return;
 }
+
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
 ?>
 
 <div class="property-groups">
