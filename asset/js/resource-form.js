@@ -278,6 +278,7 @@
             var valueObj = $('.resource-details').data('resource-values');
             var value = $('.value.selecting-resource');
             if (value.hasClass('value')) {
+                // Use value_resource_name that is more precise than value data-data-type.
                 const dataTypeNames = {items: 'resource:item', item_sets: 'resource:itemset', media: 'resource:media'};
                 const dataTypeName = dataTypeNames[valueObj.value_resource_name] ? dataTypeNames[valueObj.value_resource_name] : 'resource';
                 $(document).trigger('o:prepare-value', [dataTypeName, value, valueObj]);
@@ -293,6 +294,12 @@
             Omeka.closeSidebar($('#select-resource'));
         });
 
+        // Manage primary media selection labels.
+        $('#media-list').on('change', '.primary-media-input', function() {
+            $('.primary-media-label-text:not(.sr-only)').addClass('sr-only');
+            $(this).parent('.primary-media').find('.primary-media-label-text').removeClass('sr-only');
+        });
+
         // Prevent resource details from opening when quick add is toggled on.
         $('#select-resource').on('click', '.quick-select-toggle', function() {
             $('#item-results').find('a.select-resource').each(function() {
@@ -306,6 +313,7 @@
                 var field = value.closest('.resource-values.field');
                 $('#item-results').find('.resource')
                     .has('input.select-resource-checkbox:checked').each(function(index) {
+                        // Use value_resource_name that is more precise than value data-data-type.
                         var valueObj = $(this).data('resource-values');
                         const dataTypeNames = {items: 'resource:item', item_sets: 'resource:itemset', media: 'resource:media'};
                         const dataTypeName = dataTypeNames[valueObj.value_resource_name] ? dataTypeNames[valueObj.value_resource_name] : 'resource';
@@ -327,8 +335,7 @@
                         hydrateValueAnnotation(value, valueObj);
                         $(document).trigger('o:prepare-value-annotation', [dataTypeName, value, valueObj]);
                     } else {
-                        newValue = makeValueAnnotation(dataTypeName, valueObj);
-                        value.after(newValue);
+                        value.after(makeValueAnnotation(dataTypeName, valueObj));
                     }
                 });
             }
@@ -621,7 +628,7 @@
         field.removeClass('template');
         field.find('.field-label').text(propertyLi.data('child-search')).attr('id', 'property-' + propertyId + '-label');
         field.find('.field-term').text(term);
-        field.find('.field-description').prepend(propertyLi.find('.field-comment').text());
+        field.find('.field-description').text(propertyLi.find('.field-comment').text());
         field.data('property-term', term);
         field.data('property-id', propertyId);
         field.data('data-types', dataTypes.join(','));
@@ -962,6 +969,7 @@
     var prepareFieldsAfter = function() {
         // Furthermore, the values are moved to the property row according to their
         // data type when there are template properties with the same property.
+        // Unchanged default values (TItle, Description) are managed like other properties.
         fields = $('#properties .resource-values');
         if (fields.length > 0) {
             // Prepare the list of data types one time and make easier to fill specific rows first.
