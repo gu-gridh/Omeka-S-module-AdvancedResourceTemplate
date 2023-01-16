@@ -229,7 +229,7 @@
         $('#properties').on('click', '.add-value', function(e) {
             e.preventDefault();
             var typeButton = $(this);
-            var field = typeButton.closest('.resource-values.field');
+            var field = typeButton.closest('.resource-property');
             var value = makeNewValue(field.data('property-term'), typeButton.data('type'));
             field.find('.values').append(value);
         });
@@ -311,7 +311,7 @@
         $('#select-resource').on('o:resources-selected', '.select-resources-button', function(e) {
             var value = $('.value.selecting-resource');
             if (value.hasClass('value')) {
-                var field = value.closest('.resource-values.field');
+                var field = value.closest('.resource-property');
                 $('#item-results').find('.resource')
                     .has('input.select-resource-checkbox:checked').each(function(index) {
                         // Use value_resource_name that is more precise than value data-data-type.
@@ -346,13 +346,13 @@
             e.preventDefault();
             var selectButton = $(this);
             var sidebar = $('#select-resource');
-            var term = selectButton.closest('.resource-values').data('property-term');
+            var term = selectButton.closest('.resource-property').data('property-term');
             $('.selecting-resource').removeClass('selecting-resource');
             selectButton.closest('.value').addClass('selecting-resource');
             $('#select-item a').data('property-term', term);
 
             // Copy template property data in sidebar to be able to respond to sidebar events.
-            const templatePropertyData = selectButton.closest('.resource-values').data('template-property-data');
+            const templatePropertyData = selectButton.closest('.resource-property').data('template-property-data');
             sidebar.data('term', term);
             sidebar.data('template-property-data', templatePropertyData);
 
@@ -386,9 +386,9 @@
             // Manage value suggest options from Advanced resource template.
             // TODO Add an event before submit.
             const templateData = $('#resource-values').data('template-data');
-            $('#properties .resource-values.field').find('.values > .value[data-data-type^="valuesuggest"]').each(function () {
+            $('#properties .resource-property').find('.values > .value[data-data-type^="valuesuggest"]').each(function () {
                 const value = $(this);
-                const field = value.closest('.resource-values.field');
+                const field = value.closest('.resource-property');
                 const rtpData = field.data('template-property-data')
                     ? field.data('template-property-data')
                     : { value_suggest_keep_original_label: 'no', value_suggest_require_uri: 'no' };
@@ -416,7 +416,7 @@
             }
 
             // Iterate all required properties.
-            var requiredProps = thisForm.find('.resource-values.required');
+            var requiredProps = thisForm.find('.resource-property.required');
             requiredProps.each(function() {
 
                 var thisProp = $(this);
@@ -514,7 +514,7 @@
      * Make a new value.
      */
     var makeNewValue = function(term, dataType, valueObj) {
-        var field = $('.resource-values.field[data-property-term="' + term + '"]');
+        var field = $('.resource-property[data-property-term="' + term + '"]');
         // Get the value node from the templates.
         if (!dataType || typeof dataType !== 'string') {
             dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
@@ -633,7 +633,7 @@
         }
 
         var term = propertyLi.data('property-term');
-        var field = $('.resource-values.field.template').clone(true);
+        var field = $('.resource-property.template').clone(true);
         field.removeClass('template');
         field.find('.field-label').text(propertyLi.data('child-search')).attr('id', 'property-' + propertyId + '-label');
         field.find('.field-term').text(term);
@@ -782,7 +782,7 @@
     var applyResourceTemplate = function(changeClass) {
         var templateSelect = $('#resource-template-select');
         var templateId = templateSelect.val();
-        var fields = $('#properties .resource-values');
+        var fields = $('#properties .resource-property');
 
         // Reset data of the previous template.
         $('#resource-values').data('template-data', {});
@@ -860,7 +860,9 @@
 
         function finalize() {
             // Remove empty fields, except the templates and user added ones, to avoid mix of templates fields.
-            fields = templateId ? $('#properties .resource-values[data-template-id!="' + templateId + '"]') : $('#properties .resource-values');
+            fields = templateId
+                ? $('#properties .resource-property[data-template-id!="' + templateId + '"]')
+                : $('#properties .resource-property');
             fields.not('.user-added').each(function() {
                 if ($(this).find('.inputs .values > .value').length === $(this).find('.inputs .values > .value.default-value').length) {
                     $(this).remove();
@@ -868,12 +870,12 @@
             });
 
             // Add default fields if none.
-            if (!$('#properties .resource-values').length) {
+            if (!$('#properties .resource-property').length) {
                 makeDefaultTemplate();
             }
 
             // Add a default empty value if none already exist in the property.
-            fields = $('#properties .resource-values');
+            fields = $('#properties .resource-property');
             fields.each(function(index, field) {
                 field = $(field);
                 if (!field.find('.value').length) {
@@ -980,7 +982,7 @@
         // Furthermore, the values are moved to the property row according to their
         // data type when there are template properties with the same property.
         // Unchanged default values (TItle, Description) are managed like other properties.
-        fields = $('#properties .resource-values');
+        fields = $('#properties .resource-property');
         if (fields.length > 0) {
             // Prepare the list of data types one time and make easier to fill specific rows first.
             var dataTypesByProperty = {};
