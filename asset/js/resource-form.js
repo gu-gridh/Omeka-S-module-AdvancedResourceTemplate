@@ -57,6 +57,9 @@
                             .attr('title', Omeka.jsTranslate('Make private'));
                     }
                 }
+                if (thisInput.hasClass('value-language') && thisInput.val() !== "") {
+                    thisInput.closest('.language-wrapper').addClass('active');
+                }
             });
         };
         // Prepare the value annotation markup.
@@ -202,16 +205,14 @@
 
         $('#resource-values').on('click', 'a.value-language', function(e) {
             e.preventDefault();
-            var languageButton = $(this);
-            var languageInput = languageButton.next('input.value-language');
-            languageButton.toggleClass('active');
-            languageInput.toggleClass('active');
-            if (languageInput.hasClass('active')) {
-                languageInput.focus();
+            var languageWrapper = $(this).closest('.language-wrapper');
+            languageWrapper.toggleClass('active');
+            if (languageWrapper.hasClass('active')) {
+                languageWrapper.find('input.value-language').focus();
             }
         });
 
-        $('input.value-language').on('keyup, change', function(e) {
+        $('input.value-language').on('keyup change', function(e) {
             if ('' === this.value || Omeka.langIsValid(this.value)) {
                 this.setCustomValidity('');
             } else {
@@ -551,6 +552,14 @@
             .attr('aria-labelledby', valueLabelID);
         value.attr('aria-labelledby', valueLabelID);
         $(document).trigger('o:prepare-value', [dataType, value, valueObj]);
+
+        // Add default language, if any.
+        var templateProperty = field.data('template-property');
+        if (templateProperty && templateProperty['o:default_lang']) {
+            value.find('.language-wrapper').addClass('active');
+            value.find('input.value-language').val(templateProperty['o:default_lang']);
+        }
+
         return value;
     };
 
@@ -669,6 +678,7 @@
         if (!field.length) {
             field = makeNewField(propertyId, dataTypes);
         }
+        field.data('template-property', templateProperty);
 
         var originalLabel = field.find('.field-label');
         var originalDescription = field.find('.field-description');
@@ -782,6 +792,7 @@
         // Fieldsets may have been marked as required or private in a previous state.
         fields.removeClass('required');
         fields.removeClass('private');
+        fields.data('template-property', null);
 
         // Reset all properties to the default selector.
         fields.find('div.multiple-selector').hide();
@@ -881,8 +892,7 @@
     var initValueLanguage = function() {
         var languageInput = $(this);
         if (languageInput.val() !== '') {
-            languageInput.addClass('active');
-            languageInput.prev('a.value-language').addClass('active');
+            languageInput.closest('.language-wrapper').addClass('active');
         }
     }
 

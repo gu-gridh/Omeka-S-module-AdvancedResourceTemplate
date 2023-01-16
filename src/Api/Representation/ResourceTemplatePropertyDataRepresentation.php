@@ -145,4 +145,9 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
     {
         return (bool) $this->dataValue('o:is_private');
     }
+
+    public function defaultLang(): ?string
+    {
+        return $this->dataValue('o:default_lang');
+    }
 }

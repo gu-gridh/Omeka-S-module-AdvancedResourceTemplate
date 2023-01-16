@@ -123,6 +123,12 @@ $this->headScript()
                 </label>
             </div>
             <div class="option">
+                <label for="default-lang">
+                    <?php echo $translate('Default language'); ?>
+                </label>
+                <input id="default-lang" type="text" data-property-key="o:default_lang" class="validate-language">
+            </div>
+            <div class="option">
                 <label for="data-type"><?php echo $translate('Data types'); ?></label>
                 <?php echo $this->dataType()->getSelect('data_type', null, ['id' => 'data-type', 'multiple' => true, 'class' => 'chosen-select', 'data-property-key' => 'o:data_type', 'data-placeholder' => 'Select data types…']); ?>
             </div>

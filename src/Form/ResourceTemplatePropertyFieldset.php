@@ -105,6 +105,17 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                 ],
             ])
             ->add([
+                'name' => 'o:default_lang',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Default language', // @translate
+                ],
+                'attributes' => [
+                    // 'id' => 'o-default-lang',
+                    'data-property-key' => 'o:default_lang',
+                ],
+            ])
+            ->add([
                 'name' => 'o:data_type',
                 'type' => DataTypeSelect::class,
                 'options' => [

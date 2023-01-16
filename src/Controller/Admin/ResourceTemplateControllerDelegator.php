@@ -453,6 +453,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                         'Data types' => null,
                         'Required' => null,
                         'Private' => null,
+                        'Default language' => null,
                     ];
                     $rtp = $this->fillTerm($row['Property']);
                     if (!$rtp) {
@@ -465,6 +466,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                     }, $stringToArray($row['Data types'])));
                     $rtp['o:is_required'] = (bool) $row['Required'];
                     $rtp['o:is_private'] = (bool) $row['Private'];
+                    $rtp['o:default_lang'] = $row['Default language'];
                     $rtpOData = [];
                     foreach (array_filter($row, $propertyData, ARRAY_FILTER_USE_BOTH) as $header => $cell) {
                         $cell = $cellValue($cell, $header);
@@ -651,7 +653,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             }
 
             // Manage import from an export of Omeka < 3.0.
-            $oldExport = !array_key_exists('data_types', $property);
+            $oldExportBefore3 = !array_key_exists('data_types', $property);
 
             // Check missing o:resource_template_property info.
             if (!array_key_exists('vocabulary_namespace_uri', $property)
@@ -665,7 +667,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             ) {
                 return false;
             }
-            if ($oldExport
+            if ($oldExportBefore3
                  && (!array_key_exists('data_type_name', $property)
                     || !array_key_exists('data_type_label', $property)
             )) {
@@ -684,13 +686,19 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             ) {
                 return false;
             }
-            if ($oldExport) {
+            if ($oldExportBefore3) {
                 if ((!is_string($property['data_type_name']) && !is_null($property['data_type_name']))
                     || (!is_string($property['data_type_label']) && !is_null($property['data_type_label']))
                 ) {
                     return false;
                 }
             } elseif (!is_array($property['data_types']) && !is_null($property['data_types'])) {
+                return false;
+            }
+
+            // Validate info introduced in newer versions.
+            if (isset($property['o:default_lang']) && (!is_string($property['o:default_lang']) && !is_null($property['o:default_lang']))) {
+                // o:default_lang introduced in v4.0.0
                 return false;
             }
 
@@ -776,6 +784,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 'o:alternate_comment' => $templateProperty->alternateComment(),
                 'o:is_required' => $templateProperty->isRequired(),
                 'o:is_private' => $templateProperty->isPrivate(),
+                'o:default_lang' => $templateProperty->defaultLang(),
                 'o:data' => $templateProperty->data(),
                 // The labels are needed for custom vocabs.
                 'data_types' => $templateProperty->dataTypeLabels(),
@@ -837,6 +846,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             'Data types',
             'Required',
             'Private',
+            'Default language',
         ];
         $templatePropertyHeaders = array_combine($templatePropertyHeaders, $templatePropertyHeaders);
 
@@ -884,6 +894,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             'Property data: is-description-property',
             'Property data: o:is_required',
             'Property data: o:is_private',
+            'Property data: o:default_lang',
             'Property data: o:data_type',
         ];
         $templatePropertyDataHeaders = array_diff($templatePropertyDataHeaders, $skips);
@@ -941,6 +952,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 $row['Data types'] = implode(' | ', $rtpData->dataTypes());
                 $row['Required'] = $rtpData->isRequired() ? '1' : '0';
                 $row['Private'] = $rtpData->isPrivate() ? '1' : '0';
+                $row['Default language'] = $rtpData->defaultLang();
                 foreach ($rtpData->data() as $key => $value) {
                     if (in_array('Property data: ' . $key, $skips)) {
                         continue;
@@ -1327,6 +1339,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 'o:data_type' => [],
                 'o:is_required' => 0,
                 'o:is_private' => 0,
+                'o:default_lang' => '',
                 'o:data' => [],
             ];
         }
