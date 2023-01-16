@@ -117,6 +117,8 @@ resources:
   appending the property label after a `/`, for example : `dcterms:subject/Sujets Rameau`
   and `dcterms:subject/Sujets libres`.
 
+  ![Example of display of grouped properties](data/images/groups_properties.png)
+
 - Language selection and default by template and by property, or no language:
 
   ![Example of language by template and property](data/images/advanced_language_settings.png)
@@ -371,6 +373,7 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
+- [ ] Integrate template for value annotations.
 - [ ] Replace the mapper with AutomapFields or TransformSource from module [Bulk Import].
 - [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module [Bulk Import]).
 - [ ] Include all suggesters from module [Value Suggest].
@@ -388,6 +391,8 @@ TODO
 - [x] Use the event and remove the specific template for resource-values.
 - [ ] Fix copy alternative labels when importing a template (for now should re-save template).
 - [ ] Select default custom vocabs when importing a template from the same server.
+- [ ] Group properties in resource form.
+- [ ] Allow to group properties differently between sites?
 
 
 Warning

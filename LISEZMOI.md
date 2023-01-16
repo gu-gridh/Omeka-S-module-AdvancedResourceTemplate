@@ -123,10 +123,14 @@ l’édition des ressources :
   propriété dans le modèle après un ^`/`, par exemple : `dcterms:subject/Sujets Rameau`
   et `dcterms:subject/Sujets libres`.
 
+  ![Exemple d’affichage de groupes de propriétés](data/images/groups_properties.png)
+
 - Sélection de la langue et langue par défaut par modèle et par propriété, ou
   aucune langue :
 
   ![Exemple de langue par modèle et par propriété](data/images/advanced_language_settings.png)
+
+  Cette fonctionnalité a été partiellement implémentée dans Omeka S v4.
 
 - Création d’une nouvelle ressource liée pendant l’édition d’une ressource :
 
@@ -389,6 +393,7 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
+- [ ] Ajouter les modèles pour les annotations de valeur.
 - [ ] Remplacer FieldNameToProperty avec AutomapFields ou TransformSource du module BulkImport.
 - [ ] Remplacer `{__value__}` et `{__label__}` par `{value}` et `{label}` (prêt dans module BulkImport).
 - [ ] Inclure tous les suggesteurs du module [Value Suggest].
@@ -406,6 +411,8 @@ TODO
 - [x] Utiliser un événement et supprimer le gabarit spécifique pour resource-values.
 - [ ] Corriger la copie des libellés alternatifs lorsqu’un modèle est importé (actuellement, le modèle doit être resauvé).
 - [ ] Choisir les vocabulaires personnalisés par défaut lorsque l’on importe du même serveur.
+- [ ] Grouper les propriétés dans le formulaire de ressource.
+- [ ] Permettre de grouper les propriétés différemment selon les sites ?
 
 
 Avertissement
