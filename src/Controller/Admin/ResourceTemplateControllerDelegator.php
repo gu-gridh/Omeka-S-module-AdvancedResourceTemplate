@@ -124,6 +124,16 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             foreach (array_keys($rtp['o:data']) as $k) {
                 unset($import['o:resource_template_property'][$key]['o:data'][$k]['data_types']);
             }
+
+            // Keep default language when importing from Omeka S < v4.
+            if (isset($rtp['o:data']) && count($rtp['o:data']) > 1) {
+                foreach ($rtp['o:data'] as $k => $rtpOData) {
+                    if (!empty($rtpOData['default_language'])) {
+                        $import['o:resource_template_property'][$key]['o:default_lang'] = $rtpOData['default_language'];
+                    }
+                    unset($import['o:resource_template_property'][$key]['o:data'][$k]['default_language']);
+                }
+            }
         }
 
         $import['o:resource_class'] = empty($import['o:resource_class']['o:id']) ? null : ['o:id' => $import['o:resource_class']['o:id']];

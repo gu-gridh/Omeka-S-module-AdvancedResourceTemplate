@@ -247,21 +247,20 @@ $(document).ready(function() {
      * Init the language input.
      */
     function initValueLanguage(languageInput, field) {
+        const languageWrapper = languageInput.closest('.language-wrapper');
         const languageButton = languageInput.prev('a.value-language');
-        var languageElement;
         var language = languageInput.val();
         if (field.data('no-language') == true) {
             language = '';
-            languageButton.removeClass('active').addClass('no-language');
-            languageInput.prop('disabled', true).removeClass('active');
+            languageWrapper.removeClass('active');
+            languageButton.addClass('no-language');
+            languageInput.prop('disabled', true);
         } else {
             languageButton.removeClass('no-language');
             languageInput.prop('disabled', false);
-            languageElement = languageInput;
         }
         if (language !== '') {
-            languageButton.addClass('active');
-            languageElement.addClass('active');
+            languageWrapper.addClass('active');
         }
     }
 
@@ -285,12 +284,12 @@ $(document).ready(function() {
         var defaultLanguage = templateData && templateData.default_language && templateData.default_language.length
             ? templateData.default_language
             : '';
-        defaultLanguage = rtpData.default_language && rtpData.default_language.length
-            ? rtpData.default_language
+        defaultLanguage = rtpData['o:default_lang'] && rtpData['o:default_lang'].length
+            ? rtpData['o:default_lang']
             : defaultLanguage;
         if (defaultLanguage.length) {
-            value.find('input.value-language').val(defaultLanguage).addClass('active');
-            value.find('a.value-language').addClass('active');
+            value.find('input.value-language').val(defaultLanguage);
+            value.find('.language-wrapper').addClass('active');
         }
     }
 

@@ -965,11 +965,14 @@
                 rtpd['o:alternate_comment'] = rtpData['o:alternate_comment'] == '' ? null : rtpData['o:alternate_comment'];
                 rtpd['o:is_private'] = rtpData['o:is_private'] === true || rtpData['o:is_private'] == '1';
                 rtpd['o:is_required'] = rtpData['o:is_required'] === true || rtpData['o:is_required'] == '1';
+                rtpd['o:default_lang'] = rtpData['o:default_lang'] === '' ? null : rtpData['o:default_lang'];
                 rtpd['o:data_type'] = rtpData['o:data_type'] ? rtpData['o:data_type'] : [];
                 // Remove core property keys in data.
                 Object.keys(rtp).forEach(function (key) {
                     delete rtpData[key];
                 });
+                // To simplify process, specific options are kept as data.
+                rtpData['o:default_lang'] = rtpd['o:default_lang'];
                 rtpd['o:data'] = rtpData;
                 rtps.push(rtpd);
             });

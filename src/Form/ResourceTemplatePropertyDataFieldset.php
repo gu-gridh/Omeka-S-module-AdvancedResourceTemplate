@@ -207,18 +207,6 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'default_language',
-                'type' => Element\Text::class,
-                'options' => [
-                    'label' => 'Default language', // @translate
-                ],
-                'attributes' => [
-                    // 'id' => 'default_language',
-                    'class' => 'setting',
-                    'data-setting-key' => 'default_language',
-                ],
-            ])
-            ->add([
                 'name' => 'use_language',
                 'type' => Element\Radio::class,
                 'options' => [

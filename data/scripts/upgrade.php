@@ -178,3 +178,40 @@ if (version_compare((string) $oldVersion, '3.3.4.15', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.4.16', '<')) {
+    // Replace the option "default_language" by the new "o:default_language".
+    $qb = $connection->createQueryBuilder();
+    $qb
+        ->select('*')
+        ->from('resource_template_property_data', 'resource_template_property_data')
+    ;
+    $templatePropertyDatas = $connection->executeQuery($qb)->fetchAllAssociative();
+    $sqlRtp = <<<SQL
+UPDATE `resource_template_property`
+SET
+    `default_lang` = :default_lang
+WHERE `id` = :rtp_id;
+SQL;
+    $sqlRtpd = <<<SQL
+UPDATE `resource_template_property_data`
+SET
+    `data` = :data
+WHERE `id` = :id;
+SQL;
+    foreach ($templatePropertyDatas as $templatePropertyData) {
+        $rtpData = json_decode($templatePropertyData['data'], true);
+        if (!empty($rtpData['default_language'])) {
+            $connection->executeStatement($sqlRtp, [
+                'default_lang' => $rtpData['default_language'],
+                'rtp_id' => (int) $templatePropertyData['resource_template_property_id'],
+            ]);
+        }
+        $rtpData['o:default_lang'] = empty($rtpData['default_language']) ? null : $rtpData['default_language'];
+        unset($rtpData['default_language']);
+        $connection->executeStatement($sqlRtpd, [
+            'data' => json_encode($rtpData),
+            'id' => (int) $templatePropertyData['id'],
+        ]);
+    }
+}
