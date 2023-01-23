@@ -39,6 +39,15 @@ if ($this->status()->isSiteRequest()) {
 }
 */
 
+// For compatibility with value annotations, waiting fix omeka/omeka-s#1997.
+if (empty($resource)) {
+    /** @var \Omeka\Api\Representation\ValueRepresentation $firstValueValue */
+    $firstValue = is_array($values) ? reset($values) : $values->current();
+    $firstValueValue = reset($firstValue['values']);
+    $resource = $firstValueValue->resource();
+}
+$templateProperties ??= [];
+
 /**
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
  * @var array $groups
