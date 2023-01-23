@@ -68,7 +68,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'autocomplete',
-                'type' => Element\Radio::class,
+                'type' => AdvancedResourceTemplateElement\OptionalRadio::class,
                 'options' => [
                     'label' => 'Autocomplete with existing values', // @translate
                     'value_options' => [
