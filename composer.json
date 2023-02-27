@@ -53,11 +53,9 @@
         }
     },
     "scripts": {
-        "post-install-cmd": [
-            "# Fix https://github.com/devbridge/jQuery-Autocomplete/pull/811",
-            "@php -r '$f = __DIR__ . \"/asset/vendor/jquery-autocomplete/jquery.autocomplete.min.js\"; file_put_contents($f, str_replace(\",200)\", \",350)\", file_get_contents($f)));'"
-        ],
-        "post-update-cmd": [
+        "post-install-cmd": "@build",
+        "post-update-cmd": "@build",
+        "build": [
             "# Fix https://github.com/devbridge/jQuery-Autocomplete/pull/811",
             "@php -r '$f = __DIR__ . \"/asset/vendor/jquery-autocomplete/jquery.autocomplete.min.js\"; file_put_contents($f, str_replace(\",200)\", \",350)\", file_get_contents($f)));'"
         ]
