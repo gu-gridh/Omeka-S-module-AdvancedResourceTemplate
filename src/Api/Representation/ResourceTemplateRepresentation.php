@@ -85,7 +85,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
                 $params = array_map('trim', explode("\n", trim($meta)));
                 $list = [];
                 foreach ($params as $keyValue) {
-                    $list[] = array_map('trim', explode('=', $keyValue, 2));
+                    $list[] = array_map('trim', explode('=', $keyValue, 2)) + ['', ''];
                 }
                 return $list;
             case 'params_key_value':
@@ -93,9 +93,9 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
                 $params = array_filter(array_map('trim', explode("\n", trim($meta))), 'strlen');
                 $list = [];
                 foreach ($params as $keyValue) {
-                    [$key, $value] = strpos($keyValue, '=') === false
-                    ? [$keyValue, null]
-                    : array_map('trim', explode('=', $keyValue, 2));
+                    [$key, $value] = mb_strpos($keyValue, '=') === false
+                        ? [trim($keyValue), '']
+                        : array_map('trim', explode('=', $keyValue, 2));
                     if ($key !== '') {
                         $list[$key] = $value;
                     }
