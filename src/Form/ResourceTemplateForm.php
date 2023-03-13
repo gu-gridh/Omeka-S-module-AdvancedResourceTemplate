@@ -15,6 +15,7 @@ class ResourceTemplateForm extends Form
 
     public function init(): void
     {
+        $this->setAttribute('id', 'resource-template-form');
         $this->add([
             'name' => 'o:label',
             'type' => 'Text',

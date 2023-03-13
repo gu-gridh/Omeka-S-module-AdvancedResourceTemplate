@@ -1065,13 +1065,15 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         if ($isPost) {
             $post = $this->params()->fromPost();
 
+            if (isset($post['_post'])) {
+                $post = json_decode($post['_post'], true) ?: [];
+            }
+
             // Maybe useless.
             /** @see https://github.com/omeka/omeka-s/commit/8390c44e39269dda022ac5076e49fe7a34c99a6b */
-            if (!isset($post['o:resource_template_property'])) {
-                // Must include the o:resource_template_property key if all
-                // properties are removed, else nothing is removed.
-                $post['o:resource_template_property'] = [];
-            }
+            // Must include the o:resource_template_property key if all
+            // properties are removed, else nothing is removed.
+            $post['o:resource_template_property'] ??= [];
 
             // For an undetermined reason, the fieldset "o:data" inside the
             // collection is not validated. So elements should be attached to

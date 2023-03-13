@@ -167,4 +167,79 @@ propertyList.on('click', '.property-edit', function(e) {
     Omeka.openSidebar($('#edit-sidebar'));
 });
 
+$('#resource-template-form').on('submit', function () {
+    // Prepend the full form data first to allow to pass more than 1000 variables
+    // (default on servers).
+    const data = Object.fromEntries(new FormData(document.getElementById('resource-template-form')));
+    var post = {};
+    for (const [key, value] of Object.entries(data)) {
+        if (!key.includes('[')) {
+            post[key] = value;
+            continue;
+        }
+        // TODO Use a recursive method to convert post key with brackets into nested array. Two levels are enough in real world.
+        // First key is always a string. For php, everything is object and order should be kept.
+        const mainKey = key.slice(0, key.indexOf('['));
+        if (!post.hasOwnProperty(mainKey)) {
+            post[mainKey] = {};
+        }
+        const key1 = key.slice(key.indexOf('[') + 1, key.indexOf(']'));
+        var index = 0;
+        if (key1 === '') {
+            post[mainKey][String(++index)] = value;
+        } else {
+            var remainingKey = key.slice(key.indexOf(']') + 1);
+            if (remainingKey === '') {
+                post[mainKey][key1] = value;
+            } else {
+                if (!post[mainKey].hasOwnProperty(key1)) {
+                    post[mainKey][key1] = {};
+                }
+                const key2 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
+                if (key2 === '') {
+                    post[mainKey][key1][String(++index)] = value;
+                } else {
+                    remainingKey = remainingKey.slice(remainingKey.indexOf(']') + 1);
+                    if (remainingKey === '') {
+                        post[mainKey][key1][key2] = value;
+                    } else {
+                        if (!post[mainKey][key1].hasOwnProperty(key2)) {
+                            post[mainKey][key1][key2] = {};
+                        }
+                        const key3 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
+                        if (key3 === '') {
+                            post[mainKey][key1][key2][String(++index)] = value;
+                        } else {
+                            remainingKey = remainingKey.slice(remainingKey.indexOf(']') + 1);
+                            if (remainingKey === '') {
+                                post[mainKey][key1][key2][key3] = value;
+                            } else {
+                                if (!post[mainKey][key1][key2].hasOwnProperty(key3)) {
+                                    post[mainKey][key1][key2][key3] = {};
+                                }
+                                const key4 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
+                                if (key4 === '') {
+                                    post[mainKey][key1][key2][key3][String(++index)] = value;
+                                } else {
+                                    remainingKey = remainingKey.slice(remainingKey.indexOf(']') + 1);
+                                    if (remainingKey === '') {
+                                        post[mainKey][key1][key2][key3][key4] = value;
+                                    } else {
+                                        post[mainKey][key1][key2][key3][key4][remainingKey] = value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $('#resource-template-form').prepend($('<input>', {
+        type: 'hidden',
+        name: '_post',
+        value: JSON.stringify(post),
+    }));
+});
+
 });
