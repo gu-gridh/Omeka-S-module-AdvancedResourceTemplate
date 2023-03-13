@@ -116,7 +116,11 @@ propertyList.on('click', '.property-edit', function(e) {
     });
 
     // When the sidebar fieldset is applied, store new values in the row.
-    $('#set-changes').off('click.setchanges').on('click.setchanges', function(e) {
+    $('#set-changes').off('click').on('click', function(e) {
+        if (!$('#default-lang').trigger('change')[0].reportValidity()) {
+            // The default language is invalid.
+            return false;
+        }
         altLabel.val($('#edit-sidebar #alternate-label').val());
         prop.find('.alternate-label-cell').text($('#edit-sidebar #alternate-label').val());
         $('#edit-sidebar #is-private').prop('checked')
