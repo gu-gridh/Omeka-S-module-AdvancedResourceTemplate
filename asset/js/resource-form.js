@@ -776,10 +776,11 @@
     /**
      * Apply the selected resource template to the form.
      *
-     * @param bool changeClass Whether to change the suggested class on new resource.
-     *   Also, the class may be changed if the new resource template requires a specific class.
+     * @param bool manageResourceClass Whether to change the suggested class
+     *   on new resource. Also, the class may be changed if the new resource
+     *   template requires a specific class. But don't change it on load.
      */
-    var applyResourceTemplate = function(changeClass) {
+    var applyResourceTemplate = function(manageResourceClass) {
         var templateSelect = $('#resource-template-select');
         var templateId = templateSelect.val();
         var fields = $('#properties .resource-property');
@@ -829,7 +830,7 @@
                     templateData['o:resource_class'] = data['o:resource_class'];
                     $('#resource-values').data('template-data', templateData);
 
-                    if (changeClass) {
+                    if (manageResourceClass) {
                         // Change the resource class.
                         var classSelect = $('#resource-class-select');
                         if (data['o:resource_class'] && classSelect.val() === '') {
@@ -915,8 +916,10 @@
         // Adapt the form for the template, if any.
         // The class is set for a new item (default omeka), or if the new template
         // requires a class (option specific to the module Advanced Resource Template).
-        var applyTemplateClass = $('body').hasClass('add');
-        $.when(applyResourceTemplate(applyTemplateClass))
+        var manageResourceClass = $('body').hasClass('add')
+            // But don't change it on load if any.
+            || Boolean($('body').hasClass('edit') && Number($('#resource-values #resource-class-select').val()));
+        $.when(applyResourceTemplate(manageResourceClass))
             .done(function () {
                 $('#properties').closest('form').trigger('o:form-loaded');
             });
