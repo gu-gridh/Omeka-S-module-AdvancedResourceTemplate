@@ -1373,7 +1373,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $propertyFieldset = $this->getForm(ResourceTemplatePropertyFieldset::class);
         $propertyFieldset->get('o:property')->setValue($property->id());
 
-        $namePrefix = 'o:resource_template_property[' . random_int((int) (PHP_INT_MAX / 1000000), PHP_INT_MAX) . ']';
+        $namePrefix = 'o:resource_template_property[' . random_int((int) (PHP_INT_MAX / 1000000000), (int) (PHP_INT_MAX / 100000000)) . ']';
         $propertyFieldset->setName($namePrefix);
         foreach ($propertyFieldset->getElements()  as $element) {
             $element->setName($namePrefix . '[' . $element->getName() . ']');
