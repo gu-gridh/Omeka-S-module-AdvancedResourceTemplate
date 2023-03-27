@@ -53,7 +53,7 @@ class GroupTextarea extends Textarea implements InputProviderInterface
             return $string;
         }
 
-        if ($string === '') {
+        if ($string === '' || is_null($string)) {
             return [];
         }
 
@@ -61,7 +61,7 @@ class GroupTextarea extends Textarea implements InputProviderInterface
 
         // Clean the text area from end of lines.
         // Fixes Windows and Apple copy/paste.
-        $string = str_replace(["\r\n", "\n\r", "\r"], ["\n", "\n", "\n"], $string);
+        $string = str_replace(["\r\n", "\n\r", "\r"], ["\n", "\n", "\n"], (string) $string);
         $array = array_filter(array_map('trim', explode("\n", $string)), 'strlen');
 
         // No check: if a property or any value doesn't exist, it won't be used.
