@@ -666,8 +666,8 @@
         var templateId = $('#resource-template-select').val();
         var properties = $('div#properties');
         var propertyId = templateProperty['o:property']['o:id'];
-        var dataTypes = templateProperty['o:data_type'] && templateProperty['o:data_type'].length
-            ? templateProperty['o:data_type']
+        var dataTypes = templateProperty['o:data_type'] && Object.keys(templateProperty['o:data_type']).length
+            ? Object.values(templateProperty['o:data_type'])
             : $('div#properties').data('default-data-types').split(',');
 
         // Check if an existing field exists in order to update it and to avoid duplication.
@@ -719,19 +719,19 @@
 
         // Change value selector (multiple, single, or default) and add empty value if needed.
         var selector = 'default';
-        if (templateProperty['o:data_type'].length > 1) {
+        if (dataTypes.length > 1) {
             selector = 'multiple';
             defaultSelector.hide();
             singleSelector.hide();
             if (!multipleSelector.find('.add-value').length) {
-                multipleSelector.append(prepareMultipleSelector(templateProperty['o:data_type']));
+                multipleSelector.append(prepareMultipleSelector(dataTypes));
             }
             multipleSelector.show();
-        } else if (templateProperty['o:data_type'].length === 1) {
+        } else if (dataTypes.length === 1) {
             selector = 'single';
             defaultSelector.hide();
             multipleSelector.hide();
-            singleSelector.find('a.add-value.button').data('type', templateProperty['o:data_type'][0]);
+            singleSelector.find('a.add-value.button').data('type', dataTypes[0]);
             singleSelector.show();
         } else {
             multipleSelector.hide();
