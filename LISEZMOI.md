@@ -1,5 +1,5 @@
-Modèles de ressource avancés (module pour Omeka S)
-==================================================
+Modèle de ressource avancé (module pour Omeka S)
+================================================
 
 > __Les nouvelles versions de ce modules et l’assistance pour Omeka S version 3.0
 > et supérieur sont disponibles sur [GitLab], qui semble mieux respecter les
@@ -19,6 +19,13 @@ l’édition des ressources :
 
   ![Limitation du formulaire à la liste de propriétés définie](data/images/closed_template.png)
 
+- Contrôle de saisie via un modèle :
+
+  Permet de forcer une valeur textuelle à respecter un format via un regex, par
+  exemple pour les identifiants.
+
+  ![contrôle de saisie via regex](data/images/input_control_regex.png)
+
 - Longueur minimale/maximale pour une valeur textuelle ;
 
 - Nombre minimum et maximum de valeurs :
@@ -29,7 +36,7 @@ l’édition des ressources :
 
 - Valeur par défaut :
 
-  Cette option rend plus simple la création manuelle des ressouces.
+  Cette option rend plus simple la création manuelle des ressources.
 
 - Valeur automatique (lors de l’enregistrement) :
 
@@ -131,6 +138,16 @@ l’édition des ressources :
   ![Exemple de langue par modèle et par propriété](data/images/advanced_language_settings.png)
 
   Cette fonctionnalité a été partiellement implémentée dans Omeka S v4.
+
+- Module Custom Vocab : Liste d’autorité ouverte (module Custom Vocab),
+  permettant à l’utilisateur d’ajouter de nouveaux termes quand cela est
+  nécessaire pour une valeur.
+
+  ![Exemple de liste ouverte via module Custom Vocab](data/images/custom_vocab_open.png)
+
+- Module Value Suggest: conserver le libellé original
+
+- Module Value Suggest: requiert une uri
 
 - Création d’une nouvelle ressource liée pendant l’édition d’une ressource :
 
@@ -312,8 +329,8 @@ countryName = dcterms:isPartOf
 ```
 
 Notez que [geonames] nécessite un nom d’utilisateur (qui doit être le votre,
-mais il peut s’agir de "demo", "google" ou "johnsmith"). Testez le sur
-https://api.geonames.org/searchJSON?username=demo.
+mais il peut s’agir de "demo", "kdlinfo", "google" ou "johnsmith"). Testez le
+sur https://api.geonames.org/searchJSON?username=demo.
 
 Si la clé contient un `.` ou une `\`, le caractère doit être échappé avec une `\` :
 `\.` et `\\`.

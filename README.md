@@ -19,6 +19,12 @@ resources:
 
   ![Limit template to defined properties](data/images/closed_template.png)
 
+- Input control via a pattern:
+
+  Force a literal value to follow a regex pattern, for example for identifiers.
+
+  ![input control via regex](data/images/input_control_regex.png)
+
 - Minimum/maximum length of a literal value
 
 - Minimum/maximum number of values:
@@ -122,6 +128,15 @@ resources:
 - Language selection and default by template and by property, or no language:
 
   ![Example of language by template and property](data/images/advanced_language_settings.png)
+
+- Module Custom Vocab: Open authority list to allow user to add a new term when
+  none can be used for a value.
+
+  ![Example of open custom vocab](data/images/custom_vocab_open.png)
+
+- Module Value Suggest: keep original label
+
+- Module Value Suggest: require uri
 
 - Creation of a new linked resource during edition of a resource:
 
@@ -296,8 +311,8 @@ countryName = dcterms:isPartOf
 ```
 
 Note that [geonames] requires a user name (that should be the one of your
-institution, but it can be "demo", "google", or "johnsmith"). Test it on
-https://api.geonames.org/searchJSON?username=demo.
+institution, but it can be "demo", "kdlinfo", "google", or "johnsmith").
+Test it on https://api.geonames.org/searchJSON?username=demo.
 
 If the key contains a `.` or a `\`, it should be escaped with a `\`: `\.` and `\\`.
 
