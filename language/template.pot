@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-25 00:00+0000\n"
+"POT-Creation-Date: 2023-04-17 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,41 +43,50 @@ msgstr ""
 msgid "No configured autofiller."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:66 src/Generic/AbstractModule.php:740
+#: src/Generic/AbstractModule.php:80 src/Generic/AbstractModule.php:88
+#: src/Generic/AbstractModule.php:890
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:73
+#: src/Generic/AbstractModule.php:93
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:80
+#: src/Generic/AbstractModule.php:101
 msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:87
+#: src/Generic/AbstractModule.php:108
 msgid ""
 "This module cannot install its tables, because they exist already. Try to "
 "remove them first."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:328
+#: src/Generic/AbstractModule.php:398
 #, php-format
 msgid "The module removed tables \"%s\" from a previous broken install."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:735
+#: src/Generic/AbstractModule.php:885
 #, php-format
 msgid "This module requires the module \"%1$s\", version %2$s or above."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:832
+#: src/Generic/AbstractModule.php:982
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
 "unavailable."
+msgstr ""
+
+#: view/common/resource-values.phtml:93
+msgid "Other metadata"
+msgstr ""
+
+#: view/omeka/admin/resource-template/review-import.phtml:87
+msgid "Default language?"
 msgstr ""
 
 #: view/omeka/admin/resource-template/show.phtml:24
@@ -92,87 +101,199 @@ msgstr ""
 msgid "As json"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:51
+#: view/omeka/admin/resource-template/show.phtml:52
 msgid "Other settings"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:112
+#: view/omeka/admin/resource-template/show.phtml:114
 msgid "Advanced settings"
 msgstr ""
 
-#: data/scripts/upgrade.php:85
+#: data/scripts/upgrade.php:84
 msgid "New settings were added to the resource templates."
 msgstr ""
 
-#: data/scripts/upgrade.php:89
+#: data/scripts/upgrade.php:88
 msgid ""
 "Values are now validated against settings in all cases, included background "
 "or direct api process."
 msgstr ""
 
-#: data/scripts/upgrade.php:166
+#: data/scripts/upgrade.php:164
 msgid "New settings were added to the template."
 msgstr ""
 
-#: data/scripts/upgrade.php:170
+#: data/scripts/upgrade.php:168
 #, php-format
 msgid ""
 "New settings were added to the %1$smain settings%2$s to simplify resource "
 "form."
 msgstr ""
 
-#: Module.php:287
+#: data/scripts/upgrade.php:177
+msgid "It’s now possible to group a long list of template properties."
+msgstr ""
+
+#: data/scripts/upgrade.php:221
+msgid "It’s now possible to set a control input for literal values."
+msgstr ""
+
+#: data/scripts/upgrade.php:225
+msgid ""
+"It’s now possible to set a custom vocab open, so the user can complete the "
+"authority list when filiing data for a resource."
+msgstr ""
+
+#: Module.php:306
 msgid "A class is required."
 msgstr ""
 
-#: Module.php:299
+#: Module.php:318
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr ""
 
-#: Module.php:308
+#: Module.php:327
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr ""
 
-#: Module.php:336
+#: Module.php:365
+#, php-format
+msgid ""
+"The html input pattern \"%1$s\" for template \"%2$s\" cannot be processed."
+msgstr ""
+
+#: Module.php:374
+#, php-format
+msgid ""
+"The value \"%1$s\" for term \"%2$s\" does not follow the input pattern \"%3$s"
+"\"."
+msgstr ""
+
+#: Module.php:393
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:346
+#: Module.php:403
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:371
+#: Module.php:425
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
 "number (%3$d)."
 msgstr ""
 
-#: Module.php:382
+#: Module.php:436
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
 "number (%3$d)."
 msgstr ""
 
-#: src/Form/ResourceTemplateForm.php:35
-msgid "Suggested classes"
+#: Module.php:494
+#, php-format
+msgid ""
+"The value for term \"%1$s\" should be unique, but already set for resource #"
+"%2$s."
 msgstr ""
 
-#: src/Form/ResourceTemplateForm.php:42
-msgid "Select classes"
+#: Module.php:1003
+#, php-format
+msgid "New descriptor appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 
-#: src/Form/ResourceTemplateImportForm.php:15
-msgid "Resource template file (json, csv, tsv)"
+#: Module.php:1008
+#, php-format
+msgid "New descriptors appended to custom vocab \"%1$s\": %2$s"
+msgstr ""
+
+#: Module.php:1016
+#, php-format
+msgid "Unable to append new descriptors to custom vocab \"%1$s\": %2$s"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:11
+msgid "Advanced Resource Template"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:27
+msgid "Elements of resource form to display"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:29
+msgid "Collapse Metadata description by default"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:30
+msgid "Button Metadata description"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:31
+msgid "Button Language"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:32
+msgid "Button Visibility"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:33
+msgid "Button Value annotation"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:34
+msgid "Button More actions"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:47
+msgid ""
+"Skip checking advanced template settings to allow to save an invalid record"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:48
+msgid ""
+"Disable the checking of the template settings. For example if a value is "
+"longer than the specified length, it will be saved anyway.\n"
+"This option should be used only during a migration process or to simplify a "
+"complex batch edition or import.\n"
+"It does not skip core checks, in particular required properties."
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:61
+msgid "Append properties to resource form"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:62
+msgid ""
+"When no template is selected in resource form, the property selector may be "
+"available or not to force to select a template.\n"
+"Warning: you may have to set each resource template as open/close to "
+"addition according to this setting."
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:65
+msgid "Allow"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:66
+msgid "Forbid"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:78
+#: src/Form/ResourceTemplateDataFieldset.php:153
+msgid "Autofillers"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:79
+msgid "The autofillers should be set in selected templates params."
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:28
@@ -188,22 +309,22 @@ msgid "Limit to specified properties"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:61
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:150
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:178
 msgid "Allow quick creation of a resource"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:73
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:168
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:196
 msgid "Autocomplete with existing values"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:76
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:172
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:200
 msgid "Starts with"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:77
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:173
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:201
 msgid "Contains"
 msgstr ""
 
@@ -211,22 +332,17 @@ msgstr ""
 msgid "Languages for values"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:100
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:200
-msgid "Default language"
-msgstr ""
-
 #: src/Form/ResourceTemplateDataFieldset.php:110
 msgid "No language"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:121
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:230
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:259
 msgid "Value Suggest: keep original label"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:132
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:248
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:277
 msgid "Value Suggest: require uri"
 msgstr ""
 
@@ -234,211 +350,118 @@ msgstr ""
 msgid "Automatic values (on save)"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:153
-#: src/Form/SettingsFieldset.php:69
-msgid "Autofillers"
-msgstr ""
-
 #: src/Form/ResourceTemplateDataFieldset.php:170
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:266
-msgid "More settings"
+msgid "Groups"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:171
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:267
+msgid ""
+"Allow to get properties by group for display. This is a list of group names "
+"and properties for each of them. May need a specific theme template."
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:205
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:295
+msgid "More settings"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:206
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:296
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
 "pairs or json."
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:11
-msgid "Advanced Resource Template"
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:21
+msgid "Input control for literal (html pattern)"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:21
-msgid "Elements of resource form to display"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:23
-msgid "Collapse Metadata description by default"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:24
-msgid "Button Metadata description"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:25
-msgid "Button Language"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:26
-msgid "Button Visibility"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:27
-msgid "Button Value annotation"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:28
-msgid "Button More actions"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:40
-msgid ""
-"Skip checking advanced template settings to allow to save an invalid record"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:41
-msgid ""
-"Disable the checking of the template settings. For example if a value is "
-"longer than the specified length, it will be saved anyway.\n"
-"This option should be used only during a migration process or to simplify a "
-"complex batch edition or import.\n"
-"It does not skip core checks, in particular required properties."
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:53
-msgid "Append properties to resource form"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:54
-msgid ""
-"When no template is selected in resource form, the property selector may be "
-"available or not to force to select a template.\n"
-"Warning: you may have to set each resource template as open/close to "
-"addition according to this setting."
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:57
-msgid "Allow"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:58
-msgid "Forbid"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:70
-msgid "The autofillers should be set in selected templates params."
-msgstr ""
-
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:19
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:34
 msgid "Minimum length (characters)"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:33
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:48
 msgid "Maximum length (characters)"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:47
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:62
 msgid "Minimum number of values (when required)"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:61
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:76
 msgid "Maximum number of values"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:75
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:90
 msgid "Default value"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:87
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:102
 msgid "Automatic value (on save)"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:99
-msgid "Property disabled in form (editable only by api/job)"
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:114
+msgid "Unique value"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:112
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:127
 msgid "Locked value once saved"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:125
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:140
+msgid "Property disabled in form (editable only by api/job)"
+msgstr ""
+
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:153
 msgid "Separator to split a literal value"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:137
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:165
 msgid "Filter linked resources with a query"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:138
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:166
 msgid "Use url arguments of a standard advanced search query"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:152
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:170
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:214
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:232
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:250
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:180
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:198
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:230
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:261
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:279
 msgid "Use template setting"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:187
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:215
 msgid "Suggested languages"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:212
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:228
 msgid "Use language"
 msgstr ""
 
-#: src/Controller/Admin/IndexController.php:106
-#, php-format
-msgid "The remote service \"%s\" seems unavailable."
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:246
+msgid "Custom vocab: open authority list"
 msgstr ""
 
-#: src/Controller/Admin/IndexController.php:161
-#, php-format
-msgid "The template \"%s\" is not available."
+#: src/Form/ResourceTemplateImportForm.php:15
+msgid "Resource template file (json, csv, tsv)"
 msgstr ""
 
-#: src/Controller/Admin/IndexController.php:169
-msgid "The service \"%1\" has no mapping."
+#: src/Form/ResourceTemplateForm.php:36
+msgid "Suggested classes"
 msgstr ""
 
-#: src/Controller/Admin/IndexController.php:176
-#, php-format
-msgid "The service \"%s\" is not available."
+#: src/Form/ResourceTemplateForm.php:43
+msgid "Select classes"
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:344
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:558
-msgid ""
-"The template has duplicate properties. They are mixed in the form, but will "
-"be imported separately."
+#: src/Autofiller/GenericAutofiller.php:7
+msgid "Generic"
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:353
-#, php-format
-msgid "Wrong media type (\"%s\") for file."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:377
-msgid "The file does not contain any row."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:485
-msgid "There is no valid template properties."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:530
-#, php-format
-msgid "The alternative label for a duplicate property (%s) should be unique."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:551
-msgid "File cannot be checked or saved."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1051
-msgid ""
-"When multiple fields use the same property, only one field can be without "
-"data type."
-msgstr ""
-
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1054
-msgid ""
-"When multiple fields use the same property, the data types must be unique "
-"among them."
+#: src/Autofiller/GeonamesAutofiller.php:7
+msgid "Geonames"
 msgstr ""
 
 #: src/Autofiller/IdRefAutofiller.php:7 src/Autofiller/IdRefAutofiller.php:19
@@ -497,24 +520,80 @@ msgstr ""
 msgid "IdRef: Library registry (RCR)"
 msgstr ""
 
-#: src/Autofiller/GenericAutofiller.php:7
-msgid "Generic"
-msgstr ""
-
 #: src/Autofiller/AbstractAutofiller.php:57
 #, php-format
 msgid "%1$s: %2$s"
 msgstr ""
 
-#: src/Autofiller/GeonamesAutofiller.php:7
-msgid "Geonames"
+#: src/Controller/Admin/IndexController.php:106
+#, php-format
+msgid "The remote service \"%s\" seems unavailable."
+msgstr ""
+
+#: src/Controller/Admin/IndexController.php:161
+#, php-format
+msgid "The template \"%s\" is not available."
+msgstr ""
+
+#: src/Controller/Admin/IndexController.php:169
+msgid "The service \"%1\" has no mapping."
+msgstr ""
+
+#: src/Controller/Admin/IndexController.php:176
+#, php-format
+msgid "The service \"%s\" is not available."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:357
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:573
+msgid ""
+"The template has duplicate properties. They are mixed in the form, but will "
+"be imported separately."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:366
+#, php-format
+msgid "Wrong media type (\"%s\") for file."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:390
+msgid "The file does not contain any row."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:500
+msgid "There is no valid template properties."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:545
+#, php-format
+msgid "The alternative label for a duplicate property (%s) should be unique."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:566
+msgid "File cannot be checked or saved."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1087
+msgid ""
+"When multiple fields use the same property, only one field can be without "
+"data type."
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1090
+msgid ""
+"When multiple fields use the same property, the data types must be unique "
+"among them."
 msgstr ""
 
 #: src/Service/Autofiller/AutofillerPluginManagerFactory.php:16
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:165
+#: config/module.config.php:168
+msgid "New value"
+msgstr ""
+
+#: config/module.config.php:169
 msgid "No results"
 msgstr ""
 
