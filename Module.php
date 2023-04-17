@@ -264,18 +264,22 @@ class Module extends AbstractModule
 
     public function validateEntityHydratePost(Event $event): void
     {
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        if ($settings->get('advancedresourcetemplate_skip_checks')) {
-            return;
-        }
-
         /** @var \Omeka\Entity\Resource $entity */
         $entity = $event->getParam('entity');
 
         /** @var \Omeka\Entity\ResourceTemplate $templateEntity */
         $templateEntity = $entity->getResourceTemplate();
         if (!$templateEntity) {
+            return;
+        }
+
+        // Update open custom vocabs in any cases, when checks are skipped.
+        $this->updateCustomVocabOpen($event);
+
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $skipChecks = (bool) $settings->get('advancedresourcetemplate_skip_checks');
+        if ($skipChecks) {
             return;
         }
 
@@ -292,20 +296,7 @@ class Module extends AbstractModule
         $errorStore = $event->getParam('errorStore');
         $connection = $services->get('Omeka\Connection');
 
-        // Because the form doesn't contain the properties, that are added
-        // dynamically, and because the resource controllers don't include the
-        // stored messages from create/update events, error messages may be
-        // added directly.
-        // TODO Include the check in the resource form. Add a fake hidden element? Or fix api plugin (the form is static in plugin api, so it is removed when called somewhere else)? For now, just js (issue is only on the min/max numbers of values).
-        /** @var \Omeka\Mvc\Status $status */
-        $status = $services->get('Omeka\Status');
-        $routeMatch = $status->getRouteMatch();
-        // RouteMatch may be unavailable during background process.
-        $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;
-        // Module Contribute can use the error store so don't output issue here.
-        $directMessage = $routeName === 'admin/default'
-            && in_array($routeMatch->getParam('__CONTROLLER__'), ['item', 'item-set', 'media', 'annotation'])
-            && in_array($routeMatch->getParam('action'), ['add', 'edit']);
+        $directMessage = $this->displayDirectMessage();
         $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
 
         // Template level.
@@ -875,6 +866,161 @@ SQL;
         //     ->add($advancedFieldset);
         foreach ($advancedFieldset->getElements() as $element) {
             $fieldset->add($element);
+        }
+    }
+
+    /**
+     * Check if messages should be displayed to end user.
+     *
+     * Because the form doesn't contain the properties, that are added
+     * dynamically, and because the resource controllers don't include the
+     * stored messages from create/update events, error messages may be added
+     * directly.
+     *
+     * @todo Include the check in the resource form. Add a fake hidden element? Or fix api plugin (the form is static in plugin api, so it is removed when called somewhere else)? For now, just js (issue is only on the min/max numbers of values).
+     */
+    protected function displayDirectMessage(): bool
+    {
+        /** @var \Omeka\Mvc\Status $status */
+        $services = $this->getServiceLocator();
+        $status = $services->get('Omeka\Status');
+        $routeMatch = $status->getRouteMatch();
+        // RouteMatch may be unavailable during background process.
+        $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;
+        // Module Contribute can use the error store so don't output issue here.
+        return $routeName === 'admin/default'
+            && in_array($routeMatch->getParam('__CONTROLLER__'), ['item', 'item-set', 'media', 'annotation'])
+            && in_array($routeMatch->getParam('action'), ['add', 'edit']);
+    }
+
+    /**
+     * Update open custom vocabs with new terms.
+     */
+    protected function updateCustomVocabOpen(Event $event): void
+    {
+        /** @var \Omeka\Entity\Resource $entity */
+        $entity = $event->getParam('entity');
+
+        /** @var \Omeka\Entity\ResourceTemplate $templateEntity */
+        $templateEntity = $entity->getResourceTemplate();
+        if (!$templateEntity) {
+            return;
+        }
+
+        /**
+         * @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter
+         * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Stdlib\ErrorStore $errorStore
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \Omeka\Api\Manager $api
+         * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
+         */
+        $adapter = $event->getTarget();
+        $template = $adapter->getAdapter('resource_templates')->getRepresentation($templateEntity);
+        $resource = $adapter->getRepresentation($entity);
+
+        // First, quick check if some custom vocabs are open.
+        $hasCustomVocabOpen = false;
+        foreach ($template->resourceTemplateProperties() as $templateProperty) {
+            foreach ($templateProperty->data() as $rtpData) {
+                if ($rtpData->dataValue('custom_vocab_open', false) === 'yes') {
+                    $hasCustomVocabOpen = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$hasCustomVocabOpen) {
+            return;
+        }
+
+        $services = $this->getServiceLocator();
+        $api = $services->get('Omeka\ApiManager');
+
+        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
+        $customVocabs = [];
+
+        // Only literal custom vocabs are managed for now, but no query.
+        foreach ($api->search('custom_vocabs')->getContent() as $customVocab) {
+            if ($customVocab->typeValues() === 'literal') {
+                $id = $customVocab->id();
+                $customVocabs['customvocab:' . $id] = [
+                    'id' => $id,
+                    'label' => $customVocab->label(),
+                    'terms' => $customVocab->listValues(),
+                    'new' => [],
+                    'term' => null,
+                ];
+            }
+        }
+        if (!$customVocabs) {
+            return;
+        }
+
+        foreach ($template->resourceTemplateProperties() as $templateProperty) {
+            foreach ($templateProperty->data() as $rtpData) {
+                if ($rtpData->dataValue('custom_vocab_open', false) !== 'yes') {
+                    continue;
+                }
+                $term = $templateProperty->property()->term();
+                foreach ($resource->value($term, ['all' => true, 'type' => array_keys($customVocabs)]) as $value) {
+                    $val = trim((string) $value->value());
+                    $dataType = $value->type();
+                    if (strlen($val) && !in_array($val, $customVocabs[$dataType]['terms'])) {
+                        $customVocabs[$dataType]['term'] = $term;
+                        $customVocabs[$dataType]['new'][] = $val;
+                    }
+                }
+            }
+        }
+
+        /** @var \Omeka\Permissions\Acl $acl */
+        $acl = $services->get('Omeka\Acl');
+        $roles = $acl->getRoles();
+        $acl
+            ->allow(
+                $roles,
+                [\CustomVocab\Api\Adapter\CustomVocabAdapter::class],
+                ['update']
+            );
+
+        $errorStore = $event->getParam('errorStore');
+        $directMessage = $this->displayDirectMessage();
+        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
+
+        foreach ($customVocabs as $customVocab) {
+            if (!$customVocab['new']) {
+                continue;
+            }
+            // Update custom vocab.
+            $newTerms = array_merge($customVocab['terms'], $customVocab['new']);
+            try {
+                $api->update('custom_vocabs', $customVocab['id'], ['o:terms' => $newTerms], [], ['isPartial' => true]);
+                if ($directMessage) {
+                    if (count($customVocab['new']) <= 1) {
+                        $message = new \Omeka\Stdlib\Message(
+                            'New descriptor appended to custom vocab "%1$s": %2$s', // @translate
+                            $customVocab['label'], $customVocab['new']
+                        );
+                    } else {
+                        $message = new \Omeka\Stdlib\Message(
+                            'New descriptors appended to custom vocab "%1$s": %2$s', // @translate
+                            $customVocab['label'], implode('", "', $customVocab['new'])
+                        );
+                    }
+                    $messenger->addSuccess($message);
+                }
+            } catch (\Exception $e) {
+                $message = new \Omeka\Stdlib\Message(
+                    'Unable to append new descriptors to custom vocab "%1$s": %2$s', // @translate
+                    $customVocab['label'], $e->getMessage()
+                );
+                $errorStore->addError($customVocab['term'], $message);
+                if ($directMessage) {
+                    $messenger->addError($message);
+                }
+            }
         }
     }
 

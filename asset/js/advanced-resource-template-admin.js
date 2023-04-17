@@ -283,6 +283,55 @@ $(document).ready(function() {
     }
 
     /**
+     * Set a custom vocab open to new values.
+     */
+    function prepareFieldCustomVocabOpen(field) {
+        const rtpData = field.data('template-property-data');
+        if (!rtpData) {
+            return;
+        }
+
+        const dataType = field.data('data-types') && field.data('data-types').length ? field.data('data-types').split(',')[0] : 'literal';
+        if (!dataType.startsWith('customvocab:')) {
+            return;
+        }
+
+        const select = field.find('select.custom-vocab-literal');
+        const isCustomVocabOpen = rtpData.custom_vocab_open === 'yes';
+        if (isCustomVocabOpen) {
+            prepareCustomVocabOpenInput(select);
+        } else if (select.hasClass('customvocab-open')) {
+            select.removeClass('customvocab-open');
+            field.find('input.customvocab-open')
+                .remove();
+        }
+    }
+
+    function prepareCustomVocabOpenInput(select) {
+        if (!select.length) {
+            return;
+        }
+
+        // May be already set for new resource.
+        if (select.hasClass('customvocab-open')) {
+            return;
+        }
+
+        select.addClass('customvocab-open');
+        select.on('change', function(e) {
+            const inputBody = $(this).closest('.input-body');
+            if ($(this).val() === '') {
+                inputBody
+                    .append($('<input/>', { type: 'text', class: 'customvocab-open', 'data-value-key': '@value', placeholder: Omeka.jsTranslate('New value') }));
+            } else {
+                inputBody
+                    .find('input.customvocab-open')
+                    .remove();
+            }
+        });
+    }
+
+    /**
      * Init the language input.
      */
     function initValueLanguage(languageInput, field) {
@@ -913,6 +962,7 @@ $(document).ready(function() {
             prepareFieldLength($(field));
             prepareFieldMinValues($(field));
             prepareFieldMaxValues($(field));
+            prepareFieldCustomVocabOpen($(field));
             prepareFieldReadOnly($(field));
             prepareFieldAutocomplete($(field));
             prepareFieldLanguage($(field));
@@ -932,6 +982,7 @@ $(document).ready(function() {
         // prepareFieldLength(field);
         // prepareFieldMinValues(field);
         // prepareFieldMaxValues(field);
+        // prepareFieldCustomVocabOpen($(field));
         prepareFieldReadOnly(field);
         prepareFieldAutocomplete(field);
         prepareFieldLanguage(field);
@@ -986,6 +1037,13 @@ $(document).ready(function() {
             }
             if (rtpData.max_length) {
                 value.find('textarea.input-value').attr('maxlength', rtpData.max_length);
+            }
+        }
+
+        if (dataType.startsWith('customvocab:')) {
+            if (rtpData.custom_vocab_open === 'yes') {
+                const select = value.find('select.custom-vocab-literal');
+                prepareCustomVocabOpenInput(select);
             }
         }
 

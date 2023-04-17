@@ -240,6 +240,19 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'custom_vocab_open',
+                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'options' => [
+                    'label' => 'Custom vocab: open authority list', // @translate
+                    'checked_value' => 'yes',
+                ],
+                'attributes' => [
+                    // 'id' => 'custom_vocab_open',
+                    'class' => 'setting',
+                    'data-setting-key' => 'custom_vocab_open',
+                ],
+            ])
+            ->add([
                 'name' => 'value_suggest_keep_original_label',
                 'type' => Element\Radio::class,
                 'options' => [

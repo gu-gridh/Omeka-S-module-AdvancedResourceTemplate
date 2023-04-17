@@ -165,6 +165,7 @@ return [
     'js_translate_strings' => [
         'New item', // @translate
         'New item set', // @translate
+        'New value', // @translate
         'No results', // @translate
     ],
     'advancedresourcetemplate' => [
