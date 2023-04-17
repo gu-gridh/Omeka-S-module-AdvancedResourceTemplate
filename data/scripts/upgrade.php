@@ -215,3 +215,14 @@ SQL;
         ]);
     }
 }
+
+if (version_compare((string) $oldVersion, '3.4.4.18', '<')) {
+    $message = new Message(
+        'It’s now possible to set a control input for literal values.' // @translate
+    );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'It’s now possible to set a custom vocab open, so the user can complete the authority list when filiing data for a resource.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
