@@ -355,6 +355,43 @@ class Module extends AbstractModule
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
                 $term = $templateProperty->property()->term();
+
+                $inputControl = $rtpData->dataValue('input_control', '');
+                if (strlen($inputControl)) {
+                    // Check that the input control is a valid regex first.
+                    $anchors = ['/', '#', '~', '%', '`', ';', '§', 'µ'];
+                    foreach ($anchors as $anchor) {
+                        if (mb_strpos($inputControl, $anchor) === false) {
+                            $regex = $anchor . '^(?:' . $inputControl . ')$' . $anchor . 'u';
+                            if (preg_match($regex, '') === false) {
+                                $anchor = '';
+                            }
+                            break;
+                        }
+                    }
+                    if (empty($anchor) || empty($regex)) {
+                        $message = new \Omeka\Stdlib\Message(
+                            'The html input pattern "%1$s" for template "%2$s" cannot be processed.', // @translate
+                            $inputControl, $template->label()
+                        );
+                        $services->get('Omeka\Logger')->warn((string) $message);
+                    } else {
+                        foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
+                            $val = $value->value();
+                            if (!preg_match($regex, $val)) {
+                                $message = new \Omeka\Stdlib\Message(
+                                    'The value "%1$s" for term "%2$s" does not follow the input pattern "%3$s".', // @translate
+                                    $val, $term, $inputControl
+                                );
+                                $errorStore->addError($term, $message);
+                                if ($directMessage) {
+                                    $messenger->addError($message);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 $minLength = (int) $rtpData->dataValue('min_length');
                 $maxLength = (int) $rtpData->dataValue('max_length');
                 if ($minLength || $maxLength) {

@@ -74,6 +74,45 @@ $(document).ready(function() {
     }
 
     /**
+     * Set a input regex pattern to a literal field.
+     */
+    function prepareFieldInputControl(field) {
+        const rtpData = field.data('template-property-data');
+        if (!rtpData) {
+            return;
+        }
+
+        const dataType = field.data('data-types') && field.data('data-types').length ? field.data('data-types').split(',')[0] : 'literal';
+        if (dataType !== 'literal') {
+            return;
+        }
+
+        // Html input pattern does not work on textarea, so replace the textarea
+        // by an input.
+        const textarea = field.find('textarea.input-value, textarea.inputcontrol');
+        var input;
+        if (rtpData.input_control) {
+            // May be already set for new resource.
+            if (!textarea.hasClass('inputcontrol')) {
+                textarea.addClass('inputcontrol');
+                textarea.removeClass('input-value to-require');
+                textarea.after($('<input/>', { type: 'text', class: 'input-value to-require', 'data-value-key': '@value' }));
+                input = field.find('input.input-value');
+                input.attr('pattern', rtpData.input_control);
+                input.val(textarea.val());
+                textarea.hide();
+            }
+        } else if (textarea.hasClass('inputcontrol')) {
+            input = field.find('input.input-value');
+            textarea.val(input.val());
+            textarea.addClass('input-value to-require');
+            textarea.removeClass('inputcontrol');
+            input.remove();
+            textarea.show();
+        }
+    }
+
+    /**
      * Set min/max length of a literal field.
      */
     function prepareFieldLength(field) {
@@ -206,7 +245,7 @@ $(document).ready(function() {
         if (datalist.length) {
             datalist.empty();
         } else {
-            $('#value-languages').after('<datalist id="value-languages-template" class="value-languages"></datalist>');
+            $('#value-languages').after($('<datalist/>', { id: 'value-languages-template', class: 'value-languages' }));
             datalist = $('#value-languages-template');
         }
         if (templateData && templateData.value_languages && !$.isEmptyObject(templateData.value_languages)) {
@@ -870,6 +909,7 @@ $(document).ready(function() {
         }
 
         fields.each(function(index, field) {
+            prepareFieldInputControl($(field));
             prepareFieldLength($(field));
             prepareFieldMinValues($(field));
             prepareFieldMaxValues($(field));
@@ -886,7 +926,9 @@ $(document).ready(function() {
 
     $(document).on('o:property-added', '.resource-property', function() {
         const field = $(this);
-        // This is managed after values (and useless for this event).
+        // This is managed after values.
+        // This is useless for this event: added properties have no specific params.
+        // prepareFieldInputControl($(field));
         // prepareFieldLength(field);
         // prepareFieldMinValues(field);
         // prepareFieldMaxValues(field);
@@ -927,6 +969,18 @@ $(document).ready(function() {
         }
 
         if (dataType === 'literal') {
+            // Html input pattern does not work on textarea, so replace the textarea
+            // by an input.
+            if (rtpData.input_control) {
+                const textarea = value.find('textarea.input-value');
+                textarea.addClass('inputcontrol');
+                textarea.removeClass('input-value to-require');
+                textarea.after($('<input/>', { type: 'text', class: 'input-value to-require', 'data-value-key': '@value' }));
+                textarea.hide();
+                const input = value.find('input.input-value');
+                input.attr('pattern', rtpData.input_control);
+                input.val('');
+            }
             if (rtpData.min_length) {
                 value.find('textarea.input-value').attr('minlength', rtpData.min_length);
             }

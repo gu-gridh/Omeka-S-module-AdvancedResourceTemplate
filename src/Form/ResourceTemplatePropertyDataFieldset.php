@@ -13,6 +13,21 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
     {
         $this
             ->add([
+                'name' => 'input_control',
+                'type' => Element\Text::class,
+                'options' => [
+                    // Don't include leading and trailing "/", neither start/end
+                    // "^$": it's implied.
+                    'label' => 'Input control for literal (html pattern)', // @translate
+                    'documentation' => 'https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern',
+                ],
+                'attributes' => [
+                    // 'id' => 'input_control',
+                    'class' => 'setting',
+                    'data-setting-key' => 'input_control',
+                ],
+            ])
+            ->add([
                 'name' => 'min_length',
                 'type' => Element\Number::class,
                 'options' => [
