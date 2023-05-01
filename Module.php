@@ -938,12 +938,16 @@ SQL;
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
 
-        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
         $customVocabs = [];
 
         // Only literal custom vocabs are managed for now, but no query.
+        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
         foreach ($api->search('custom_vocabs')->getContent() as $customVocab) {
-            if ($customVocab->typeValues() === 'literal') {
+            // CustomVocab v2.0.0 changed method names.
+            $customVocabType = method_exists($customVocab, 'typeValues')
+                ? $customVocab->typeValues()
+                : $customVocab->type();
+            if ($customVocabType === 'literal') {
                 $id = $customVocab->id();
                 $customVocabs['customvocab:' . $id] = [
                     'id' => $id,

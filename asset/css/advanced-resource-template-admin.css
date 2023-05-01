@@ -13,6 +13,7 @@
         padding-left: 6px;
     }
 
+    /* // Old fix for custom vocab.
     .resource-form .value:not(:only-of-type) .input-body {
         max-width: inherit;
     }
@@ -20,6 +21,12 @@
         max-width: calc(100% - 12px);
         margin: 6px;
         background-color: #fff;
+    }
+    */
+
+    /* Manage large values in custom vocab. See Thesaurus. */
+    .field.resource-property .chosen-container-single .chosen-single span {
+        white-space: break-spaces;
     }
 
     .art-no-more-actions.art-direct-buttons .resource-form .input-footer .actions {
