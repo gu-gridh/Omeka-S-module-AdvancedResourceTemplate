@@ -110,7 +110,7 @@ if (version_compare((string) $oldVersion, '3.3.4.14', '<')) {
             'value_suggest_require_uri',
         ] as $key) {
             if (array_key_exists($key, $templateData)) {
-                if (in_array($templateData[$key], [true, 1, '1', 'yes'], true)) {
+                if (in_array($templateData[$key], [true, 1, '1', 'true', 'yes', 'on'], true)) {
                     $templateData[$key] = 'yes';
                 } else {
                     unset($templateData[$key]);
@@ -140,7 +140,7 @@ SQL;
             'locked_value',
         ] as $key) {
             if (array_key_exists($key, $templatePropertyData)) {
-                if (in_array($templatePropertyData[$key], [true, 1, '1', 'yes'], true)) {
+                if (in_array($templatePropertyData[$key], [true, 1, '1', 'true', 'yes', 'on'], true)) {
                     $templatePropertyData[$key] = 'yes';
                 } else {
                     unset($templatePropertyData[$key]);

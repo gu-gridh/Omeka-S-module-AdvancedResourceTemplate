@@ -301,7 +301,7 @@ class Module extends AbstractModule
 
         // Template level.
         $resourceClass = $entity->getResourceClass();
-        $requireClass = $template->dataValue('require_resource_class') === 'yes';
+        $requireClass = $this->valueIsTrue($template->dataValue('require_resource_class'));
         if ($requireClass && !$resourceClass) {
             $message = new \Omeka\Stdlib\Message('A class is required.'); // @translate
             $errorStore->addError('o:resource_class', $message);
@@ -309,7 +309,7 @@ class Module extends AbstractModule
                 $messenger->addError($message);
             }
         }
-        $closedClassList = $template->dataValue('closed_class_list') === 'yes';
+        $closedClassList = $this->valueIsTrue($template->dataValue('closed_class_list'));
         if ($closedClassList && $resourceClass) {
             $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
             if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
@@ -924,7 +924,7 @@ SQL;
         $hasCustomVocabOpen = false;
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                if ($rtpData->dataValue('custom_vocab_open', false) === 'yes') {
+                if ($this->valueIsTrue($rtpData->dataValue('custom_vocab_open', false))) {
                     $hasCustomVocabOpen = true;
                     break 2;
                 }
@@ -964,7 +964,7 @@ SQL;
 
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                if ($rtpData->dataValue('custom_vocab_open', false) !== 'yes') {
+                if (!$this->valueIsTrue($rtpData->dataValue('custom_vocab_open', false))) {
                     continue;
                 }
                 $term = $templateProperty->property()->term();
@@ -1481,5 +1481,27 @@ SQL;
     public function fixEndOfLine($string): string
     {
         return str_replace(["\r\n", "\n\r", "\r"], ["\n", "\n", "\n"], (string) $string);
+    }
+
+    /**
+     * Check if a value is true (true, 1, "1", "true", yes", "on").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    protected function valueIsTrue($value): bool
+    {
+        return in_array($value, [true, 1, '1', 'true', 'yes', 'on'], true);
+    }
+
+    /**
+     * Check if a value is false (false, 0, "0", "false", "no", "off").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    protected function valueIsFalse($value): bool
+    {
+        return in_array($value, [false, 0, '0', 'false', 'no', 'off'], true);
     }
 }

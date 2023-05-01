@@ -1,5 +1,25 @@
 (function($) {
 
+    /**
+     * Check if a value is true (true, 1, "1", "true", yes", "on").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    const valueIsTrue = function checkIfValueIsTrue(value) {
+        return [true, 1, '1', 'true', 'yes', 'on'].includes(value);
+    }
+
+    /**
+     * Check if a value is false (false, 0, "0", "false", "no", "off").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    const valueIsFalse = function checkIfValueIsFalse(value) {
+        return [false, 0, '0', 'false', 'no', 'off'].includes(value);
+    }
+
     $(document).ready(function() {
 
         const baseUrl = window.location.pathname.replace(/\/admin\/.*/, '/');
@@ -276,8 +296,8 @@
             const inputLanguage = field.find('.values input.value-language');
             inputLanguage.attr('list', listName);
 
-            const noLanguage = rtpData.use_language === 'no'
-                || ((!rtpData.use_language || rtpData.use_language === '') && templateData && templateData.no_language === 'yes');
+            const noLanguage = valueIsFalse(rtpData.use_language)
+                || ((!rtpData.use_language || rtpData.use_language === '') && templateData && valueIsTrue(templateData.no_language));
             field.data('no-language', noLanguage);
             field.find('.inputs .values input.value-language').each(function() {
                 initValueLanguage($(this), field);
@@ -299,7 +319,7 @@
             }
 
             const select = field.find('select.custom-vocab-literal');
-            const isCustomVocabOpen = rtpData.custom_vocab_open === 'yes';
+            const isCustomVocabOpen = valueIsTrue(rtpData.custom_vocab_open);
             if (isCustomVocabOpen) {
                 prepareCustomVocabOpenInput(select);
             } else if (select.hasClass('customvocab-open')) {
@@ -723,7 +743,7 @@
             // Fill the classes according to the template.
             if (hasTemplate
                 && countSuggestedClasses
-                && templateData.closed_class_list === 'yes'
+                && valueIsTrue(templateData.closed_class_list)
             ) {
                 resourceClassSelect.find('option').each(function() {
                     const resClassId = Number($(this).val());
@@ -750,7 +770,7 @@
                 resourceClassSelect.val(resClassId);
             }
 
-            if (templateData && templateData.require_resource_class === 'yes') {
+            if (templateData && valueIsTrue(templateData.require_resource_class)) {
                 resourceClassSelect.attr('require', 'require')
                     .closest('.field').addClass('required');
             } else {
@@ -930,7 +950,7 @@
         $(document).on('o:template-applied', 'form.resource-form', function() {
             const templateData = $('#resource-values').data('template-data');
             const hasTemplate = $('#resource-template-select').val() != '';
-            if ((hasTemplate && templateData && templateData.closed_property_list === 'yes')
+            if ((hasTemplate && templateData && valueIsTrue(templateData.closed_property_list))
                 || (!hasTemplate && $('form.resource-form').hasClass('closed-property-list'))
             ) {
                 sidebarPropertySelector.removeClass('always-open');
@@ -1043,7 +1063,7 @@
             }
 
             if (dataType.startsWith('customvocab:')) {
-                if (rtpData.custom_vocab_open === 'yes') {
+                if (valueIsTrue(rtpData.custom_vocab_open)) {
                     const select = value.find('select.custom-vocab-literal');
                     prepareCustomVocabOpenInput(select);
                 }
@@ -1119,14 +1139,13 @@
             const isManagedResourceType = resourceType && resourceType !== 'media';
             const templateData = $('#resource-values').data('template-data');
             const templatePropertyData = sidebar.data('template-property-data');
-            const quickNewResourceTemplate = templateData && templateData.quick_new_resource !== 'no';
+            const quickNewResourceTemplate = templateData && !valueIsFalse(templateData.quick_new_resource);
             const quickNewResourceTemplateProperty = typeof templatePropertyData === 'object'
                 ? (typeof templatePropertyData.quick_new_resource === 'undefined' || templatePropertyData.quick_new_resource === ''
                     ? quickNewResourceTemplate
-                    : templatePropertyData.quick_new_resource !== 'no'
+                    : !valueIsFalse(templatePropertyData.quick_new_resource)
                 )
                 : quickNewResourceTemplate;
-
             if (isManagedResourceType && quickNewResourceTemplateProperty) {
                 const iconResourceType = resourceType === 'media' ? 'media' : resourceType + 's';
                 const button = `<div class="quick-new-resource" data-data-type="resource:${resourceType}">

@@ -1,5 +1,25 @@
 (function($) {
 
+    /**
+     * Check if a value is true (true, 1, "1", "true", yes", "on").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    const valueIsTrue = function checkIfValueIsTrue(value) {
+        return [true, 1, '1', 'true', 'yes', 'on'].includes(value);
+    }
+
+    /**
+     * Check if a value is false (false, 0, "0", "false", "no", "off").
+     *
+     * This function avoids issues with values stored directly or with a form.
+     * A value can be neither true or false.
+     */
+    const valueIsFalse = function checkIfValueIsFalse(value) {
+        return [false, 0, '0', 'false', 'no', 'off'].includes(value);
+    }
+
     $(document).ready( function() {
 
         // In some cases (other modules), this js is used without properties.
@@ -392,16 +412,16 @@
                 const rtpData = field.data('template-property-data')
                     ? field.data('template-property-data')
                     : { value_suggest_keep_original_label: 'no', value_suggest_require_uri: 'no' };
-                const valueSuggestKeepOriginalLabel = rtpData.value_suggest_keep_original_label === 'yes'
-                    || (rtpData.value_suggest_keep_original_label !== 'no' && templateData.value_suggest_keep_original_label == 'yes');
+                const valueSuggestKeepOriginalLabel = valueIsTrue(rtpData.value_suggest_keep_original_label)
+                    || (!valueIsFalse(rtpData.value_suggest_keep_original_label) && valueIsTrue(templateData.value_suggest_keep_original_label));
                 if (valueSuggestKeepOriginalLabel) {
                     value.find(':input[data-value-key="o:label"]')
                         // .val(value.find(':input[data-value-key="@value"]').val())
                         .val(value.find('.valuesuggest-input').prop('placeholder'))
                         .prop('disabled', false);
                 }
-                const valueSuggestRequireUri = rtpData.value_suggest_require_uri === 'yes'
-                    || (rtpData.value_suggest_require_uri !== 'no' && templateData.value_suggest_require_uri == 'yes');
+                const valueSuggestRequireUri = valueIsTrue(rtpData.value_suggest_require_uri)
+                    || (!valueIsFalse(rtpData.value_suggest_require_uri) && valueIsTrue(templateData.value_suggest_require_uri));
                 if (valueSuggestRequireUri) {
                     value.find(':input[data-value-key="@id"]')
                         .prop('disabled', false);
