@@ -170,9 +170,11 @@ propertyList.on('click', '.property-edit', function(e) {
 $('#resource-template-form').on('submit', function () {
     // Prepend the full form data first to allow to pass more than 1000 variables
     // (default on servers).
-    const data = Object.fromEntries(new FormData(document.getElementById('resource-template-form')));
+    // Don't use Object.fromEntries() directly: it skips values when there
+    // are multiple entries, for example for multi-select.
+    const formData = new FormData(document.getElementById('resource-template-form'));
     var post = {};
-    for (const [key, value] of Object.entries(data)) {
+    for (const [key, value] of formData.entries()) {
         if (!key.includes('[')) {
             post[key] = value;
             continue;
@@ -186,9 +188,8 @@ $('#resource-template-form').on('submit', function () {
             post[mainKey] = {};
         }
         var key1 = key.slice(key.indexOf('[') + 1, key.indexOf(']'));
-        var index = 0;
         if (key1 === '') {
-            post[mainKey][String(++index)] = value;
+            post[mainKey].push(value);
         } else {
             if (key1.match(/^\d+$/)) {
                 key1 = '_' + key1;
@@ -198,11 +199,11 @@ $('#resource-template-form').on('submit', function () {
                 post[mainKey][key1] = value;
             } else {
                 if (!post[mainKey].hasOwnProperty(key1)) {
-                    post[mainKey][key1] = {};
+                    post[mainKey][key1] = remainingKey === '[]' ? [] : {};
                 }
                 var key2 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                 if (key2 === '') {
-                    post[mainKey][key1][String(++index)] = value;
+                    post[mainKey][key1].push(value);
                 } else {
                     if (key2.match(/^\d+$/)) {
                         key2 = '_' + key2;
@@ -212,11 +213,11 @@ $('#resource-template-form').on('submit', function () {
                         post[mainKey][key1][key2] = value;
                     } else {
                         if (!post[mainKey][key1].hasOwnProperty(key2)) {
-                            post[mainKey][key1][key2] = {};
+                            post[mainKey][key1][key2] = remainingKey === '[]' ? [] : {};
                         }
                         var key3 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                         if (key3 === '') {
-                            post[mainKey][key1][key2][String(++index)] = value;
+                            post[mainKey][key1][key2].push(value);
                         } else {
                             if (key3.match(/^\d+$/)) {
                                 key3 = '_' + key3;
@@ -226,11 +227,11 @@ $('#resource-template-form').on('submit', function () {
                                 post[mainKey][key1][key2][key3] = value;
                             } else {
                                 if (!post[mainKey][key1][key2].hasOwnProperty(key3)) {
-                                    post[mainKey][key1][key2][key3] = {};
+                                    post[mainKey][key1][key2][key3] = remainingKey === '[]' ? [] : {};
                                 }
                                 var key4 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                                 if (key4 === '') {
-                                    post[mainKey][key1][key2][key3][String(++index)] = value;
+                                    post[mainKey][key1][key2][key3].push(value);
                                 } else {
                                     if (key4.match(/^\d+$/)) {
                                         key4 = '_' + key4;
