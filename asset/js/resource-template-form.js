@@ -182,7 +182,7 @@ $('#resource-template-form').on('submit', function () {
         // First key is always a string. For php, everything is object and order
         // should be kept, so prepend a "_" when the key is numeric, because the
         //  array is not ordered in js.
-        // TODO Use a recursive method to convert post key with brackets into nested array. Two levels are enough in real world.
+        // TODO Use a recursive method to convert post key with brackets into nested array. Four levels are enough in real world.
         const mainKey = key.slice(0, key.indexOf('['));
         if (!post.hasOwnProperty(mainKey)) {
             post[mainKey] = {};
