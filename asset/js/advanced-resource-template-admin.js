@@ -474,7 +474,9 @@
             var field = $('.resource-property[data-property-term="' + term + '"]');
             // Get the value node from the templates.
             if (!dataType || typeof dataType !== 'string') {
-                dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
+                // ":visible" cannot be used when loading page on a specific tab, for example "#item-media".
+                // dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
+                dataType = valueObj ? valueObj['type'] : field.find('.add-values:not([style="display: none;"]):not([style="display:none;"]) .add-value:first').data('type');
             }
             const fieldForDataType = field.filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; });
             field = fieldForDataType.length ? fieldForDataType.first() : field.first();

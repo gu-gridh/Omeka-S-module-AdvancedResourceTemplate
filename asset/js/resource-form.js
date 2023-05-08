@@ -537,7 +537,9 @@
         var field = $('.resource-property[data-property-term="' + term + '"]');
         // Get the value node from the templates.
         if (!dataType || typeof dataType !== 'string') {
-            dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
+            // ":visible" cannot be used when loading page on a specific tab, for example "#item-media".
+            // dataType = valueObj ? valueObj['type'] : field.find('.add-value:visible:first').data('type');
+            dataType = valueObj ? valueObj['type'] : field.find('.add-values:not([style="display: none;"]):not([style="display:none;"]) .add-value:first').data('type');
         }
         var fieldForDataType = field.filter(function() { return $.inArray(dataType, $(this).data('data-types').split(',')) > -1; });
         field = fieldForDataType.length ? fieldForDataType.first() : field.first();
@@ -881,6 +883,10 @@
 
         function finalize() {
             // Remove empty fields, except the templates and user added ones, to avoid mix of templates fields.
+            // Now partially integrated in core.
+            // Remove unchanged default values (Title, Description) if the
+            // template doesn't define them. This works because we remove
+            // unchanged default values when rewriting property fields.
             fields = templateId
                 ? $('#properties .resource-property[data-template-id!="' + templateId + '"]')
                 : $('#properties .resource-property');
@@ -901,7 +907,9 @@
                 field = $(field);
                 if (!field.find('.value').length) {
                     field.find('.inputs .values').append(
-                        makeDefaultValue(field.data('property-term'), field.find('.add-value:visible:first').data('type'))
+                        // ":visible" cannot be used when loading page on a specific tab, for example "#item-media".
+                        // makeDefaultValue(field.data('property-term'), field.find('.add-value:visible:first').data('type'))
+                        makeDefaultValue(field.data('property-term'), field.find('.add-values:not([style="display: none;"]):not([style="display:none;"]) .add-value:first').data('type'))
                     );
                 }
             });
