@@ -80,6 +80,7 @@ resources:
   but as multple template properties too, so each one has its own label and
   settings (size, number, etc.), as for spatial cover ("couverture spatiale") in
   the example below.
+
   **Warning**: for compatibility with core and modules and because they are
   variants of the same property, the template properties are kept gathered
   according to the original term in the resource template. So, in the example
@@ -93,7 +94,7 @@ resources:
   When values and properties are numerous, the module allows to group them under
   a label. For example, you can group the Dublin Core properties like that:
 
-  ```
+```
   # Descriptive metadata
   dcterms:title
   dcterms:description
@@ -116,7 +117,7 @@ resources:
   dcterms:format
   dcterms:identifier
   dcterms:language
-  ```
+```
 
   Here, the record is divided under four group labels.
   When some properties have multiple fields, you can group them more precisely
@@ -201,6 +202,7 @@ By default, simply set the string to use a default value. For a resource, this
 is the resource id and for uri this is the uri.
 
 For a uri with a label, just separate the uri and the label with a space:
+
 ```
 https://example.com/my-id Label of the value
 ```
@@ -209,6 +211,7 @@ For other data types that may be more complex, the default value can be set as a
 json with all hidden sub-data that are in the Omeka resource form.
 
 For a uri with a label and a language (for value suggest):
+
 ```json
 {
     "@id": "https://example.com/my-id",
@@ -219,6 +222,7 @@ For a uri with a label and a language (for value suggest):
 ```
 
 For a linked resource, that is useful only for a better display:
+
 ```json
 {
     "display_title": "Title of my object",
@@ -326,6 +330,7 @@ pattern, you can use any source path between `{` and `}`.
 For more complex pattern, you can use some [Twig filters] with the current
 value. For example, to convert a date `17890804` into a standard [ISO 8601]
 numeric date time `1789-08-04`, you can use:
+
 ```
 /record/datafield[@tag="103"]/subfield[@code="b"] = dcterms:valid ^^numeric:timestamp ~ {{ value|trim|slice(1,4) }}-{{ value|trim|slice(5,2) }}-{{ value|trim|slice(7,2) }}
 ```

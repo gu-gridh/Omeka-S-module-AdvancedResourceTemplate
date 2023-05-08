@@ -100,7 +100,7 @@ l’édition des ressources :
   grouper sous un titre. Par exemple, vous pouvez grouper les propriétés du
   Dublin Coe comme cela :
 
-  ```
+```
   # Métadonnées descriptives
   dcterms:title
   dcterms:description
@@ -123,7 +123,7 @@ l’édition des ressources :
   dcterms:format
   dcterms:identifier
   dcterms:language
-  ```
+```
 
   Ici, la notice est divisée en quatre groupe. Quand une propriété a plusieurs
   sous-champs, vous pouvez les groupes plus précisément en ajoutant le nom de la
@@ -214,6 +214,7 @@ Lorsque la valeur est une ressource, la valeur est le numéro de la resource et
 lorsque c’est une uri, c’est l’uri.
 
 Pour une uri avec un libellé, séparez les avec une espace :
+
 ```
 https://exemple.com/mon-id Libellé de la valeur
 ```
@@ -223,6 +224,7 @@ Pour les autres de types de données plus complexes, la valeur par défaut peut
 formulaire de ressource Omeka.
 
 Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
+
 ```json
 {
     "@id": "https://exemple.com/mon-id",
@@ -233,6 +235,7 @@ Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
 ```
 
 Pour une ressource liée, le json sert seulement pour un meilleur affichage :
+
 ```json
 {
     "display_title": "Titre de mon objet",
@@ -347,6 +350,7 @@ source entre `{` et `}`.
 Pour un modèle plus complexe, vous pouvez utiliser des [filtres Twig] avec la
 valeur. Par exemple, pour convertir une date "17890804" en une norme [ISO 8601],
 avec la date numérique `1789-08-04`, vous pouvez utiliser :
+
 ```
 /record/datafield[@tag="103"]/subfield[@code="b"] = dcterms:valid ^^numeric:timestamp ~ {{ value|trim|slice(1,4) }}-{{ value|trim|slice(5,2) }}-{{ value|trim|slice(7,2) }}
 ```
