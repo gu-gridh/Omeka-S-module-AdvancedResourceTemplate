@@ -226,3 +226,17 @@ if (version_compare((string) $oldVersion, '3.4.4.18', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.20', '<')) {
+    $message = new Message(
+        'It’s now possible to set resource template for annotations on each property.' // @translate
+    );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'The format for automatic value and autofilling has changed slightly and upgrade is not automatic. You should check them if you use this feature. See %1$sreadme%2$s for more info.', // @translate
+        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate#automatic-value" _target="blank">',
+        '</a>'
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addWarning($message);
+}
