@@ -118,7 +118,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
         $resTemProps = [];
         // Get services one time.
         $services = $this->getServiceLocator();
-        foreach ($this->resource->getResourceTemplateProperties() as $resTemProp) {
+        foreach ($this->resource->getResourceTemplateProperties() ?? [] as $resTemProp) {
             $resTemProps[] = new ResourceTemplatePropertyRepresentation($resTemProp, $services);
         }
         return $resTemProps;
@@ -134,10 +134,13 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
      */
     public function resourceTemplateProperty($propertyId)
     {
-        $resTemProp = $this->resource->getResourceTemplateProperties()->get($propertyId);
-        if ($resTemProp) {
-            return new ResourceTemplatePropertyRepresentation($resTemProp, $this->getServiceLocator());
+        $resTemProps = $this->resource->getResourceTemplateProperties();
+        if (!$resTemProps) {
+            return null;
         }
-        return null;
+        $resTemProp = $resTemProps->get($propertyId);
+        return $resTemProp
+            ? new ResourceTemplatePropertyRepresentation($resTemProp, $this->getServiceLocator())
+            : null;
     }
 }
