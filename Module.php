@@ -167,6 +167,26 @@ class Module extends AbstractModule
             -100
         );
 
+        // Display subject values according to options of the resource template.
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ItemRepresentation::class,
+            'api.subject_values.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ItemSetRepresentation::class,
+            'api.subject_values.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\MediaRepresentation::class,
+            'api.subject_values.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+
         // Add css/js to some admin pages.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
@@ -546,6 +566,58 @@ SQL;
             : $this->prependGroupsToValues($resource, $values, $groups);
 
         $event->setParam('values', $newValues);
+    }
+
+    /**
+     * Prepare specific data to display the list of the linked resources.
+     *
+     * Specific data passed to display values for this module are:
+     * - order of subject values
+     *
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getSubjectValues()
+     */
+    public function handleResourceDisplaySubjectValues(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Adapter\AbstractResourceEntityAdapter $adapter
+         * @var \Doctrine\ORM\QueryBuilder $qb
+         * @var \Omeka\Entity\Resource $resource
+         * @var int|string|null $propertyId
+         * @var string|null $resourceType
+         * @var int|null $siteId
+         * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         */
+        $resource = $event->getParam('resource');
+        $template = $resource->getResourceTemplate();
+        if (!$template) {
+            return;
+        }
+
+        $order = $template->dataValue('subject_values_order');
+        if (!$order) {
+            return;
+        }
+
+        $qb = $event->getParam('queryBuilder');
+        $adapter = $event->getTarget();
+
+        $next = false;
+        foreach ($order as $property => $sort) {
+            if (!is_numeric($property)) {
+                $property = $adapter->getPropertyByTerm($property);
+                if (!$property) {
+                    continue;
+                }
+                $property = $property->getId();
+            }
+            $alias = $adapter->createAlias();
+            $sort = strtoupper($sort) === 'DESC' ? 'DESC' : 'ASC';
+            $qb
+                ->leftJoin('value', $alias, 'ON', "$alias.resource_id = value.resource_id AND $alias.property_id = $property AND $alias.value IS NOT NULL")
+                // Remove previous orderBy first.
+                ->add('orderBy', new \Doctrine\ORM\Query\Expr\OrderBy($property, $sort, $next));
+            $next = true;
+        }
     }
 
     /**

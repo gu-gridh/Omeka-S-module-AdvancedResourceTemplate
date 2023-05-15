@@ -199,6 +199,21 @@ dcterms:language
                 ],
             ])
             ->add([
+                'name' => 'subject_values_order',
+                'type' => OmekaElement\ArrayTextarea::class,
+                'options' => [
+                    'label' => 'Order of linked values (require patch to Omeka)', // @translate
+                    'as_key_value' => true,
+                    'key_value_separator' => ' ',
+                ],
+                'attributes' => [
+                    'id' => 'subject_values_order',
+                    'rows' => 5,
+                    'placeholder' => 'bibo:volume asc
+bibo:issue asc',
+                ],
+            ])
+            ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,
                 'options' => [
@@ -208,7 +223,8 @@ dcterms:language
                 'attributes' => [
                     'id' => 'settings',
                 ],
-            ]);
+            ])
+        ;
     }
 
     public function setAutofillers(array $autofillers)
