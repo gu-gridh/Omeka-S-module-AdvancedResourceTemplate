@@ -149,13 +149,13 @@ class Module extends AbstractModule
             -100
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Representation\ItemSetRepresentation::class,
+            \Omeka\Api\Representation\MediaRepresentation::class,
             'rep.resource.display_values',
             [$this, 'handleResourceDisplayValues'],
             -100
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Representation\MediaRepresentation::class,
+            \Omeka\Api\Representation\ItemSetRepresentation::class,
             'rep.resource.display_values',
             [$this, 'handleResourceDisplayValues'],
             -100
@@ -169,20 +169,38 @@ class Module extends AbstractModule
 
         // Display subject values according to options of the resource template.
         $sharedEventManager->attach(
-            \Omeka\Api\Representation\ItemRepresentation::class,
+            \Omeka\Api\Adapter\ItemAdapter::class,
             'api.subject_values.query',
             [$this, 'handleResourceDisplaySubjectValues'],
             -100
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Representation\ItemSetRepresentation::class,
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.subject_values_simple.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
             'api.subject_values.query',
             [$this, 'handleResourceDisplaySubjectValues'],
             -100
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Representation\MediaRepresentation::class,
+            \Omeka\Api\Adapter\MediaAdapter::class,
+            'api.subject_values_simple.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.subject_values.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.subject_values_simple.query',
             [$this, 'handleResourceDisplaySubjectValues'],
             -100
         );
@@ -587,15 +605,22 @@ SQL;
             return;
         }
 
+        $adapter = $event->getTarget();
+        $templateAdapter = $adapter->getAdapter('resource_templates');
+        $template = $templateAdapter->getRepresentation($template);
+
         $order = $template->dataValue('subject_values_order');
         if (!$order) {
             return;
         }
 
-        $qb = $event->getParam('queryBuilder');
-        $adapter = $event->getTarget();
+        // Filter order early.
+        $orderPropertyIds = $this->getPropertyIds(array_keys($order));
+        $order = array_replace($orderPropertyIds, array_intersect_key($order, $orderPropertyIds));
 
+        $qb = $event->getParam('queryBuilder');
         $qb
+            // Default order without "resource.title".
             ->orderBy('property.id, resource_template_property.alternateLabel');
 
         foreach ($order as $property => $sort) {
@@ -607,9 +632,9 @@ SQL;
             $aliasProperty = $adapter->createAlias();
             $sort = strtoupper((string) $sort) === 'DESC' ? 'DESC' : 'ASC';
             $qb
-                ->leftJoin('value', $alias, 'ON', "$alias.resource_id = value.resource_id AND $alias.property_id = :$aliasProperty AND $alias.value IS NOT NULL")
+                ->leftJoin(\Omeka\Entity\Value::class, $alias, 'WITH', "$alias.resource = value.resource AND $alias.property = :$aliasProperty AND $alias.value IS NOT NULL")
                 ->setParameter($aliasProperty, $property, \Doctrine\DBAL\ParameterType::INTEGER)
-                ->addOrderBy($property, $sort);
+                ->addOrderBy("$alias.value", $sort);
         }
     }
 
@@ -1438,7 +1463,7 @@ SQL;
      *
      * @param array|int|string|null $termsOrIds One or multiple ids or terms.
      * @return int[] The property ids matching terms or ids, or all properties
-     * by term.
+     * by term. Order of input is kept.
      *
      * Replace feature in the adapter to get the id, that is heavy, because most
      * of the time only the property id is needed.
@@ -1461,7 +1486,8 @@ SQL;
                     'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
                     'property.id AS id',
                     // Required with only_full_group_by.
-                    'vocabulary.id'
+                    'vocabulary.id',
+                    'property.id'
                 )
                 ->from('property', 'property')
                 ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
@@ -1482,7 +1508,10 @@ SQL;
                 : [];
         }
 
-        return array_intersect_key($propertiesByTermsAndIds, array_flip($termsOrIds));
+        // Keep original order of ids.
+        // return array_intersect_key($propertiesByTermsAndIds, array_flip($termsOrIds));
+        $input = array_fill_keys($termsOrIds, null);
+        return array_filter(array_replace($input, array_intersect_key($propertiesByTermsAndIds, $input)));
     }
 
     protected function autofillersToString($autofillers)
