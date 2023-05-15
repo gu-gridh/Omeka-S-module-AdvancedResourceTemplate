@@ -240,3 +240,10 @@ if (version_compare((string) $oldVersion, '3.4.20', '<')) {
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.21', '<')) {
+    $message = new Message(
+        'It’s now possible to order linked resources by another property than title (require Omeka S v4.1).' // @translate
+    );
+    $messenger->addSuccess($message);
+}
