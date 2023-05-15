@@ -113,6 +113,16 @@ class Module extends AbstractModule
             'api.update.pre',
             [$this, 'handleTemplateSettingsOnSave']
         );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
+            'api.create.pre',
+            [$this, 'handleTemplateSettingsOnSave']
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
+            'api.update.pre',
+            [$this, 'handleTemplateSettingsOnSave']
+        );
 
         // Check the resource according to the specified template settings.
         $sharedEventManager->attach(
@@ -142,6 +152,16 @@ class Module extends AbstractModule
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
+            'api.hydrate.post',
+            [$this, 'validateEntityHydratePost']
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
             'api.hydrate.post',
             [$this, 'validateEntityHydratePost']
         );
@@ -210,6 +230,18 @@ class Module extends AbstractModule
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.subject_values_simple.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
+            'api.subject_values.query',
+            [$this, 'handleResourceDisplaySubjectValues'],
+            -100
+        );
+        $sharedEventManager->attach(
+            \Annotate\Api\Adapter\AnnotationAdapter::class,
             'api.subject_values_simple.query',
             [$this, 'handleResourceDisplaySubjectValues'],
             -100
