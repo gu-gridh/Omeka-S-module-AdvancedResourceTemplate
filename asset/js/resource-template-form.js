@@ -174,6 +174,7 @@ $('#resource-template-form').on('submit', function () {
     // are multiple entries, for example for multi-select.
     const formData = new FormData(document.getElementById('resource-template-form'));
     var post = {};
+    var remainingKey;
     for (const [key, value] of formData.entries()) {
         if (!key.includes('[')) {
             post[key] = value;
@@ -184,17 +185,21 @@ $('#resource-template-form').on('submit', function () {
         //  array is not ordered in js.
         // TODO Use a recursive method to convert post key with brackets into nested array. Four levels are enough in real world.
         const mainKey = key.slice(0, key.indexOf('['));
+        remainingKey = key.slice(key.indexOf('['));
         if (!post.hasOwnProperty(mainKey)) {
-            post[mainKey] = {};
+            post[mainKey] = remainingKey === '[]' ? [] : {};
         }
         var key1 = key.slice(key.indexOf('[') + 1, key.indexOf(']'));
         if (key1 === '') {
+            if (!Array.isArray(post[mainKey])) {
+                post[mainKey] = [];
+            }
             post[mainKey].push(value);
         } else {
             if (key1.match(/^\d+$/)) {
                 key1 = '_' + key1;
             }
-            var remainingKey = key.slice(key.indexOf(']') + 1);
+            remainingKey = key.slice(key.indexOf(']') + 1);
             if (remainingKey === '') {
                 post[mainKey][key1] = value;
             } else {
@@ -203,6 +208,9 @@ $('#resource-template-form').on('submit', function () {
                 }
                 var key2 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                 if (key2 === '') {
+                    if (!Array.isArray(post[mainKey][key1])) {
+                        post[mainKey][key1] = [];
+                    }
                     post[mainKey][key1].push(value);
                 } else {
                     if (key2.match(/^\d+$/)) {
@@ -217,6 +225,9 @@ $('#resource-template-form').on('submit', function () {
                         }
                         var key3 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                         if (key3 === '') {
+                            if (!Array.isArray(post[mainKey][key1][key2])) {
+                                post[mainKey][key1][key2] = [];
+                            }
                             post[mainKey][key1][key2].push(value);
                         } else {
                             if (key3.match(/^\d+$/)) {
@@ -231,6 +242,9 @@ $('#resource-template-form').on('submit', function () {
                                 }
                                 var key4 = remainingKey.slice(remainingKey.indexOf('[') + 1, remainingKey.indexOf(']'));
                                 if (key4 === '') {
+                                    if (!Array.isArray(post[mainKey][key1][key2][key3])) {
+                                        post[mainKey][key1][key2][key3] = [];
+                                    }
                                     post[mainKey][key1][key2][key3].push(value);
                                 } else {
                                     if (key4.match(/^\d+$/)) {
