@@ -5,7 +5,7 @@ namespace AdvancedResourceTemplate\Form;
 use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
-use Omeka\Form\Element\ArrayTextarea;
+use Omeka\Form\Element as OmekaElement;
 
 class ResourceTemplatePropertyDataFieldset extends Fieldset
 {
@@ -210,7 +210,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'value_languages',
-                'type' => ArrayTextarea::class,
+                'type' => OmekaElement\ArrayTextarea::class,
                 'options' => [
                     'label' => 'Suggested languages', // @translate
                     'as_key_value' => true,

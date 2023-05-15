@@ -200,16 +200,18 @@ dcterms:language
             ])
             ->add([
                 'name' => 'subject_values_order',
-                'type' => OmekaElement\ArrayTextarea::class,
+                'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
                 'options' => [
-                    'label' => 'Order of linked values (require patch to Omeka)', // @translate
+                    'label' => 'Order of linked values (Omeka v4.1)', // @translate
+                    'info' => 'The default order of linked values is the resource title. Another order can be set for resource linked with a specific property. For the default order when there is no property, just skip the property term.', // @translate
                     'as_key_value' => true,
                     'key_value_separator' => ' ',
                 ],
                 'attributes' => [
                     'id' => 'subject_values_order',
                     'rows' => 5,
-                    'placeholder' => 'bibo:volume asc
+                    'placeholder' => '# dcterms:isPartOf
+bibo:volume asc
 bibo:issue asc',
                 ],
             ])

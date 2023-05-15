@@ -2,10 +2,9 @@
 
 namespace AdvancedResourceTemplate\Form\Element;
 
-use Laminas\Form\Element\Textarea;
-use Laminas\InputFilter\InputProviderInterface;
+use Omeka\Form\Element\ArrayTextarea;
 
-class GroupTextarea extends Textarea implements InputProviderInterface
+class GroupTextarea extends ArrayTextarea
 {
     public function setValue($value)
     {
@@ -41,10 +40,21 @@ class GroupTextarea extends Textarea implements InputProviderInterface
         }
 
         $string = '';
-        foreach ($array as $group => $values) {
-            $string .= '# ' . $group . "\n" . implode("\n", $values) . "\n\n";
+        if ($this->asKeyValue) {
+            foreach ($array ?? [] as $group => $values) {
+                $string .= '# ' . $group . "\n";
+                foreach ($values ?? [] as $key => $value) {
+                    $string .= strlen($value) ? "$key $this->keyValueSeparator $value\n" : $key . "\n";
+                }
+                $string .= "\n";
+            }
+        } else {
+            foreach ($array ?? [] as $group => $values) {
+                $string .= '# ' . $group . "\n" . implode("\n", $values) . "\n\n";
+            }
         }
-        return trim($string) . "\n";
+
+        return trim($string);
     }
 
     public function stringToArray($string)
@@ -57,14 +67,12 @@ class GroupTextarea extends Textarea implements InputProviderInterface
             return [];
         }
 
-        $groupsArray = [];
-
         // Clean the text area from end of lines.
-        // Fixes Windows and Apple copy/paste.
+        // Fixes Windows and Apple issues for copy/paste.
         $string = str_replace(["\r\n", "\n\r", "\r"], ["\n", "\n", "\n"], (string) $string);
         $array = array_filter(array_map('trim', explode("\n", $string)), 'strlen');
 
-        // No check: if a property or any value doesn't exist, it won't be used.
+        $groupsArray = [];
         $id = 0;
         foreach ($array as $string) {
             $cleanString = preg_replace('/\s+/', ' ', $string);
@@ -78,9 +86,18 @@ class GroupTextarea extends Textarea implements InputProviderInterface
                 // Set a default group name when missing.
                 $groupName = sprintf('Group %d', $id); // $translate
             }
-            $groupsArray[$groupName][] = $cleanString;
+            if ($this->asKeyValue) {
+                if (strpos($cleanString, $this->keyValueSeparator) === false) {
+                    $key = trim($cleanString);
+                    $value = '';
+                } else {
+                    [$key, $value] = array_map('trim', explode($this->keyValueSeparator, $cleanString, 2));
+                }
+                $groupsArray[$groupName][$key] = $value;
+            } else {
+                $groupsArray[$groupName][] = $cleanString;
+            }
         }
-
         return $groupsArray;
     }
 }

@@ -18,6 +18,16 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
+    /**
+     * @var array
+     */
+    protected $propertiesByTerms;
+
+    /**
+     * @var array
+     */
+    protected $propertiesByTermsAndIds;
+
     protected function postInstall(): void
     {
         $filepath = __DIR__ . '/data/mapping/mappings.ini';
@@ -598,6 +608,10 @@ SQL;
          * @var string|null $resourceType
          * @var int|null $siteId
          * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         *
+         * Warning: the property id may not be the property id, but the property
+         * id and a resource template property id like "123-234".
+         * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getSubjectValuesQueryBuilder()
          */
         $resource = $event->getParam('resource');
         $template = $resource->getResourceTemplate();
@@ -609,14 +623,28 @@ SQL;
         $templateAdapter = $adapter->getAdapter('resource_templates');
         $template = $templateAdapter->getRepresentation($template);
 
+        // Use the template order for the property when propertyId is set.
         $order = $template->dataValue('subject_values_order');
         if (!$order) {
             return;
         }
 
+        $propertyId = $event->getParam('propertyId');
+        $propertyTerm = $propertyId
+            ? $this->getPropertyTerm(strtok((string) $propertyId, '-'))
+            : null;
+        if (empty($order[$propertyTerm])) {
+            return;
+        }
+
+        $order = $order[$propertyTerm];
+
         // Filter order early.
         $orderPropertyIds = $this->getPropertyIds(array_keys($order));
         $order = array_replace($orderPropertyIds, array_intersect_key($order, $orderPropertyIds));
+        if (!$order) {
+            return;
+        }
 
         $qb = $event->getParam('queryBuilder');
         $qb
@@ -1438,24 +1466,31 @@ SQL;
     /**
      * Get a property id by JSON-LD term or by numeric id.
      *
-     * @param int|string|null $termsOrIds One or multiple ids or terms.
-     * @return int[] The property ids matching terms or ids, or all properties
-     * by term.
-     *
-     * Replace feature in the adapter to get the id, that is heavy, because most
-     * of the time only the property id is needed.
-     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::isTerm()
-     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getPropertyByTerm()
-     *
-     * @see \AdvancedResourceTemplate\Module::getPropertyId()
+     * @param int|string|null $termsOrId An id or a term.
      */
-    public function getPropertyId($termOrId): ?int
+    protected function getPropertyId($termOrId): ?int
     {
-        if (!$termOrId) {
-            return null;
+        if ($this->propertiesByTermsAndIds === null) {
+            $this->prepareProperties();
         }
-        $result = $this->getPropertyIds($termOrId);
-        return $result ? reset($result) : null;
+        return $termOrId
+            ? $this->propertiesByTermsAndIds[$termOrId] ?? null
+            : null;
+    }
+
+    /**
+     * Get a property JSON-LD term or by JSON-LD term or numeric id.
+     *
+     * @param int|string|null $termsOrId An id or a term.
+     */
+    protected function getPropertyTerm($termOrId): ?string
+    {
+        if ($this->propertiesByTermsAndIds === null) {
+            $this->prepareProperties();
+        }
+        return $termOrId && !empty($this->propertiesByTermsAndIds[$termOrId])
+            ? array_search($this->propertiesByTermsAndIds[$termOrId], $this->propertiesByTerms)
+            : null;
     }
 
     /**
@@ -1472,46 +1507,87 @@ SQL;
      *
      * @see \AdvancedResourceTemplate\Module::getPropertyIds()
      */
-    public function getPropertyIds($termsOrIds = null): array
+    protected function getPropertyIds($termsOrIds = null): array
     {
-        static $propertiesByTerms;
-        static $propertiesByTermsAndIds;
-
-        if (is_null($propertiesByTermsAndIds)) {
-            /** @var \Doctrine\DBAL\Connection $connection */
-            $connection = $this->getServiceLocator()->get('Omeka\Connection');
-            $qb = $connection->createQueryBuilder();
-            $qb
-                ->select(
-                    'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
-                    'property.id AS id',
-                    // Required with only_full_group_by.
-                    'vocabulary.id',
-                    'property.id'
-                )
-                ->from('property', 'property')
-                ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
-                ->orderBy('vocabulary.id', 'asc')
-                ->addOrderBy('property.id', 'asc')
-            ;
-            $propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
-            $propertiesByTermsAndIds = array_replace($propertiesByTerms, array_combine($propertiesByTerms, $propertiesByTerms));
+        if ($this->propertiesByTermsAndIds === null) {
+            $this->prepareProperties();
         }
 
-        if (is_null($termsOrIds)) {
-            return $propertiesByTerms;
+        if ($termsOrIds === null) {
+            return $this->propertiesByTerms;
         }
 
         if (is_scalar($termsOrIds)) {
-            return isset($propertiesByTermsAndIds[$termsOrIds])
-                ? [$termsOrIds => $propertiesByTermsAndIds[$termsOrIds]]
+            return isset($this->propertiesByTermsAndIds[$termsOrIds])
+                ? [$termsOrIds => $this->propertiesByTermsAndIds[$termsOrIds]]
                 : [];
         }
 
         // Keep original order of ids.
         // return array_intersect_key($propertiesByTermsAndIds, array_flip($termsOrIds));
         $input = array_fill_keys($termsOrIds, null);
-        return array_filter(array_replace($input, array_intersect_key($propertiesByTermsAndIds, $input)));
+        return array_filter(array_replace($input, array_intersect_key($this->propertiesByTermsAndIds, $input)));
+    }
+
+    /**
+     * Get property JSON-LD terms by JSON-LD terms or by numeric ids.
+     *
+     * @param array|int|string|null $termsOrIds One or multiple ids or terms.
+     * @return string[] The property terms matching terms or ids, or all
+     * properties by id. Order of input is kept.
+     */
+    protected function getPropertyTerms($termsOrIds = null): array
+    {
+        if ($this->propertiesByTermsAndIds === null) {
+            $this->prepareProperties();
+        }
+
+        if ($termsOrIds === null) {
+            return array_flip($this->propertiesByTerms);
+        }
+
+        if (is_scalar($termsOrIds)) {
+            return isset($this->propertiesByTermsAndIds[$termsOrIds])
+                ? [$termsOrIds => array_search($this->propertiesByTermsAndIds[$termsOrIds], $this->propertiesByTerms)]
+                : [];
+        }
+
+        // TODO Should table of property terms by terms and ids be stored? Not use often.
+        $propertyTermsByTermsAndIds = array_combine(array_keys($this->propertiesByTerms), array_keys($this->propertiesByTerms))
+            + array_flip($this->propertiesByTerms);
+
+        // Keep original order of ids.
+        $input = array_fill_keys($termsOrIds, null);
+        return array_filter(array_replace($input, array_intersect_key($propertyTermsByTermsAndIds, $input)));
+    }
+
+    /**
+     * Store properties ids and terms one time.
+     */
+    protected function prepareProperties(): void
+    {
+        if ($this->propertiesByTermsAndIds !== null) {
+            return;
+        }
+
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $this->getServiceLocator()->get('Omeka\Connection');
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select(
+                'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+                'property.id AS id',
+                // Required with only_full_group_by.
+                'vocabulary.id',
+                'property.id'
+            )
+            ->from('property', 'property')
+            ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
+            ->orderBy('vocabulary.id', 'asc')
+            ->addOrderBy('property.id', 'asc')
+        ;
+        $this->propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
+        $this->propertiesByTermsAndIds = array_replace($this->propertiesByTerms, array_combine($this->propertiesByTerms, $this->propertiesByTerms));
     }
 
     protected function autofillersToString($autofillers)
