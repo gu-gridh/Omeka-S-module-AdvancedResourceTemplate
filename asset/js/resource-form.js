@@ -297,7 +297,7 @@
 
         $('#select-item a').on('o:resource-selected', function (e) {
             var valueObj = $('.resource-details').data('resource-values');
-            var value = $('.value.selecting-resource');
+            var value = $('.selecting-resource');
             if (value.hasClass('value')) {
                 // Use value_resource_name that is more precise than value data-data-type.
                 const dataTypeNames = {items: 'resource:item', item_sets: 'resource:itemset', media: 'resource:media'};
