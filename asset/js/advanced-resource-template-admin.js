@@ -764,7 +764,10 @@
             // If the current resource class is not in the new list of options,
             // set the first suggested one. This is the most common case when
             // templates are used.
-            if (hasTemplate && !Object.values(suggestedClasses).includes(resourceClassId)) {
+            if (hasTemplate
+                && Object.values(suggestedClasses).length
+                && !Object.values(suggestedClasses).includes(resourceClassId)
+            ) {
                 let resClassId = countSuggestedClasses
                     ? Object.values(suggestedClasses)[0]
                     // Manage non-advanced templates.
