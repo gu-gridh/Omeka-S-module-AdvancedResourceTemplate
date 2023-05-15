@@ -130,6 +130,20 @@ resources:
 
   ![Example of language by template and property](data/images/advanced_language_settings.png)
 
+- Order of linked resources (subject values)
+
+  **Warning**: This feature requires a patch on Omeka, waiting for pull request [Omeka/Omeka-S#2054].
+
+  By default, linked resources are ordered by title. This option allows to order
+  them with another property or multiple other properties. For example, you may
+  want to order linked resources by `bibo:volume` and `bibo:issue`, in which
+  case you set:
+
+```
+  bibo:volume asc
+  bibo:issue asc
+```
+
 - Module Custom Vocab: Open authority list to allow user to add a new term when
   none can be used for a value.
 
@@ -473,6 +487,7 @@ and for the institutional repository of student works [Dante] of the [Universit√
 [Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
+[Omeka/Omeka-S#2054]: https://github.com/omeka/omeka-s/pull/2054
 [IdRef]: https://www.idref.fr
 [Geonames]: https://www.geonames.org
 [Colbert]: https://www.idref.fr/027274527.xml

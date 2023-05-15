@@ -139,6 +139,21 @@ l’édition des ressources :
 
   Cette fonctionnalité a été partiellement implémentée dans Omeka S v4.
 
+- Tri des ressources liées (valeurs sujets)
+
+  Par défaut, Omeka trie les ressources liées par titre. Cette option permet de
+  trier en fonction d’une ou plusieurs autres propriétés. Par exemple, vous
+  pouvez trier les ressources liées par `bibo:volume` et `bibo:issue`, auquel
+  cas vous indiquez :
+
+```
+  bibo:volume asc
+  bibo:issue asc
+```
+
+  **Attention** : Cette fonctionnalité nécessite un correctif sur Omeka, en
+  l’attente de la requête [Omeka/Omeka-S#2054].
+
 - Module Custom Vocab : Liste d’autorité ouverte (module Custom Vocab),
   permettant à l’utilisateur d’ajouter de nouveaux termes quand cela est
   nécessaire pour une valeur.
@@ -153,7 +168,7 @@ l’édition des ressources :
 
   Cette fonctionnalité rend possible par exemple la création d’un nouvel auteur
   dans une nouvelle ressource lorsque les auteurs sont gérés en tant que
-  ressource. Une option permet de l’autoriser ou de l’interdir pour chaque
+  ressource. Une option permet de l’autoriser ou de l’interdire pour chaque
   propriété. Après création, la nouvelle ressource est automatiquement liée à la
   ressource en cours d’édition.
 
@@ -505,6 +520,7 @@ des travaux étudiants [Dante] de l’[Université de Toulouse Jean-Jaurès].
 [installer un module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
+[Omeka/Omeka-S#2054]: https://github.com/omeka/omeka-s/pull/2054
 [IdRef]: https://www.idref.fr
 [Geonames]: https://www.geonames.org
 [Colbert]: https://www.idref.fr/027274527.xml
