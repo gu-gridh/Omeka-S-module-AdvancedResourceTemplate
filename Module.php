@@ -601,7 +601,9 @@ SQL;
         $qb = $event->getParam('queryBuilder');
         $adapter = $event->getTarget();
 
-        $next = false;
+        $qb
+            ->orderBy('property.id, resource_template_property.alternateLabel');
+
         foreach ($order as $property => $sort) {
             if (!is_numeric($property)) {
                 $property = $adapter->getPropertyByTerm($property);
@@ -614,9 +616,7 @@ SQL;
             $sort = strtoupper($sort) === 'DESC' ? 'DESC' : 'ASC';
             $qb
                 ->leftJoin('value', $alias, 'ON', "$alias.resource_id = value.resource_id AND $alias.property_id = $property AND $alias.value IS NOT NULL")
-                // Remove previous orderBy first.
-                ->add('orderBy', new \Doctrine\ORM\Query\Expr\OrderBy($property, $sort, $next));
-            $next = true;
+                ->addOrderBy(new \Doctrine\ORM\Query\Expr\OrderBy($property, $sort));
         }
     }
 
