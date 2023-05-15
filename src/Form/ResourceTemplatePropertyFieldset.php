@@ -112,6 +112,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
                 ],
                 'attributes' => [
                     // 'id' => 'o-default-lang',
+                    'class' => 'default-lang',
                     'data-property-key' => 'o:default_lang',
                 ],
             ])
