@@ -320,15 +320,14 @@ class Module extends AbstractModule
         $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
 
         // Template level.
+
         $resourceClass = $entity->getResourceClass();
         $requireClass = $this->valueIsTrue($template->dataValue('require_resource_class'));
         if ($requireClass && !$resourceClass) {
             $message = new \Omeka\Stdlib\Message('A class is required.'); // @translate
-            $errorStore->addError('o:resource_class', $message);
-            if ($directMessage) {
-                $messenger->addError($message);
-            }
+            $errorStore->addError('o:resource_class[o:id]', $message);
         }
+
         $closedClassList = $this->valueIsTrue($template->dataValue('closed_class_list'));
         if ($closedClassList && $resourceClass) {
             $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
@@ -338,19 +337,13 @@ class Module extends AbstractModule
                         'The class should be "%s".', // @translate
                         key($suggestedClasses)
                     );
-                    $errorStore->addError('o:resource_class', $message);
-                    if ($directMessage) {
-                        $messenger->addError($message);
-                    }
+                    $errorStore->addError('o:resource_class[o:id]', $message);
                 } else {
                     $message = new \Omeka\Stdlib\Message(
                         'The class should be one of "%s".', // @translate
                         implode('", "', array_keys($suggestedClasses))
                     );
-                    $errorStore->addError('o:resource_class', $message);
-                    if ($directMessage) {
-                        $messenger->addError($message);
-                    }
+                    $errorStore->addError('o:resource_class[o:id]', $message);
                 }
             }
         }
@@ -363,6 +356,7 @@ class Module extends AbstractModule
         $resourceId = (int) $resource->id();
 
         // Property level.
+
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
                 $term = $templateProperty->property()->term();
