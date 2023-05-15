@@ -605,18 +605,17 @@ SQL;
             ->orderBy('property.id, resource_template_property.alternateLabel');
 
         foreach ($order as $property => $sort) {
-            if (!is_numeric($property)) {
-                $property = $adapter->getPropertyByTerm($property);
-                if (!$property) {
-                    continue;
-                }
-                $property = $property->getId();
+            $property = $this->getPropertyId($property);
+            if (!$property) {
+                continue;
             }
             $alias = $adapter->createAlias();
-            $sort = strtoupper($sort) === 'DESC' ? 'DESC' : 'ASC';
+            $aliasProperty = $adapter->createAlias();
+            $sort = strtoupper((string) $sort) === 'DESC' ? 'DESC' : 'ASC';
             $qb
-                ->leftJoin('value', $alias, 'ON', "$alias.resource_id = value.resource_id AND $alias.property_id = $property AND $alias.value IS NOT NULL")
-                ->addOrderBy(new \Doctrine\ORM\Query\Expr\OrderBy($property, $sort));
+                ->leftJoin('value', $alias, 'ON', "$alias.resource_id = value.resource_id AND $alias.property_id = :$aliasProperty AND $alias.value IS NOT NULL")
+                ->setParameter($aliasProperty, $property, \Doctrine\DBAL\ParameterType::INTEGER)
+                ->addOrderBy($property, $sort);
         }
     }
 
@@ -1415,6 +1414,81 @@ SQL;
         return ['property_id' => $propertyId]
             + $automaticValueArray
             + ['is_public' => $isPublic];
+    }
+
+    /**
+     * Get a property id by JSON-LD term or by numeric id.
+     *
+     * @param int|string|null $termsOrIds One or multiple ids or terms.
+     * @return int[] The property ids matching terms or ids, or all properties
+     * by term.
+     *
+     * Replace feature in the adapter to get the id, that is heavy, because most
+     * of the time only the property id is needed.
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::isTerm()
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getPropertyByTerm()
+     *
+     * @see \AdvancedResourceTemplate\Module::getPropertyId()
+     */
+    public function getPropertyId($termOrId): ?int
+    {
+        if (!$termOrId) {
+            return null;
+        }
+        $result = $this->getPropertyIds($termOrId);
+        return $result ? reset($result) : null;
+    }
+
+    /**
+     * Get property ids by JSON-LD terms or by numeric ids.
+     *
+     * @param array|int|string|null $termsOrIds One or multiple ids or terms.
+     * @return int[] The property ids matching terms or ids, or all properties
+     * by term.
+     *
+     * Replace feature in the adapter to get the id, that is heavy, because most
+     * of the time only the property id is needed.
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::isTerm()
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getPropertyByTerm()
+     *
+     * @see \AdvancedResourceTemplate\Module::getPropertyIds()
+     */
+    public function getPropertyIds($termsOrIds = null): array
+    {
+        static $propertiesByTerms;
+        static $propertiesByTermsAndIds;
+
+        if (is_null($propertiesByTermsAndIds)) {
+            /** @var \Doctrine\DBAL\Connection $connection */
+            $connection = $this->getServiceLocator()->get('Omeka\Connection');
+            $qb = $connection->createQueryBuilder();
+            $qb
+                ->select(
+                    'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
+                    'property.id AS id',
+                    // Required with only_full_group_by.
+                    'vocabulary.id'
+                )
+                ->from('property', 'property')
+                ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
+                ->orderBy('vocabulary.id', 'asc')
+                ->addOrderBy('property.id', 'asc')
+            ;
+            $propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
+            $propertiesByTermsAndIds = array_replace($propertiesByTerms, array_combine($propertiesByTerms, $propertiesByTerms));
+        }
+
+        if (is_null($termsOrIds)) {
+            return $propertiesByTerms;
+        }
+
+        if (is_scalar($termsOrIds)) {
+            return isset($propertiesByTermsAndIds[$termsOrIds])
+                ? [$termsOrIds => $propertiesByTermsAndIds[$termsOrIds]]
+                : [];
+        }
+
+        return array_intersect_key($propertiesByTermsAndIds, array_flip($termsOrIds));
     }
 
     protected function autofillersToString($autofillers)
