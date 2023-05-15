@@ -141,18 +141,23 @@ l’édition des ressources :
 
 - Tri des ressources liées (valeurs sujets)
 
+  **Attention** : Cette fonctionnalité nécessite un correctif sur Omeka, en
+  l’attente de la requête [Omeka/Omeka-S#2054].
+
   Par défaut, Omeka trie les ressources liées par titre. Cette option permet de
-  trier en fonction d’une ou plusieurs autres propriétés. Par exemple, vous
-  pouvez trier les ressources liées par `bibo:volume` et `bibo:issue`, auquel
-  cas vous indiquez :
+  les trier en fonction d’une ou plusieurs autres propriétés. Par exemple, les
+  interventions d’une manifestation publiées dans une revue peut être triée par
+  `bibo:volume` et `bibo:issue`. Chaque intervention référençant la manifestation
+  via `dcterms:isPartOf`, le paramètre du modèle Manifestation peut être :
 
 ```
+  # dcterms:isPartOf
   bibo:volume asc
   bibo:issue asc
 ```
 
-  **Attention** : Cette fonctionnalité nécessite un correctif sur Omeka, en
-  l’attente de la requête [Omeka/Omeka-S#2054].
+  Le tri par défaut peut être défini avec `#` sans nom de propriété, mais les
+  cas d’usage sont probablement très rares.
 
 - Module Custom Vocab : Liste d’autorité ouverte (module Custom Vocab),
   permettant à l’utilisateur d’ajouter de nouveaux termes quand cela est

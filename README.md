@@ -135,14 +135,20 @@ resources:
   **Warning**: This feature requires a patch on Omeka, waiting for pull request [Omeka/Omeka-S#2054].
 
   By default, linked resources are ordered by title. This option allows to order
-  them with another property or multiple other properties. For example, you may
-  want to order linked resources by `bibo:volume` and `bibo:issue`, in which
-  case you set:
+  them with another property or multiple other properties. For example, the
+  interventions of a manifestation published in a journal can be ordered by
+  `bibo:volume` and `bibo:issue`. So, if each intervention references the
+  manifestation via `dcterms:isPartOf`, the parameter of the template
+  Manifestation can be:
 
 ```
+  # dcterms:isPartOf
   bibo:volume asc
   bibo:issue asc
 ```
+
+  The default order can be set with `#` without property, but the use cases
+  are probably very rare.
 
 - Module Custom Vocab: Open authority list to allow user to add a new term when
   none can be used for a value.
