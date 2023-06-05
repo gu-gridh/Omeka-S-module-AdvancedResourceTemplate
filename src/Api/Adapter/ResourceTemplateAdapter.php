@@ -2,6 +2,7 @@
 
 namespace AdvancedResourceTemplate\Api\Adapter;
 
+use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
 use Omeka\Entity\ResourceTemplateProperty;
@@ -12,6 +13,26 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
     public function getRepresentationClass()
     {
         return \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation::class;
+    }
+
+    public function buildQuery(QueryBuilder $qb, array $query)
+    {
+        parent::buildQuery($qb, $query);
+
+        if (!empty($query['resource'])) {
+            /** @var \Omeka\Settings\Settings $settings */
+            $settings = $this->getServiceLocator()->get('Omeka\Settings');
+            $templateByResourceNames = $settings->get('advancedresourcetemplate_templates_by_resource', []);
+            if ($templateByResourceNames) {
+                $templateIds = $templateByResourceNames[$query['resource']] ?? [];
+                if ($templateIds) {
+                    $qb->andWhere($qb->expr()->in(
+                        'omeka_root.id',
+                        $this->createNamedParameter($qb, $templateIds)
+                    ));
+                }
+            }
+        }
     }
 
     public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore): void

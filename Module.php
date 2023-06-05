@@ -969,23 +969,16 @@ SQL;
         // Limit resource templates to the current resource type.
         $resourceName = $this->getRouteResourceName($status);
         if ($resourceName) {
-            $templatesByResources = $settings->get('advancedresourcetemplate_templates_by_resource', []);
-            $templateIds = $templatesByResources[$resourceName] ?? [];
-            // Display all resource templates when none are configured.
-            if ($templateIds) {
-                /** @var \Omeka\Form\ResourceForm $form */
-                $form = $event->getTarget();
-                if ($form->has('o:resource_template[o:id]')) {
-                    /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
-                    $templateSelect = $form->get('o:resource_template[o:id]');
-                    $templateSelectOptions = $templateSelect->getOptions();
-                    $templateSelectOptions['resource_value_options']['query'] = $templateSelectOptions['resource_value_options']['query'] ?? [];
-                    $templateSelectOptions['resource_value_options']['query']['id'] = empty($templateSelectOptions['resource_value_options']['query']['id'])
-                        ? $templateIds
-                        : array_intersect($templateSelectOptions['resource_value_options']['query']['id'], $templateIds);
-                    // TODO The process is not optimal in the core, since the value options are set early when options are set.
-                    $templateSelect->setOptions($templateSelectOptions);
-                }
+            /** @var \Omeka\Form\ResourceForm $form */
+            $form = $event->getTarget();
+            if ($form->has('o:resource_template[o:id]')) {
+                /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
+                $templateSelect = $form->get('o:resource_template[o:id]');
+                $templateSelectOptions = $templateSelect->getOptions();
+                $templateSelectOptions['resource_value_options']['query'] = $templateSelectOptions['resource_value_options']['query'] ?? [];
+                $templateSelectOptions['resource_value_options']['query']['resource'] = $resourceName;
+                // TODO The process is not optimal in the core, since the value options are set early when options are set.
+                $templateSelect->setOptions($templateSelectOptions);
             }
         }
 
