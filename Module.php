@@ -381,6 +381,16 @@ class Module extends AbstractModule
 
         // Template level.
 
+        $availableForResources = $template->dataValue('available_for_resources', []);
+        $resourceName = $entity->getResourceName();
+        if ($availableForResources && !in_array($resourceName, $availableForResources)) {
+            $message = new \Omeka\Stdlib\Message('This template cannot be used for this resource.'); // @translate
+            $errorStore->addError('o:resource_template[o:id]', $message);
+            if ($directMessage) {
+                $messenger->addError($message);
+            }
+        }
+
         $resourceClass = $entity->getResourceClass();
         $requireClass = $this->valueIsTrue($template->dataValue('require_resource_class'));
         if ($requireClass && !$resourceClass) {
