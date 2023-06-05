@@ -121,12 +121,16 @@
             vaContainer.empty();
             const valueAnnotations = annotatingValue.data('value-annotations') ? annotatingValue.data('value-annotations') : {};
             const templateData = $('#resource-values').data('template-data');
+            const propertyData = annotatingValue.closest('.resource-property').data('template-property-data');
             const vaTemplate = templateData && templateData.value_annotations_template ? templateData.value_annotations_template : 'manual';
-            if (vaTemplate === 'none') {
+            const vaTemplateProperty = propertyData.value_annotations_template && propertyData.value_annotations_template !== ''
+                ? propertyData.value_annotations_template
+                : vaTemplate;
+            if (vaTemplateProperty === 'none') {
                 // Not possible: the button should be hidden.
                 return;
-            } else if (!isNaN(vaTemplate)) {
-                loadVaTemplate(parseInt(vaTemplate), vaContainer, valueAnnotations);
+            } else if (!isNaN(vaTemplateProperty)) {
+                loadVaTemplate(parseInt(vaTemplateProperty), vaContainer, valueAnnotations);
             } else {
                 fillValueAnnotations(vaContainer, valueAnnotations);
             }
@@ -915,6 +919,7 @@
         });
 
         if (templateId) {
+            // TODO Store templates locally.
             var url = templateSelect.data('api-base-url') + '/' + templateId;
             $.get(url)
                 .done(function(data) {

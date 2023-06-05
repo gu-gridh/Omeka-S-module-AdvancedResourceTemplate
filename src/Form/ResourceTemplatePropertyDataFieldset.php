@@ -288,6 +288,34 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                     'value' => '',
                 ],
             ])
+
+            ->add([
+                'name' => 'value_annotations_template',
+                'type' => AdvancedResourceTemplateElement\OptionalResourceSelect::class,
+                'options' => [
+                    'label' => 'Value annotations', // @translate
+                    'disable_group_by_owner' => true,
+                    'prepend_value_options' => [
+                        '' => 'Use template setting', // @translate
+                        'manual' => 'Manual selection (default)', // @translate
+                        'none' => 'No value annotation', // @translate
+                    ],
+                    'resource_value_options' => [
+                        'resource' => 'resource_templates',
+                        'query' => ['resource' => 'value_annotations'],
+                        'option_text_callback' => function ($resourceTemplate) {
+                            return $resourceTemplate->label();
+                        },
+                    ],
+                ],
+                'attributes' => [
+                    // 'id' => 'value_annotations_templates',
+                    'class' => 'chosen-select setting',
+                    'data-setting-key' => 'value_annotations_template',
+                    'value' => '',
+                ],
+            ])
+
             ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,

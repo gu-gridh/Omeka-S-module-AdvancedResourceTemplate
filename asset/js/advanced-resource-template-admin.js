@@ -310,12 +310,15 @@
         function prepareFieldValueAnnotation(field) {
             // Add a specific datalist for the property. It replaces the previous one from another template.
             const templateData = $('#resource-values').data('template-data');
-            const term = field.data('property-term');
+            const propertyData = field.data('template-property-data') ? field.data('template-property-data') : {};
             const vaTemplate = templateData && templateData.value_annotations_template ? templateData.value_annotations_template : 'manual';
+            const vaTemplateProperty = propertyData.value_annotations_template && propertyData.value_annotations_template !== ''
+                ? propertyData.value_annotations_template
+                : vaTemplate;
             // Default config: display value annotations (except if main params hide them via EasyAdmin).
-            if (!vaTemplate || vaTemplate === 'manual') {
+            if (!vaTemplateProperty || vaTemplateProperty === 'manual') {
                 field.find('.value-annotation-annotate').show();
-            } else if (vaTemplate === 'none') {
+            } else if (vaTemplateProperty === 'none') {
                 field.find('.value-annotation-annotate').hide();
             } else {
                 // This is a template, so load it via api.
