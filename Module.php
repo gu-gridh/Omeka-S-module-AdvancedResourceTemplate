@@ -1754,16 +1754,17 @@ SQL;
         ];
         foreach ($templatesData as $templateId => $templateData) {
             $templateId = (int) $templateId;
-            $templateData = $templateData ? json_decode($templateData, true) : [];
-            if (empty($templateData)
-                || empty($templateData['available_for_resources'])
+            $templateData = $templateData ? json_decode($templateData, true) : null;
+            if ($templateData === null
+                // When null or empty array, the template is not used.
+                || !array_key_exists('available_for_resources', $templateData)
             ) {
                 $templatesByResourceNames['items'][] = $templateId;
                 $templatesByResourceNames['media'][] = $templateId;
                 $templatesByResourceNames['item_sets'][] = $templateId;
                 $templatesByResourceNames['value_annotations'][] = $templateId;
                 $templatesByResourceNames['annotations'][] = $templateId;
-            } else {
+            } elseif (is_array($templateData['available_for_resources'])) {
                 foreach ($templateData['available_for_resources'] as $resourceName) {
                     $templatesByResourceNames[$resourceName][] = $templateId;
                 }
