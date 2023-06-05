@@ -82,6 +82,23 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
+        // Store some template settings in main settings for simple access.
+        $sharedEventManager->attach(
+            \AdvancedResourceTemplate\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.create.post',
+            [$this, 'handleTemplateConfigOnSave']
+        );
+        $sharedEventManager->attach(
+            \AdvancedResourceTemplate\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.update.post',
+            [$this, 'handleTemplateConfigOnSave']
+        );
+        $sharedEventManager->attach(
+            \AdvancedResourceTemplate\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.delete.post',
+            [$this, 'handleTemplateConfigOnSave']
+        );
+
         // Manage the auto-value setting for each resource type.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
@@ -299,6 +316,11 @@ class Module extends AbstractModule
             'form.add_elements',
             [$this, 'addResourceTemplatePropertyFieldsetElements']
         );
+    }
+
+    public function handleTemplateConfigOnSave(Event $event): void
+    {
+        $this->storeResourceTemplateSettings();
     }
 
     public function handleTemplateSettingsOnSave(Event $event): void
@@ -1697,6 +1719,66 @@ SQL;
         ;
         $this->propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
         $this->propertiesByTermsAndIds = array_replace($this->propertiesByTerms, array_combine($this->propertiesByTerms, $this->propertiesByTerms));
+    }
+
+    /**
+     * Store some settings of ressource templates in settngs for easier process.
+     *
+     * Instead of multiplying columns in the database table resource_template_data,
+     * some settings are managed differently for now.
+     */
+    protected function storeResourceTemplateSettings(): void
+    {
+        // Resource templates can be searched only by id or by label, not data,
+        // but they should be searched by option "available_for_options" in many
+        // places, so it is stored in main settings too.
+        // TODO To store the options for available templates by resource is possible, but probably useless.
+
+        /**
+         * @var \Doctrine\DBAL\Connection $connection
+         * @var \Omeka\Settings\Settings $settings
+         */
+        $services = $this->getServiceLocator();
+        $connection = $services->get('Omeka\Connection');
+        $settings = $services->get('Omeka\Settings');
+
+        // Since data are json, it's hard to extract them with mysql < 8, so
+        // process here.
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select(
+                'resource_template.id',
+                'resource_template_data.data',
+            )
+            ->from('resource_template')
+            ->leftJoin('resource_template', 'resource_template_data', 'resource_template_data', 'resource_template_data.resource_template_id = resource_template.id')
+        ;
+        $templatesData = $connection->executeQuery($qb)->fetchAllKeyValue();
+        $templatesByResourceNames = [
+            'items' => [],
+            'media' => [],
+            'item_sets' => [],
+            'value_annotations' => [],
+            'annotations' => [],
+        ];
+        foreach ($templatesData as $templateId => $templateData) {
+            $templateId = (int) $templateId;
+            $templateData = $templateData ? json_decode($templateData, true) : [];
+            if (empty($templateData)
+                || empty($templateData['available_for_resources'])
+            ) {
+                $templatesByResourceNames['items'][] = $templateId;
+                $templatesByResourceNames['media'][] = $templateId;
+                $templatesByResourceNames['item_sets'][] = $templateId;
+                $templatesByResourceNames['value_annotations'][] = $templateId;
+                $templatesByResourceNames['annotations'][] = $templateId;
+            } else {
+                foreach ($templateData['available_for_resources'] as $resourceName) {
+                    $templatesByResourceNames[$resourceName][] = $templateId;
+                }
+            }
+        }
+        $settings->set('advancedresourcetemplate_templates_by_resource', $templatesByResourceNames);
     }
 
     protected function autofillersToString($autofillers)
