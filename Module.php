@@ -1726,6 +1726,9 @@ SQL;
         $connection = $services->get('Omeka\Connection');
         $settings = $services->get('Omeka\Settings');
 
+        // The connection is required because the module entities are not
+        // available during upgrade.
+
         // Since data are json, it's hard to extract them with mysql < 8, so
         // process here.
         $qb = $connection->createQueryBuilder();

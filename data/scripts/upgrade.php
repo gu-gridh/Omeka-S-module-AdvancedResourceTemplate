@@ -247,3 +247,49 @@ if (version_compare((string) $oldVersion, '3.4.21', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.22', '<')) {
+    // Create a resource data for all resource templates.
+    $sql = <<<SQL
+INSERT INTO resource_template_data (resource_template_id, data)
+SELECT resource_template.id, "{}"
+FROM resource_template
+LEFT JOIN resource_template_data ON resource_template_data.resource_template_id = resource_template.id
+WHERE resource_template_data.resource_template_id IS NULL
+;
+SQL;
+    $connection->executeStatement($sql);
+
+    // Make all templates available to all resources by default.
+    $qb = $connection->createQueryBuilder();
+    $qb
+        ->select('id', 'data')
+        ->from('resource_template_data', 'resource_template_data')
+    ;
+    $templateDatas = $connection->executeQuery($qb)->fetchAllKeyValue();
+
+    foreach ($templateDatas as $id => $templateData) {
+        $templateData = json_decode($templateData, true) ?: [];
+        $templateData['use_for_resources'] ??= ['items', 'media', 'item_sets'];
+        $quotedTemplateData = $connection->quote(json_encode($templateData));
+        $sql = <<<SQL
+UPDATE `resource_template_data`
+SET
+    `data` = $quotedTemplateData
+WHERE `id` = $id;
+SQL;
+        $connection->executeStatement($sql);
+    }
+
+    $this->storeResourceTemplateSettings();
+
+    $message = new Message(
+        'It’s now possible to limit templates available by resource, for example the template "Incunable" for items only and the template "Folio" for medias only.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    $message = new Message(
+        'It’s now possible to specify templates by property for value annotations.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
