@@ -20,6 +20,8 @@
         return [false, 0, '0', 'false', 'no', 'off'].includes(value);
     }
 
+    // TODO Why some functions and events are outside of the jQuery wrapper?
+
     $(document).ready( function() {
 
         // In some cases (other modules), this js is used without properties.
@@ -32,6 +34,15 @@
         if (!$('div#properties').data('default-data-types') || !$('div#properties').data('default-data-types').length) {
             $('div#properties').data('default-data-types', 'literal,resource,uri');
         }
+
+        const propertyTermsByIds = function() {
+            var propertyByIds = {};
+            $('#property-selector li.selector-child').each(function() {
+                var property = $(this);
+                propertyByIds[property.data('property-id')] = property.data('property-term');
+            });
+            return propertyByIds;
+        };
 
         let annotatingValue;
         const vaSidebar = $('#value-annotation-sidebar');
@@ -108,13 +119,17 @@
             e.preventDefault();
             annotatingValue = $(this).closest('.value');
             vaContainer.empty();
-            $.each(annotatingValue.data('valueAnnotations'), function(propertyTerm, values) {
-                $.each(values, function(index, value) {
-                    value.property_term = propertyTerm;
-                    const valueAnnotation = makeValueAnnotation(value.type, value);
-                    vaContainer.append(valueAnnotation);
-                });
-            });
+            const valueAnnotations = annotatingValue.data('value-annotations') ? annotatingValue.data('value-annotations') : {};
+            const templateData = $('#resource-values').data('template-data');
+            const vaTemplate = templateData && templateData.value_annotations_template ? templateData.value_annotations_template : 'manual';
+            if (vaTemplate === 'none') {
+                // Not possible: the button should be hidden.
+                return;
+            } else if (!isNaN(vaTemplate)) {
+                loadVaTemplate(parseInt(vaTemplate), vaContainer, valueAnnotations);
+            } else {
+                fillValueAnnotations(vaContainer, valueAnnotations);
+            }
             Omeka.openSidebar(vaSidebar);
         });
         // Enable/disable "Add annotation" button.
@@ -479,6 +494,63 @@
 
             $('#values-json').val(JSON.stringify(collectValues()));
         });
+
+        // Handle value annotation template.
+        var loadVaTemplate = function(vaTemplateId, vaContainer, valueAnnotations) {
+            var templateSelect = $('#resource-template-select');
+            var url = templateSelect.data('api-base-url') + '/' + vaTemplateId;
+            $.get(url)
+                .done(function(data) {
+                    fillVaTemplate(vaContainer, valueAnnotations, data);
+                })
+                .fail(function() {
+                    console.log('Failed loading resource template from API.');
+                    fillValueAnnotations(vaContainer, valueAnnotations);
+                })
+        }
+
+        var fillVaTemplate = function(vaContainer, valueAnnotations, template) {
+            // Store global data of the template for special features,
+            var templateData = template['o:data'] ? template['o:data'] : {};
+            $('#resource-values').data('template-data-va', templateData);
+            const propertyTerms = propertyTermsByIds();
+            // Prepare the property fields of the template.
+            var templateValues = {};
+            template['o:resource_template_property'].forEach(function(rtp) {
+                const propertyTerm = propertyTerms[rtp['o:property']['o:id']];
+                // Check if an annotating value is already set for this term.
+                if (valueAnnotations[propertyTerm] && valueAnnotations[propertyTerm].length) {
+                    templateValues[propertyTerm] = valueAnnotations[propertyTerm];
+                    delete valueAnnotations[propertyTerm];
+                } else {
+                    var value = {
+                        '@language': null,
+                        '@value': null,
+                        '@id': null,
+                        value_resource_id: null,
+                        is_public: '1',
+                        property_id: rtp['o:property']['o:id'],
+                        property_term: propertyTerm,
+                        type: rtp['o:data_type'] && rtp['o:data_type'].length ? rtp['o:data_type'][0] : 'literal',
+                    };
+                    templateValues[propertyTerm] = [value];
+                }
+            });
+            // Fill template values, then remaining values.
+            fillValueAnnotations(vaContainer, templateValues);
+            fillValueAnnotations(vaContainer, valueAnnotations);
+        }
+
+        // Fill the annotations of a  value.
+        var fillValueAnnotations = function(vaContainer, valueAnnotations) {
+            $.each(valueAnnotations, function(propertyTerm, values) {
+                $.each(values, function(index, value) {
+                    value.property_term = propertyTerm;
+                    const valueAnnotation = makeValueAnnotation(value.type, value);
+                    vaContainer.append(valueAnnotation);
+                });
+            });
+        }
 
         Omeka.initializeSelector('#item-sites', '#site-selector');
         Omeka.initializeSelector('#item-item-sets', '#item-set-selector');
@@ -847,7 +919,7 @@
             $.get(url)
                 .done(function(data) {
                     // Store global data of the template,
-                    // included the resource class for non advanced templates..
+                    // included the resource class for non advanced templates.
                     var templateData = data['o:data'] ? data['o:data'] : {};
                     templateData['o:resource_class'] = data['o:resource_class'];
                     $('#resource-values').data('template-data', templateData);

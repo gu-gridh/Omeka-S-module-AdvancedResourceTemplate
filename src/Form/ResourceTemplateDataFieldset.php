@@ -23,6 +23,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             'items' => 'Items', // @translate
             'media' => 'media', // @translate
             'item_sets' => 'Item sets', // @translate
+            'value_annotations' => 'Value annotations', // @translate
         ];
 
         $this
@@ -35,6 +36,8 @@ class ResourceTemplateDataFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'available_for_resources',
+                    // Don't make templates available for value annotations by
+                    // default to incite to create specific templates for them.
                     'value' => ['items', 'media', 'item_sets'],
                 ],
             ])
