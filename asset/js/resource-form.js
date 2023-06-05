@@ -517,6 +517,9 @@
             // Store global data of the template for special features,
             var templateData = template['o:data'] ? template['o:data'] : {};
             $('#resource-values').data('template-data-va', templateData);
+            valueIsTrue(templateData.closed_property_list)
+                ? $('#value-annotation-sidebar .annotation-form').hide()
+                : $('#value-annotation-sidebar .annotation-form').show();
             const propertyTerms = propertyTermsByIds();
             // Prepare the property fields of the template.
             var templateValues = {};
