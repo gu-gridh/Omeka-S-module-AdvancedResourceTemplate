@@ -13,6 +13,7 @@ use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Mvc\Status;
 
 class Module extends AbstractModule
 {
@@ -963,57 +964,13 @@ SQL;
             return;
         }
 
-        // Limit resource templates to the current resource type.
-        // The resource type can be known only via the route.
-        $controllerToResourceNames = [
-            'Omeka\Controller\Admin\Item' => 'items',
-            'Omeka\Controller\Admin\Media' => 'media',
-            'Omeka\Controller\Admin\ItemSet' => 'item_sets',
-            'item' => 'items',
-            'media' => 'media',
-            'item-set' => 'item_sets',
-            'items' => 'items',
-            'itemset' => 'item_sets',
-            'item_sets' => 'item_sets',
-            'Annotate\Controller\Admin\Annotation' => 'annotations',
-            'annotation' => 'annotations',
-            'annotations' => 'annotations',
-        ];
-        $params = $status->getRouteMatch()->getParams();
-        $controller = $params['controller'] ?? $params['__CONTROLLER__'] ?? null;
+        $settings = $services->get('Omeka\Settings');
 
-        if ($controller && isset($controllerToResourceNames[$controller])) {
-            $resourceName = $controllerToResourceNames[$controller];
-            // Get templates without the option "available_for_resources" or
-            // with the option set for the resource name.
-            /** @todo Store the list of resource templates by resource names in settings after create/update. */
-            /** @var \Doctrine\DBAL\Connection $connection */
-            $connection = $services->get('Omeka\Connection');
-            $qb = $connection->createQueryBuilder();
-            $qb
-                ->select(
-                    'resource_template.id',
-                    'resource_template_data.data',
-                )
-                ->from('resource_template')
-                ->leftJoin('resource_template', 'resource_template_data', 'resource_template_data', 'resource_template_data.resource_template_id = resource_template.id')
-            ;
-            // Since data are json, it's hard to extract them with current mysql
-            // version, so use php.
-            $templatesData = $connection->executeQuery($qb)->fetchAllKeyValue();
-            $templateIds = [];
-            foreach ($templatesData as $templateId => $templateData) {
-                if (empty($templateData)) {
-                    $templateIds[] = $templateId;
-                } else {
-                    $templateData = json_decode($templateData, true);
-                    if (empty($templateData['available_for_resources'])
-                        || in_array($resourceName, $templateData['available_for_resources'])
-                    ) {
-                        $templateIds[] = $templateId;
-                    }
-                }
-            }
+        // Limit resource templates to the current resource type.
+        $resourceName = $this->getRouteResourceName($status);
+        if ($resourceName) {
+            $templatesByResources = $settings->get('advancedresourcetemplate_templates_by_resource', []);
+            $templateIds = $templatesByResources[$resourceName] ?? [];
             // Display all resource templates when none are configured.
             if ($templateIds) {
                 /** @var \Omeka\Form\ResourceForm $form */
@@ -1032,7 +989,6 @@ SQL;
             }
         }
 
-        $settings = $services->get('Omeka\Settings');
         $closedPropertyList = (bool) (int) $settings->get('advancedresourcetemplate_closed_property_list');
         if ($closedPropertyList) {
             /** @var \Omeka\Form\ResourceForm $form */
@@ -1592,6 +1548,41 @@ SQL;
         return ['property_id' => $propertyId]
             + $automaticValueArray
             + ['is_public' => $isPublic];
+    }
+
+    protected function getRouteResourceName(?Status $status = null): ?string
+    {
+        if (!$status) {
+            /** @var \Omeka\Mvc\Status $status */
+            $services = $this->getServiceLocator();
+            $status = $services->get('Omeka\Status');
+        }
+
+        // Limit resource templates to the current resource type.
+        // The resource type can be known only via the route.
+        $controllerToResourceNames = [
+            'Omeka\Controller\Admin\Item' => 'items',
+            'Omeka\Controller\Admin\Media' => 'media',
+            'Omeka\Controller\Admin\ItemSet' => 'item_sets',
+            'Omeka\Controller\Site\Item' => 'items',
+            'Omeka\Controller\Site\Media' => 'media',
+            'Omeka\Controller\Site\ItemSet' => 'item_sets',
+            'item' => 'items',
+            'media' => 'media',
+            'item-set' => 'item_sets',
+            'items' => 'items',
+            'itemset' => 'item_sets',
+            'item_sets' => 'item_sets',
+            // Module Annotate.
+            'Annotate\Controller\Admin\Annotation' => 'annotations',
+            'Annotate\Controller\Site\Annotation' => 'annotations',
+            'annotation' => 'annotations',
+            'annotations' => 'annotations',
+        ];
+        $params = $status->getRouteMatch()->getParams();
+        $controller = $params['controller'] ?? $params['__CONTROLLER__'] ?? null;
+
+        return $controllerToResourceNames[$controller] ?? null;
     }
 
     /**
