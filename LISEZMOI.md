@@ -14,21 +14,21 @@ l’édition des ressources :
 - Indiquer les modèles à utiliser pour chaque ressource (contenus, media,
   collections) et annotation de valeur :
 
-  ![Indiquer si un modèle peut être utiliser pour une ressource](data/images/template_by_resource_and_value_annotation.png))
+  ![Indiquer si un modèle peut être utiliser pour une ressource](data/images/template_by_resource_and_value_annotation.png)
 
 - Indiquer un modèle pour toutes les annotations de valeur d’un modèle de
   ressource :
 
-  ![Indiquer le modèle à utiliser pour les annotations de valeur](data/images/value_annotation_template.png))
+  ![Indiquer le modèle à utiliser pour les annotations de valeur](data/images/value_annotation_template.png)
 
 - Indiquer un modèle pour les annotations de valeur de chaque propriété d’un
   modèle de ressource :
 
-  ![Indiquer le modèle à utiliser pour les annotations de valeur pour chaque propriété](data/images/value_annotation_template_by_property.png))
+  ![Indiquer le modèle à utiliser pour les annotations de valeur pour chaque propriété](data/images/value_annotation_template_by_property.png)
 
 - Obligation de choisir une classe parmi une liste définie :
 
-  ![Obligation de choisir une classe parmi une liste définie](data/images/required_limited_class.png))
+  ![Obligation de choisir une classe parmi une liste définie](data/images/required_limited_class.png)
 
 - Limitation du formulaire à la liste de propriétés définie :
 
@@ -449,7 +449,7 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
-- [ ] Ajouter les modèles pour les annotations de valeur.
+- [x] Ajouter les modèles pour les annotations de valeur.
 - [ ] Remplacer FieldNameToProperty avec AutomapFields ou TransformSource du module BulkImport.
 - [ ] Remplacer `{__value__}` et `{__label__}` par `{value}` et `{label}` (prêt dans module BulkImport).
 - [ ] Inclure tous les suggesteurs du module [Value Suggest].

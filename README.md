@@ -14,19 +14,19 @@ resources:
 - Specify templates to be used for each resource (items, media, item sets) and
   value annotations:
 
-  ![Specify if a template can be use for a resource](data/images/template_by_resource_and_value_annotation.png))
+  ![Specify if a template can be use for a resource](data/images/template_by_resource_and_value_annotation.png)
 
 - Specify a template for a value annotation globally:
 
-  ![Specify the template to use by value annotation](data/images/value_annotation_template.png))
+  ![Specify the template to use by value annotation](data/images/value_annotation_template.png)
 
 - Specify a template for a value annotation by property:
 
-  ![Specify the template to use by value annotation by property](data/images/value_annotation_template_by_property.png))
+  ![Specify the template to use by value annotation by property](data/images/value_annotation_template_by_property.png)
 
 - Require a resource class from a limited list of resource classes:
 
-  ![Require a resource class from a limited list of resource classes](data/images/required_limited_class.png))
+  ![Require a resource class from a limited list of resource classes](data/images/required_limited_class.png)
 
 - Limit template to a closed list of properties:
 
@@ -426,7 +426,7 @@ https://www.idref.fr/Sru/Solr
 TODO
 ----
 
-- [ ] Integrate template for value annotations.
+- [x] Integrate template for value annotations.
 - [ ] Replace the mapper with AutomapFields or TransformSource from module [Bulk Import].
 - [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module [Bulk Import]).
 - [ ] Include all suggesters from module [Value Suggest].
