@@ -38,6 +38,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'value' => ['items', 'media', 'item_sets'],
                 ],
             ])
+
             ->add([
                 'name' => 'require_resource_class',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
@@ -71,6 +72,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'id' => 'closed_property_list',
                 ],
             ])
+
             ->add([
                 'name' => 'quick_new_resource',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
@@ -99,6 +101,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'value' => 'no',
                 ],
             ])
+
             ->add([
                 'name' => 'value_languages',
                 'type' => OmekaElement\ArrayTextarea::class,
@@ -131,6 +134,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'id' => 'no_language',
                 ],
             ])
+
             ->add([
                 'name' => 'value_suggest_keep_original_label',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
@@ -153,6 +157,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'id' => 'value_suggest_require_uri',
                 ],
             ])
+
             ->add([
                 'name' => 'automatic_values',
                 'type' => Element\Textarea::class,
@@ -180,6 +185,36 @@ class ResourceTemplateDataFieldset extends Fieldset
                         : $this->getTranslator()->translate('No configured autofiller.'), // @translate
                 ],
             ])
+
+            // Value annotations.
+
+            ->add([
+                'name' => 'value_annotations_template',
+                'type' => AdvancedResourceTemplateElement\OptionalResourceSelect::class,
+                'options' => [
+                    'label' => 'Value annotations', // @translate
+                    'disable_group_by_owner' => true,
+                    'prepend_value_options' => [
+                        '' => 'Manual selection (default)', // @translate
+                        'none' => 'No value annotation', // @translate
+                    ],
+                    'resource_value_options' => [
+                        'resource' => 'resource_templates',
+                        'query' => ['resource' => 'value_annotations'],
+                        'option_text_callback' => function ($resourceTemplate) {
+                            return $resourceTemplate->label();
+                        },
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'value_annotations_templates',
+                    'class' => 'chosen-select',
+                    'value' => '',
+                ],
+            ])
+
+            // Display.
+
             ->add([
                 'name' => 'groups',
                 'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
@@ -232,6 +267,9 @@ bibo:volume asc
 bibo:issue asc',
                 ],
             ])
+
+            // Others.
+
             ->add([
                 'name' => 'settings',
                 'type' => Element\Textarea::class,
