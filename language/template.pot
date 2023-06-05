@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-17 00:00+0000\n"
+"POT-Creation-Date: 2023-06-05 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,11 +35,11 @@ msgstr ""
 msgid "The template is empty."
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:162
+#: src/Form/ResourceTemplateDataFieldset.php:187
 msgid "Select autofillers…"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:163
+#: src/Form/ResourceTemplateDataFieldset.php:188
 msgid "No configured autofiller."
 msgstr ""
 
@@ -144,79 +144,114 @@ msgid ""
 "authority list when filiing data for a resource."
 msgstr ""
 
-#: Module.php:306
+#: data/scripts/upgrade.php:232
+msgid ""
+"It’s now possible to set resource template for annotations on each property."
+msgstr ""
+
+#: data/scripts/upgrade.php:236
+#, php-format
+msgid ""
+"The format for automatic value and autofilling has changed slightly and "
+"upgrade is not automatic. You should check them if you use this feature. See "
+"%1$sreadme%2$s for more info."
+msgstr ""
+
+#: data/scripts/upgrade.php:246
+msgid ""
+"It’s now possible to order linked resources by another property than title "
+"(require Omeka S v4.1)."
+msgstr ""
+
+#: data/scripts/upgrade.php:287
+msgid ""
+"It’s now possible to limit templates available by resource, for example the "
+"template \"Incunable\" for items only and the template \"Folio\" for medias "
+"only."
+msgstr ""
+
+#: data/scripts/upgrade.php:292
+msgid ""
+"It’s now possible to specify templates by property for value annotations."
+msgstr ""
+
+#: Module.php:410
+msgid "This template cannot be used for this resource."
+msgstr ""
+
+#: Module.php:420
 msgid "A class is required."
 msgstr ""
 
-#: Module.php:318
+#: Module.php:430
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr ""
 
-#: Module.php:327
+#: Module.php:436
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr ""
 
-#: Module.php:365
+#: Module.php:472
 #, php-format
 msgid ""
 "The html input pattern \"%1$s\" for template \"%2$s\" cannot be processed."
 msgstr ""
 
-#: Module.php:374
+#: Module.php:481
 #, php-format
 msgid ""
 "The value \"%1$s\" for term \"%2$s\" does not follow the input pattern \"%3$s"
 "\"."
 msgstr ""
 
-#: Module.php:393
+#: Module.php:500
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:403
+#: Module.php:510
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
 "size (%3$d characters)."
 msgstr ""
 
-#: Module.php:425
+#: Module.php:532
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
 "number (%3$d)."
 msgstr ""
 
-#: Module.php:436
+#: Module.php:543
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
 "number (%3$d)."
 msgstr ""
 
-#: Module.php:494
+#: Module.php:601
 #, php-format
 msgid ""
 "The value for term \"%1$s\" should be unique, but already set for resource #"
 "%2$s."
 msgstr ""
 
-#: Module.php:1003
+#: Module.php:1205
 #, php-format
 msgid "New descriptor appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 
-#: Module.php:1008
+#: Module.php:1210
 #, php-format
 msgid "New descriptors appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 
-#: Module.php:1016
+#: Module.php:1218
 #, php-format
 msgid "Unable to append new descriptors to custom vocab \"%1$s\": %2$s"
 msgstr ""
@@ -288,7 +323,7 @@ msgid "Forbid"
 msgstr ""
 
 #: src/Form/SettingsFieldset.php:78
-#: src/Form/ResourceTemplateDataFieldset.php:153
+#: src/Form/ResourceTemplateDataFieldset.php:178
 msgid "Autofillers"
 msgstr ""
 
@@ -296,77 +331,108 @@ msgstr ""
 msgid "The autofillers should be set in selected templates params."
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:28
+#: src/Form/ResourceTemplateDataFieldset.php:26
+#: src/Form/ResourceTemplateDataFieldset.php:198
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:296
+msgid "Value annotations"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:34
+msgid "Use for resources"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:49
 msgid "Require a class"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:39
+#: src/Form/ResourceTemplateDataFieldset.php:60
 msgid "Limit to specified classes"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:50
+#: src/Form/ResourceTemplateDataFieldset.php:71
 msgid "Limit to specified properties"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:61
+#: src/Form/ResourceTemplateDataFieldset.php:83
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:178
 msgid "Allow quick creation of a resource"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:73
+#: src/Form/ResourceTemplateDataFieldset.php:95
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:196
 msgid "Autocomplete with existing values"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:76
+#: src/Form/ResourceTemplateDataFieldset.php:98
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:200
 msgid "Starts with"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:77
+#: src/Form/ResourceTemplateDataFieldset.php:99
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:201
 msgid "Contains"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:89
+#: src/Form/ResourceTemplateDataFieldset.php:112
 msgid "Languages for values"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:110
+#: src/Form/ResourceTemplateDataFieldset.php:133
 msgid "No language"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:121
+#: src/Form/ResourceTemplateDataFieldset.php:145
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:259
 msgid "Value Suggest: keep original label"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:132
+#: src/Form/ResourceTemplateDataFieldset.php:156
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:277
 msgid "Value Suggest: require uri"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:143
+#: src/Form/ResourceTemplateDataFieldset.php:168
 msgid "Automatic values (on save)"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:170
+#: src/Form/ResourceTemplateDataFieldset.php:201
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:300
+msgid "Manual selection (default)"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:202
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:301
+msgid "No value annotation"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:225
 msgid "Groups"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:171
+#: src/Form/ResourceTemplateDataFieldset.php:226
 msgid ""
 "Allow to get properties by group for display. This is a list of group names "
 "and properties for each of them. May need a specific theme template."
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:205
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:295
+#: src/Form/ResourceTemplateDataFieldset.php:260
+msgid "Order of linked values (Omeka v4.1)"
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:261
+msgid ""
+"The default order of the linked resources is the title. Another order can be "
+"set for each linking property. For the default order when there is no "
+"property, just skip the property term."
+msgstr ""
+
+#: src/Form/ResourceTemplateDataFieldset.php:280
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:323
 msgid "More settings"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:206
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:296
+#: src/Form/ResourceTemplateDataFieldset.php:281
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:324
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
 "pairs or json."
@@ -429,6 +495,7 @@ msgstr ""
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:230
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:261
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:279
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:299
 msgid "Use template setting"
 msgstr ""
 
@@ -589,11 +656,11 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:168
+#: config/module.config.php:169
 msgid "New value"
 msgstr ""
 
-#: config/module.config.php:169
+#: config/module.config.php:170
 msgid "No results"
 msgstr ""
 

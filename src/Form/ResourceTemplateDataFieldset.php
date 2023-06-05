@@ -258,7 +258,7 @@ dcterms:language
                 'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
                 'options' => [
                     'label' => 'Order of linked values (Omeka v4.1)', // @translate
-                    'info' => 'The default order of linked values is the resource title. Another order can be set for resource linked with a specific property. For the default order when there is no property, just skip the property term.', // @translate
+                    'info' => 'The default order of the linked resources is the title. Another order can be set for each linking property. For the default order when there is no property, just skip the property term.', // @translate
                     'as_key_value' => true,
                     'key_value_separator' => ' ',
                 ],
