@@ -21,7 +21,7 @@ class ResourceTemplateDataFieldset extends Fieldset
     {
         $resourceNames = [
             'items' => 'Items', // @translate
-            'media' => 'media', // @translate
+            'media' => 'Media', // @translate
             'item_sets' => 'Item sets', // @translate
             'value_annotations' => 'Value annotations', // @translate
         ];
