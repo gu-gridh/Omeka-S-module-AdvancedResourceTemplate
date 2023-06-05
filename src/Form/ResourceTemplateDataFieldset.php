@@ -28,14 +28,14 @@ class ResourceTemplateDataFieldset extends Fieldset
 
         $this
             ->add([
-                'name' => 'available_for_resources',
+                'name' => 'use_for_resources',
                 'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,
                 'options' => [
-                    'label' => 'Available for resources', // @translate
+                    'label' => 'Use for resources', // @translate
                     'value_options' => $resourceNames,
                 ],
                 'attributes' => [
-                    'id' => 'available_for_resources',
+                    'id' => 'use_for_resources',
                     // Don't make templates available for value annotations by
                     // default to incite to create specific templates for them.
                     'value' => ['items', 'media', 'item_sets'],

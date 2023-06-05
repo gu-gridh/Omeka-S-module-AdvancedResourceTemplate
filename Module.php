@@ -404,9 +404,9 @@ class Module extends AbstractModule
 
         // Template level.
 
-        $availableForResources = $template->dataValue('available_for_resources', []);
+        $useForResources = $template->dataValue('use_for_resources', []);
         $resourceName = $entity->getResourceName();
-        if ($availableForResources && !in_array($resourceName, $availableForResources)) {
+        if ($useForResources && !in_array($resourceName, $useForResources)) {
             $message = new \Omeka\Stdlib\Message('This template cannot be used for this resource.'); // @translate
             $errorStore->addError('o:resource_template[o:id]', $message);
             if ($directMessage) {
@@ -1714,7 +1714,7 @@ SQL;
     protected function storeResourceTemplateSettings(): void
     {
         // Resource templates can be searched only by id or by label, not data,
-        // but they should be searched by option "available_for_options" in many
+        // but they should be searched by option "use_for_resources" in many
         // places, so it is stored in main settings too.
         // TODO To store the options for available templates by resource is possible, but probably useless.
 
@@ -1750,15 +1750,15 @@ SQL;
             $templateData = $templateData ? json_decode($templateData, true) : null;
             if ($templateData === null
                 // When null or empty array, the template is not used.
-                || !array_key_exists('available_for_resources', $templateData)
+                || !array_key_exists('use_for_resources', $templateData)
             ) {
                 $templatesByResourceNames['items'][] = $templateId;
                 $templatesByResourceNames['media'][] = $templateId;
                 $templatesByResourceNames['item_sets'][] = $templateId;
                 $templatesByResourceNames['value_annotations'][] = $templateId;
                 $templatesByResourceNames['annotations'][] = $templateId;
-            } elseif (is_array($templateData['available_for_resources'])) {
-                foreach ($templateData['available_for_resources'] as $resourceName) {
+            } elseif (is_array($templateData['use_for_resources'])) {
+                foreach ($templateData['use_for_resources'] as $resourceName) {
                     $templatesByResourceNames[$resourceName][] = $templateId;
                 }
             }
