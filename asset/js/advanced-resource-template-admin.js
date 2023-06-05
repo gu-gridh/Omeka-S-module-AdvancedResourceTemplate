@@ -305,6 +305,25 @@
         }
 
         /**
+         * Prepare the value annotations for a property.
+         */
+        function prepareFieldValueAnnotation(field) {
+            // Add a specific datalist for the property. It replaces the previous one from another template.
+            const templateData = $('#resource-values').data('template-data');
+            const term = field.data('property-term');
+            const vaTemplate = templateData && templateData.value_annotations_template ? templateData.value_annotations_template : 'manual';
+            // Default config: display value annotations (except if main params hide them via EasyAdmin).
+            if (!vaTemplate || vaTemplate === 'manual') {
+                field.find('.value-annotation-annotate').show();
+            } else if (vaTemplate === 'none') {
+                field.find('.value-annotation-annotate').hide();
+            } else {
+                // This is a template, so load it via api.
+                field.find('.value-annotation-annotate').show();
+            }
+        }
+
+        /**
          * Set a custom vocab open to new values.
          */
         function prepareFieldCustomVocabOpen(field) {
@@ -993,6 +1012,7 @@
                 prepareFieldReadOnly($(field));
                 prepareFieldAutocomplete($(field));
                 prepareFieldLanguage($(field));
+                prepareFieldValueAnnotation($(field));
                 prepareFieldDisplay($(field));
             });
 
@@ -1012,7 +1032,8 @@
             // prepareFieldCustomVocabOpen($(field));
             prepareFieldReadOnly(field);
             prepareFieldAutocomplete(field);
-            prepareFieldLanguage(field);
+            // prepareFieldLanguage($(field));
+            prepareFieldValueAnnotation($(field));
             prepareFieldDisplay(field);
         });
 
