@@ -11,6 +11,19 @@ Voir le [Lisez-moi] en français.
 the resource templates in order to simplify and to improve the edition of
 resources:
 
+- Specify templates to be used for each resource (items, media, item sets) and
+  value annotations:
+
+  ![Specify if a template can be use for a resource](data/images/template_by_resource_and_value_annotation.png))
+
+- Specify a template for a value annotation globally:
+
+  ![Specify the template to use by value annotation](data/images/value_annotation_template.png))
+
+- Specify a template for a value annotation by property:
+
+  ![Specify the template to use by value annotation by property](data/images/value_annotation_template_by_property.png))
+
 - Require a resource class from a limited list of resource classes:
 
   ![Require a resource class from a limited list of resource classes](data/images/required_limited_class.png))
@@ -23,7 +36,7 @@ resources:
 
   Force a literal value to follow a regex pattern, for example for identifiers.
 
-  ![input control via regex](data/images/input_control_regex.png)
+  ![Input control via regex](data/images/input_control_regex.png)
 
 - Minimum/maximum length of a literal value
 

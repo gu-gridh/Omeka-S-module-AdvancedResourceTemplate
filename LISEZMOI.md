@@ -11,6 +11,21 @@ See [English readme].
 nouvelles options aux modèles de ressources afin de faciliter et d’améliorer
 l’édition des ressources :
 
+- Indiquer les modèles à utiliser pour chaque ressource (contenus, media,
+  collections) et annotation de valeur :
+
+  ![Indiquer si un modèle peut être utiliser pour une ressource](data/images/template_by_resource_and_value_annotation.png))
+
+- Indiquer un modèle pour toutes les annotations de valeur d’un modèle de
+  ressource :
+
+  ![Indiquer le modèle à utiliser pour les annotations de valeur](data/images/value_annotation_template.png))
+
+- Indiquer un modèle pour les annotations de valeur de chaque propriété d’un
+  modèle de ressource :
+
+  ![Indiquer le modèle à utiliser pour les annotations de valeur pour chaque propriété](data/images/value_annotation_template_by_property.png))
+
 - Obligation de choisir une classe parmi une liste définie :
 
   ![Obligation de choisir une classe parmi une liste définie](data/images/required_limited_class.png))
@@ -24,7 +39,7 @@ l’édition des ressources :
   Permet de forcer une valeur textuelle à respecter un format via un regex, par
   exemple pour les identifiants.
 
-  ![contrôle de saisie via regex](data/images/input_control_regex.png)
+  ![Contrôle de saisie via regex](data/images/input_control_regex.png)
 
 - Longueur minimale/maximale pour une valeur textuelle ;
 
