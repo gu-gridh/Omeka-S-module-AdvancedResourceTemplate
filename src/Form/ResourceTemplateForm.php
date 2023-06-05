@@ -7,7 +7,7 @@ use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Laminas\Form\Form;
-use Omeka\Form\Element\ResourceClassSelect;
+use Omeka\Form\Element as OmekaElement;
 
 class ResourceTemplateForm extends Form
 {
@@ -31,7 +31,7 @@ class ResourceTemplateForm extends Form
         // Unlike core, multiple classes can be suggested or required.
         $this->add([
             'name' => 'o:resource_class',
-            'type' => ResourceClassSelect::class,
+            'type' => OmekaElement\ResourceClassSelect::class,
             'options' => [
                 'label' => 'Suggested classes', // @translate
                 'empty_option' => '',

@@ -19,8 +19,25 @@ class ResourceTemplateDataFieldset extends Fieldset
 
     public function init(): void
     {
+        $resourceNames = [
+            'items' => 'Items', // @translate
+            'media' => 'media', // @translate
+            'item_sets' => 'Item sets', // @translate
+        ];
+
         $this
-            // Force specified classes.
+            ->add([
+                'name' => 'available_for_resources',
+                'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,
+                'options' => [
+                    'label' => 'Available for resources', // @translate
+                    'value_options' => $resourceNames,
+                ],
+                'attributes' => [
+                    'id' => 'available_for_resources',
+                    'value' => ['items', 'media', 'item_sets'],
+                ],
+            ])
             ->add([
                 'name' => 'require_resource_class',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
