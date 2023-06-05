@@ -531,14 +531,14 @@
                     delete valueAnnotations[propertyTerm];
                 } else {
                     var value = {
-                        '@language': null,
+                        '@language': rtp['o:default_lang'] ? rtp['o:default_lang'] : null,
                         '@value': null,
                         '@id': null,
                         value_resource_id: null,
-                        is_public: '1',
-                        property_id: rtp['o:property']['o:id'],
+                        is_public: rtp['o:is_private'] ? '0' : '1',
+                        property_id: parseInt(rtp['o:property']['o:id']),
                         property_term: propertyTerm,
-                        type: rtp['o:data_type'] && rtp['o:data_type'].length ? rtp['o:data_type'][0] : 'literal',
+                        type: rtp['o:data_type'] && rtp['o:data_type'].length ? Array.isArray(rtp['o:data_type']) ? rtp['o:data_type'][0] : rtp['o:data_type'] : 'literal',
                     };
                     templateValues[propertyTerm] = [value];
                 }
