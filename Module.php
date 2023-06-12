@@ -1746,6 +1746,7 @@ SQL;
             'media' => [],
             'item_sets' => [],
             'value_annotations' => [],
+            // Module Annotate.
             'annotations' => [],
         ];
         foreach ($templatesData as $templateId => $templateData) {

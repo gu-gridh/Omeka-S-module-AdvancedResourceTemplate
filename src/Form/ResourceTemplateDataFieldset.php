@@ -17,14 +17,23 @@ class ResourceTemplateDataFieldset extends Fieldset
      */
     protected $autofillers = [];
 
+    /**
+     * @var bool
+     */
+    protected $hasAnnotations = false;
+
     public function init(): void
     {
         $resourceNames = [
             'items' => 'Items', // @translate
-            'media' => 'Media', // @translate
+            'media' => 'Medias', // @translate
             'item_sets' => 'Item sets', // @translate
             'value_annotations' => 'Value annotations', // @translate
         ];
+
+        if ($this->hasAnnotations) {
+            $resourceNames['annotations'] = 'Annotations'; // @translate
+        }
 
         $this
             ->add([
@@ -287,9 +296,15 @@ bibo:issue asc',
         ;
     }
 
-    public function setAutofillers(array $autofillers)
+    public function setAutofillers(array $autofillers): self
     {
         $this->autofillers = $autofillers;
+        return $this;
+    }
+
+    public function setHasAnnotations(bool $hasAnnotations): self
+    {
+        $this->hasAnnotations = $hasAnnotations;
         return $this;
     }
 }

@@ -11,6 +11,8 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  * Service factory for the dataType view helper.
  *
  * Override the core view helper in order to use the form element DataTypeSelect.
+ *
+ * @see \Omeka\Service\ViewHelper\DataTypeFactory
  */
 class DataTypeFactory implements FactoryInterface
 {

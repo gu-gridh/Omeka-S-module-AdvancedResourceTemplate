@@ -42,7 +42,14 @@ class DataTypeSelect extends Select
                 // data types without an optgroup.
                 $optgroupKey = md5($optgroupLabel);
                 // Put resource data types before ones added by modules.
-                $optionsVal = in_array($dataTypeName, ['resource', 'resource:item', 'resource:itemset', 'resource:media'])
+                $optionsVal = in_array($dataTypeName, [
+                    'resource',
+                    'resource:item',
+                    'resource:itemset',
+                    'resource:media',
+                    // This is not useful for now.
+                    // 'resource:annotation',
+                ])
                     ? 'options'
                     : 'optgroupOptions';
                 if (!isset(${$optionsVal}[$optgroupKey])) {

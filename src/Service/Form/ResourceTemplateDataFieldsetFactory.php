@@ -14,9 +14,12 @@ class ResourceTemplateDataFieldsetFactory implements FactoryInterface
         foreach ($services->get('Omeka\Settings')->get('advancedresourcetemplate_autofillers', []) as $key => $value) {
             $autofillers[$key] = $value['label'] ?: $key;
         }
+
         $form = new ResourceTemplateDataFieldset(null, $options ?? []);
         return $form
             ->setTranslator($services->get('MvcTranslator'))
-            ->setAutofillers($autofillers);
+            ->setAutofillers($autofillers)
+            ->setHasAnnotations($services->get('Omeka\ApiAdapterManager')->has('annotations'))
+        ;
     }
 }
