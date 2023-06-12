@@ -263,14 +263,57 @@ SQL;
     // Make all templates available to all resources by default.
     $qb = $connection->createQueryBuilder();
     $qb
-        ->select('id', 'data')
+        ->select(
+            'resource_template_data.id',
+            'resource_template_data.resource_template_id',
+            'resource_template_data.data'
+        )
         ->from('resource_template_data', 'resource_template_data')
     ;
-    $templateDatas = $connection->executeQuery($qb)->fetchAllKeyValue();
+    $templateDatas = $connection->executeQuery($qb)->fetchAllAssociativeIndexed();
 
-    foreach ($templateDatas as $id => $templateData) {
-        $templateData = json_decode($templateData, true) ?: [];
-        $templateData['use_for_resources'] ??= ['items', 'media', 'item_sets'];
+    // Except templates used for Annotations (module Cartography).
+    $annotationTemplates = $settings->get('cartography_template_describe') ?: [];
+    $annotationTemplates = array_merge($annotationTemplates, $settings->get('cartography_template_locate') ?: []);
+    // It is not possible to search by class before Omeka S v4.1.
+    $classAnnotation = $api->searchOne('resource_classes', ['term' => 'oa:Annotation'])->getContent();
+    if ($classAnnotation) {
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select('id')
+            ->from('resource_template', 'resource_template')
+            ->where($qb->expr()->eq('resource_class_id', $classAnnotation->id()))
+        ;
+        $annotationTemplatesMore = $connection->executeQuery($qb)->fetchFirstColumn() ?: [];
+        $annotationTemplates = array_merge($annotationTemplates, $annotationTemplatesMore);
+    }
+    $annotationTemplates = array_unique(array_map('intval', $annotationTemplates));
+
+    // Except template for Thesaurus.
+    $thesaurusTemplates = [];
+    $thesaurusTemplateScheme = $api->searchOne('resource_templates', ['label' => 'Thesaurus Scheme'])->getContent();
+    $thesaurusTemplateConcept = $api->searchOne('resource_templates', ['label' => 'Thesaurus Concept'])->getContent();
+    if ($thesaurusTemplateScheme) {
+        $thesaurusTemplates[] = $thesaurusTemplateScheme->id();
+    }
+    if ($thesaurusTemplateConcept) {
+        $thesaurusTemplates[] = $thesaurusTemplateConcept->id();
+    }
+    $thesaurusTemplates = array_unique(array_map('intval', $thesaurusTemplates));
+
+    foreach ($templateDatas as $id => $templateRow) {
+        $templateData = json_decode($templateRow['data'], true) ?: [];
+        if (isset($templateData['use_for_resources']) && $templateData['use_for_resources'] === ['value_annotations']) {
+            $templateData['use_for_resources'] = ['value_annotations'];
+        } elseif (in_array($templateRow['resource_template_id'], $annotationTemplates)) {
+            $templateData['use_for_resources'] = ['annotations'];
+        } elseif (in_array($templateRow['resource_template_id'], $thesaurusTemplates)) {
+            $templateData['use_for_resources'] = ['items'];
+        } else {
+            $templateData['use_for_resources'] = (int) $templateRow['resource_template_id'] === 1
+                ? ['items', 'media', 'item_sets']
+                : ['items'];
+        }
         $quotedTemplateData = $connection->quote(json_encode($templateData));
         $sql = <<<SQL
 UPDATE `resource_template_data`
@@ -292,4 +335,14 @@ SQL;
         'It’s now possible to specify templates by property for value annotations.' // @translate
     );
     $messenger->addSuccess($message);
+
+    $message = new Message(
+        'All existing templates are made available by items only. Check your templates if you need.' // @translate
+    );
+    $messenger->addWarning($message);
+
+    $message = new Message(
+        'If you use specific templates, you may have to check this new parameter.' // @translate
+    );
+    $messenger->addWarning($message);
 }
