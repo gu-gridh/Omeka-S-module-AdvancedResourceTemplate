@@ -458,7 +458,7 @@ TODO
 - [ ] Prendre en compte les langues avec un nombre de valeurs maximales.
 - [x] Utiliser twig pour des formats plus complexes.
 - [x] Créer une option de correspondance générique.
-- [ ] Améliorer la performance de l’autorempisseur.
+- [ ] Améliorer la performance de l’autoremplisseur.
 - [ ] Importer/Exporter tous les modèles ensemble dans un tableur.
 - [ ] Valider les modèles importés avec le formulaire standard ?
 - [x] Valider les ressources avec des données (valeur unique, modèle strict, etc.)
