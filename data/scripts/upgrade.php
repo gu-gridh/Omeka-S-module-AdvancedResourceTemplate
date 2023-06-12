@@ -346,3 +346,10 @@ SQL;
     );
     $messenger->addWarning($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.23', '<')) {
+    $message = new Message(
+        'It’s now possible to specify templates for annotations of module Annotate.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
