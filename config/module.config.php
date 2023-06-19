@@ -179,7 +179,8 @@ return [
             'advancedresourcetemplate_closed_property_list' => '0',
             // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
-            // Hidden setting.
+            // Hidden settings.
+            'advancedresourcetemplate_item_set_queries' => [],
             'advancedresourcetemplate_templates_by_resource' => [],
         ],
     ],

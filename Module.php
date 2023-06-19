@@ -184,6 +184,29 @@ class Module extends AbstractModule
             [$this, 'validateEntityHydratePost']
         );
 
+        // Manage the items to append to item sets.
+        // The item should be created to be able to do a search on it.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.create.post',
+            [$this, 'handleApiSavePostItem']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.update.post',
+            [$this, 'handleApiSavePostItem']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.create.post',
+            [$this, 'handleApiSavePostItemSet']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.update.post',
+            [$this, 'handleApiSavePostItemSet']
+        );
+
         // Display values according to options of the resource template.
         // For compatibility with other modules (HideProperties, Internationalisation)
         // that use the term as key in the list of displayed values, the event
@@ -286,6 +309,18 @@ class Module extends AbstractModule
             \Annotate\Controller\Admin\AnnotationController::class,
             'view.layout',
             [$this, 'addAdminResourceHeaders']
+        );
+
+        // Display the item set query for items in advanced tab.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ItemSet',
+            'view.add.form.advanced',
+            [$this, 'addAdvancedTabElements']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ItemSet',
+            'view.edit.form.advanced',
+            [$this, 'addAdvancedTabElements']
         );
 
         $sharedEventManager->attach(
@@ -892,6 +927,146 @@ SQL;
         return $newValues;
     }
 
+    /**
+     * Append item to items sets according to each request.
+     *
+     * A post event is required else the search query cannot be done.
+     * Else process differently for "add".
+     */
+    public function handleApiSavePostItem(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Manager $api
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Api\Response $response
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Api\Adapter\ItemAdapter $adapter
+         * @var \Omeka\Entity\Item|\Omeka\Api\Representation\ItemRepresentation $item
+         */
+        $services = $this->getServiceLocator();
+        $request = $event->getParam('request');
+
+        if ($request->getOption('advancedresourcetemplate_save_post_item')) {
+            return;
+        }
+
+        $settings = $services->get('Omeka\Settings');
+
+        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
+        if (!$queries) {
+            return;
+        }
+
+        $adapter = $event->getTarget();
+        $response = $event->getParam('response');
+
+        $item = $response->getContent();
+
+        if ($item instanceof \Omeka\Api\Representation\ItemRepresentation) {
+            $item = $adapter->getEntityManager()->find(\Omeka\Entity\Item::class, $item->id());
+        }
+
+        $itemId = $item->getId();
+
+        $existingItemSetIds = [];
+        foreach ($item->getItemSets() as $itemSet) {
+            $existingItemSetIds[$itemSet->getId()] = $itemSet->getId();
+        }
+
+        // Don't check for existing item sets.
+        // It may avoid an infinite loop too.
+        $queries = array_diff_key($queries, $existingItemSetIds);
+        if (!$queries) {
+            return;
+        }
+
+        // The adapter cannot be used directly when module AdvancedSearch is
+        // enabled, because some arguments are not supported.
+        $api = $services->get('Omeka\ApiManager');
+
+        // Check if the item belongs to each item set.
+        $newItemSetIds = [];
+        foreach ($queries as $itemSetId => $query) {
+            $query['id'] = [$itemId];
+            $result = $api->search('items', $query, ['returnScalar' => 'id'])->getTotalResults();
+            if ($result) {
+                $newItemSetIds[$itemSetId] = $itemSetId;
+            }
+        }
+
+        if (!$newItemSetIds) {
+            return;
+        }
+
+        // In a post event, an infinite loop should be avoided, so skip api.
+
+        $data = [
+            'o:item_set' => $newItemSetIds,
+        ];
+
+        $updateRequest = new \Omeka\Api\Request('update', 'items');
+        $updateRequest
+            ->setId($itemId)
+            ->setOption('initialize', false)
+            ->setOption('finalize', false)
+            ->setOption('isPartial', true)
+            ->setOption('collectionAction', 'append')
+            // Manage single and batch update processes.
+            ->setOption('flushEntityManager', (bool) $request->getOption('flushEntityManager', true))
+            ->setContent($data);
+        $newItem = $adapter->update($updateRequest)->getContent();
+
+        // Set right content in response.
+        $responseContent = $request->getOption('responseContent');
+        if ($responseContent === 'representation') {
+            $newItem = $adapter->getRepresentation($newItem);
+        } elseif ($responseContent === 'reference') {
+            $newItem = $adapter->getRepresentation($newItem)->getReference();
+        }
+
+        $response->setContent($newItem);
+    }
+
+    public function handleApiSavePostItemSet(Event $event): void
+    {
+        /**
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Api\Response $response
+         * @var \Omeka\Entity\ItemSet|\Omeka\Api\Representation\ItemSetRepresentation $itemSet
+         */
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $request = $event->getParam('request');
+        $response = $event->getParam('response');
+
+        $itemSet = $response->getContent();
+        $itemSetId = method_exists($itemSet, 'getId') ? $itemSet->getId() : $itemSet->id();
+
+        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
+
+        // Store queries as array for cleaner storage and to avoid to parse it
+        // each time and for quicker process.
+        $queryString = $request->getValue('item_set_query_items') ?: null;
+        if ($queryString) {
+            $query = null;
+            parse_str($queryString, $query);
+        }
+        if (empty($query)) {
+            unset($queries[$itemSetId]);
+        } else {
+            // Simplify the query for "id" if any (normally not present).
+            if (empty($query['id'])) {
+                unset($query['id']);
+            } elseif (!is_array($query['id'])) {
+                $query['id'] = [$query['id']];
+            }
+            $queries[$itemSetId] = $query;
+        }
+
+        $settings->set('advancedresourcetemplate_item_set_queries', $queries);
+    }
+
     public function addAdminResourceHeaders(Event $event): void
     {
         /** @var \Laminas\View\Renderer\PhpRenderer $view */
@@ -988,6 +1163,37 @@ SQL;
             $form = $event->getTarget();
             $form->setAttribute('class', trim($form->getAttribute('class') . ' closed-property-list on-load'));
         }
+    }
+
+    public function addAdvancedTabElements(Event $event): void
+    {
+        $services = $this->getServiceLocator();
+        $view = $event->getTarget();
+        $resource = $view->resource;
+
+        /** @var \Omeka\Settings\Settings $settings */
+        $settings = $services->get('Omeka\Settings');
+        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
+        $query = $resource ? $queries[$resource->id()] ?? null : null;
+
+        $query = $query ? http_build_query($query, '', '&', PHP_QUERY_RFC3986) : null;
+
+        /** @var \Omeka\Form\Element\Query $element */
+        $formManager = $services->get('FormElementManager');
+        $element = $formManager->get(\Omeka\Form\Element\Query::class);
+        $element
+            ->setName('item_set_query_items')
+            ->setLabel('Search query to attach items automatically to this item set') // @translate
+            ->setOptions([
+                'query_resource_type' => 'item_sets',
+                'query_partial_excludelist' => [],
+            ])
+            ->setAttributes([
+                'id' => 'item_set_query_items',
+                'value' => $query,
+            ]);
+
+        echo $view->formRow($element);
     }
 
     public function handleMainSettings(Event $event): void
