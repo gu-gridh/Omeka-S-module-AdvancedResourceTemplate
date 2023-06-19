@@ -72,7 +72,7 @@ $translate = $plugins->get('translate');
         $valuesGroup = new \AppendIterator();
         $sourceValuesFiltered = new \AppendIterator();
         foreach ($sourceValues as $term => $propertyData) {
-            $propertyData['group'] === $groupLabel
+            ($propertyData['group'] ?? '') === $groupLabel
                 ? $valuesGroup->append(new \ArrayIterator([$term => $propertyData]))
                 : $sourceValuesFiltered->append(new \ArrayIterator([$term => $propertyData]));
         }
