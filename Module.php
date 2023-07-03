@@ -1048,6 +1048,8 @@ SQL;
 
         $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
 
+        $existingQuery = $queries[$itemSetId] ?? null;
+
         // Store queries as array for cleaner storage and to avoid to parse it
         // each time and for quicker process.
         $queryString = $request->getValue('item_set_query_items') ?: null;
@@ -1055,8 +1057,10 @@ SQL;
             $query = null;
             parse_str($queryString, $query);
         }
+
         if (empty($query)) {
             unset($queries[$itemSetId]);
+            $query = null;
         } else {
             // Simplify the query for "id" if any (normally not present).
             if (empty($query['id'])) {
@@ -1088,6 +1092,36 @@ SQL;
         }
 
         $settings->set('advancedresourcetemplate_item_set_queries', $queries);
+
+        if ($query === $existingQuery) {
+            return;
+        }
+
+        // Exclude all existing items with this query and add new ones.
+        // Don't use a sql query, but a batch update in order to manage api
+        // calls (indexations).
+        // Use a job: the process via api can be long with many items.
+        $args =[
+            'item_set_id' => $itemSetId,
+        ];
+        $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\AdvancedResourceTemplate\Job\AttachItemsToItemSet::class, $args);
+        $urlHelper = $services->get('ControllerPluginManager')->get('url');
+        $message = new \Omeka\Stdlib\Message(
+            'The query for the item set was changed: a job is run in background to detach and to attach items (%1$sjob #%2$d%3$s, %4$slogs%3$s).', // @translate
+            sprintf('<a href="%s">',
+                htmlspecialchars($urlHelper->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+            ),
+            $job->getId(),
+            '</a>',
+            sprintf('<a href="%s">',
+                htmlspecialchars($this->isModuleActive('Log')
+                    ? $urlHelper->fromRoute('admin/log', [], ['query' => ['job_id' => $job->getId()]])
+                    : $urlHelper->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId(), 'action' => 'log'])
+                )
+            )
+        );
+        $message->setEscapeHtml(false);
+        $messenger->addSuccess($message);
     }
 
     public function addAdminResourceHeaders(Event $event): void
