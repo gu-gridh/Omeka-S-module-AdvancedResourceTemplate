@@ -17,24 +17,24 @@ l’édition des ressources :
   ![Indiquer si un modèle peut être utiliser pour une ressource](data/images/template_by_resource_and_value_annotation.png)
 
 - Indiquer un modèle pour toutes les annotations de valeur d’un modèle de
-  ressource :
+  ressource :
 
   ![Indiquer le modèle à utiliser pour les annotations de valeur](data/images/value_annotation_template.png)
 
 - Indiquer un modèle pour les annotations de valeur de chaque propriété d’un
-  modèle de ressource :
+  modèle de ressource :
 
   ![Indiquer le modèle à utiliser pour les annotations de valeur pour chaque propriété](data/images/value_annotation_template_by_property.png)
 
-- Obligation de choisir une classe parmi une liste définie :
+- Obligation de choisir une classe parmi une liste définie :
 
   ![Obligation de choisir une classe parmi une liste définie](data/images/required_limited_class.png)
 
-- Limitation du formulaire à la liste de propriétés définie :
+- Limitation du formulaire à la liste de propriétés définie :
 
   ![Limitation du formulaire à la liste de propriétés définie](data/images/closed_template.png)
 
-- Contrôle de saisie via un modèle :
+- Contrôle de saisie via un modèle :
 
   Permet de forcer une valeur textuelle à respecter un format via un regex, par
   exemple pour les identifiants.
@@ -43,28 +43,29 @@ l’édition des ressources :
 
 - Longueur minimale/maximale pour une valeur textuelle ;
 
-- Nombre minimum et maximum de valeurs :
+- Nombre minimum et maximum de valeurs :
 
   Cette option permet de n’avoir qu’une seule valeur, par exemple une catégorie
   principale ou une date de publication, ou de limiter le nombre de valeurs à un
   nombre spécifique.
 
-- Valeur par défaut :
+- Valeur par défaut :
 
   Cette option rend plus simple la création manuelle des ressources.
 
-- Valeur automatique (lors de l’enregistrement) :
+- Valeur automatique (lors de l’enregistrement) :
 
   Cette option permet d’ajouter une valeur à la ressource. Par construction,
-  elle ne  peut pas être supprimée.
+  elle ne  peut pas être supprimée. La valeur peut être simple ou créée avec des
+  des jokers et d’autres valeurs. Voir plus bas.
 
-- Valeur bloquée :
+- Valeur bloquée :
 
   Cette option est utile pour les identifiants. Notez qu’une valeur automatique
   est toujours une valeur bloquée. Cette option est donc conçue pour les autres
-  valeurs. Un evaleur bloquée peut toujours être mise à jour via l’api.
+  valeurs. Une valeur bloquée peut toujours être mise à jour via l’api.
 
-- Éclater une valeur avec un séparateur :
+- Éclater une valeur avec un séparateur :
 
   Cette option permet à l’utilisateur d’entrer plusieurs valeurs dans un seul
   champ et ces valeurs sont éclatées lors de l’enregistrement. Par exemple, la
@@ -72,27 +73,29 @@ l’édition des ressources :
   l’utilisateur saisit "alpha ; beta", la chaîne sera éclatée en deux valeurs
   "alpha" et "beta".
 
-- Filtrer les ressources avec une requête :
+- Filtrer les ressources liées avec une requête :
 
   Pour les propriétés avec des ressources liées, la barre de droite recherche
   par défaut dans toutes les ressources. Cette option permet de limiter la
   recherche à un sous-ensemble pour les trouver plus rapidement. La requête à
   indiquer correspond aux arguments d’une recherche avancée standard.
 
-- Auto-complétion avec des valeurs existantes :
+  ![Filtre de sélection des ressources liées](data/images/filter_linked_resources.png)
+
+- Auto-complétion avec des valeurs existantes :
 
   ![Exemple d’auto-complétion](data/images/autocompletion.png)
 
-- Autres paramètres :
+- Autres paramètres :
 
   Cette option permet d’ajouter de nouveaux paramètre à la propriété. Elle ne
   fait rien par défaut, mais peut être utilisée pour passer des informations à
   propos des propriétés du modèle aux thèmes complexes. Aucun format n’est
-  imposé actuellemenet puisque c’est au thème ou à module spécifique de les
+  imposé actuellement puisque c’est au thème ou à module spécifique de les
   gérer. Néanmoins, il est recommandé d’utiliser soit une liste de clés/valeurs
   séparées par "=" ou du json.
 
-- Plusieurs champs avec la même propriété :
+- Plusieurs champs avec la même propriété :
 
   Cette option permet de disposer de la même propriété plusieurs fois avec des
   paramèters différents. Par exemple, dans le cas de la propriété "dcterms:subject"
@@ -101,7 +104,7 @@ l’édition des ressources :
   de données, mais il est aussi possible d’avoir trois propriétés avec
   chacune un seul type de données, avec un libellé et des paramètres spécifiques
   (taille, nombre, etc.), comme dans l’exemple plus bas.
-  **Attention** : pour conserver la compatibilité avec le cœur et les aues
+  **Attention** : pour conserver la compatibilité avec le cœur et les autres
   modules et parce qu’il peut y avoir des variantes de la même propriété, les
   propriétés sont maintenues ensemble dans le modèle. Dans l’exemple ci-dessous,
   il n’est donc pas possible d’insérer une propriété entre deux couvertures
@@ -109,11 +112,11 @@ l’édition des ressources :
 
   ![Exemple de sujets multiples avec des paramètres différents](data/images/duplicate_properties.png)
 
-- Groupe de propriétés avec un libellé :
+- Groupe de propriétés avec un libellé :
 
   Quand les valeurs et les propriétés sont nombreuses, le module permet de les
   grouper sous un titre. Par exemple, vous pouvez grouper les propriétés du
-  Dublin Coe comme cela :
+  Dublin Core comme cela :
 
 ```
   # Métadonnées descriptives
@@ -142,13 +145,13 @@ l’édition des ressources :
 
   Ici, la notice est divisée en quatre groupe. Quand une propriété a plusieurs
   sous-champs, vous pouvez les groupes plus précisément en ajoutant le nom de la
-  propriété dans le modèle après un ^`/`, par exemple : `dcterms:subject/Sujets Rameau`
+  propriété dans le modèle après un ^`/`, par exemple : `dcterms:subject/Sujets Rameau`
   et `dcterms:subject/Sujets libres`.
 
   ![Exemple d’affichage de groupes de propriétés](data/images/groups_properties.png)
 
 - Sélection de la langue et langue par défaut par modèle et par propriété, ou
-  aucune langue :
+  aucune langue :
 
   ![Exemple de langue par modèle et par propriété](data/images/advanced_language_settings.png)
 
@@ -156,14 +159,14 @@ l’édition des ressources :
 
 - Tri des ressources liées (valeurs sujets)
 
-  **Attention** : Cette fonctionnalité nécessite un correctif sur Omeka, en
+  **Attention** : Cette fonctionnalité nécessite un correctif sur Omeka, en
   l’attente de la requête [Omeka/Omeka-S#2054].
 
   Par défaut, Omeka trie les ressources liées par titre. Cette option permet de
   les trier en fonction d’une ou plusieurs autres propriétés. Par exemple, les
   interventions d’une manifestation publiées dans une revue peut être triée par
   `bibo:volume` et `bibo:issue`. Chaque intervention référençant la manifestation
-  via `dcterms:isPartOf`, le paramètre du modèle Manifestation peut être :
+  via `dcterms:isPartOf`, le paramètre du modèle Manifestation peut être :
 
 ```
   # dcterms:isPartOf
@@ -174,17 +177,17 @@ l’édition des ressources :
   Le tri par défaut peut être défini avec `#` sans nom de propriété, mais les
   cas d’usage sont probablement très rares.
 
-- Module Custom Vocab : Liste d’autorité ouverte (module Custom Vocab),
+- Module Custom Vocab : Liste d’autorité ouverte (module Custom Vocab),
   permettant à l’utilisateur d’ajouter de nouveaux termes quand cela est
   nécessaire pour une valeur.
 
   ![Exemple de liste ouverte via module Custom Vocab](data/images/custom_vocab_open.png)
 
-- Module Value Suggest: conserver le libellé original
+- Module Value Suggest : conserver le libellé original
 
-- Module Value Suggest: requiert une uri
+- Module Value Suggest : requiert une uri
 
-- Création d’une nouvelle ressource liée pendant l’édition d’une ressource :
+- Création d’une nouvelle ressource liée pendant l’édition d’une ressource :
 
   Cette fonctionnalité rend possible par exemple la création d’un nouvel auteur
   dans une nouvelle ressource lorsque les auteurs sont gérés en tant que
@@ -194,18 +197,30 @@ l’édition des ressources :
 
   ![Création d’une nouvelle ressource liée via un pop-up](data/images/new_resource_during_edition.png)
 
-- Sélection des types de données par défaut :
+- Sélection des types de données par défaut :
 
   ![Sélection des types de données par défaut](data/images/default_datatypes.png)
 
 - Remplissage automatique des valeurs avec des données externes ([IdRef], [Geonames]
-  et services json ou xml):
+  et services json ou xml) :
 
   Voir ci-dessous.
 
-- Import et export des modèles en  tableur (csv/tsv):
+- Import et export des modèles en  tableur (csv/tsv) :
 
   ![Export des modèles en csv/tsv](data/images/export_spreadsheet.png)
+
+- Placement automatique des contenus dans les collections
+
+  En indiquant une requête dans l’onglet Avancé du formulaire de collection,
+  tous les contenus existants et les nouveaux seront automatiquement placés dans
+  cette collection conformément à la requête.
+
+  Attention : les contenus placés manuellement dans la collection seront
+  automatiquement détachés s’ils ne se trouvent pas dans les résultats de la
+  requête.
+
+  ![Placement automatique des contenus dans les collections](data/images/auto-attach_items_to_item_sets.png)
 
 
 Installation
@@ -227,7 +242,7 @@ décompresser le dans le dossier `modules`.
 * Depuis la source et pour le développement
 
 Si le module est installé depuis la source, renommez le nom du dossier du module
-en `AdvancedResourceTemplate`, puis allez à la racine du module et lancez :
+en `AdvancedResourceTemplate`, puis allez à la racine du module et lancez :
 
 ```sh
 composer install --no-dev
@@ -248,7 +263,7 @@ Par défaut, indiquez simplement la valeur à utiliser comme valeur par défaut.
 Lorsque la valeur est une ressource, la valeur est le numéro de la resource et
 lorsque c’est une uri, c’est l’uri.
 
-Pour une uri avec un libellé, séparez les avec une espace :
+Pour une uri avec un libellé, séparez les avec une espace :
 
 ```
 https://exemple.com/mon-id Libellé de la valeur
@@ -258,7 +273,7 @@ Pour les autres de types de données plus complexes, la valeur par défaut peut
 être indiquée au format json avec toutes les données cachées existant dans le
 formulaire de ressource Omeka.
 
-Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
+Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
 
 ```json
 {
@@ -269,7 +284,7 @@ Pour une uri avec un libellé et une langue (pour le module Value Suggest) :
 }
 ```
 
-Pour une ressource liée, le json sert seulement pour un meilleur affichage :
+Pour une ressource liée, le json sert seulement pour un meilleur affichage :
 
 ```json
 {
@@ -309,7 +324,7 @@ Pour les modèles, la propriété doit être indiquée et éventuellement les au
 données (langue, visibilité).
 
 Par exemple, pour définir le modèle et un identifiant automatique pour un média
-lors de l’enregistrement d’un contenu :
+lors de l’enregistrement d’un contenu :
 
 ```
 ~ = o:resource_template = 1
@@ -324,13 +339,13 @@ les paramètres généraux, puis sélectionnez les dans les modèles de ressourc
 Le schéma de correspondance est un simple texte spécifiant les services et les
 correspondance. Elle utilise le même format que les modules [Export en lot],
 [Import en lot] et [Import de fichiers en lot]. Elle intégrera prochainement les
-améliorations réalisées pour le module [Bulk Import].
+améliorations réalisées pour le module [Import en lot].
 
 #### Services intégrés
 
 Par exemple, si le service renvoie un xml Marc comme pour [Colbert], le schéma
 peut être une liste de XPath et de propriétés avec quelques arguments (ici avec
-l’ontologie [bio], conçue pour gérer les informations biographiques) :
+l’ontologie [bio], conçue pour gérer les informations biographiques) :
 
 ```
 [idref:person] = IdRef Person
@@ -350,41 +365,42 @@ dans le formulaire du modèle de ressource. Plusieurs schémas peuvent être
 ajoutées pour différents services.
 
 Vous pouvez utiliser le même remplisseurs avec plusieurs schémas à des fins
-différentes : ajouter un numéro à la clé (`[idref:person #2]`). Si le schéma
+différentes : ajouter un numéro à la clé (`[idref:person #2]`). Si le schéma
 n’est pas disponible, il sera ignoré. Ne le modifiez pas une fois définie, sinon
 vous devrez vérifier tous les modèles de ressources qui l’utilisent.
 
-Pour un service json, utilisez la notation objet :
+Pour un service json, utilisez la notation objet :
 
 ```
 [geonames]
 ?username=demo
 toponymName = dcterms:title
-geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}/
 adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
 countryName = dcterms:isPartOf
-~ = dcterms:spatial ~ Coordonnées : {lat}/{lng}
+~ = dcterms:spatial ~ Coordonnées : {lat}/{lng}
 ```
 
 Notez que [geonames] nécessite un nom d’utilisateur (qui doit être le votre,
-mais il peut s’agir de "demo", "kdlinfo", "google" ou "johnsmith"). Testez le
-sur https://api.geonames.org/searchJSON?username=demo.
+mais il peut s’agir de "demo", "google" ou "johnsmith"). Testez le sur https://api.geonames.org/searchJSON?username=demo.
+Le module [Value Suggest] utilise désormais "kdlinfo" et il est appliqué si
+aucun nom n’est défini.
 
-Si la clé contient un `.` ou une `\`, le caractère doit être échappé avec une `\` :
+Si la clé contient un `.` ou une `\`, le caractère doit être échappé avec une `\` :
 `\.` et `\\`.
 
 Plus largement, vous pouvez ajouter tout argument à la requête envoyée au
-service à distance : il suffit de les ajouter au format url encodée sur une
+service à distance : il suffit de les ajouter au format url encodée sur une
 ligne commençant par `?`.
 
-Il est également possible de formater les valeurs : il suffit d’ajouter `~` pour
+Il est également possible de formater les valeurs : il suffit d’ajouter `~` pour
 indiquer le format à utiliser et `{__value__}` pour préciser la valeur à partir
 de la source. Pour un schéma complexe, vous pouvez utiliser tout chemin de la
 source entre `{` et `}`.
 
 Pour un modèle plus complexe, vous pouvez utiliser des [filtres Twig] avec la
 valeur. Par exemple, pour convertir une date "17890804" en une norme [ISO 8601],
-avec la date numérique `1789-08-04`, vous pouvez utiliser :
+avec la date numérique `1789-08-04`, vous pouvez utiliser :
 
 ```
 /record/datafield[@tag="103"]/subfield[@code="b"] = dcterms:valid ^^numeric:timestamp ~ {{ value|trim|slice(1,4) }}-{{ value|trim|slice(5,2) }}-{{ value|trim|slice(7,2) }}
@@ -398,7 +414,7 @@ deux `}`. Il ne fonctionne qu’avec la valeur `value` actuelle.
 Si vous souhaitez inclure un service qui n’est pas pris en charge actuellement,
 vous pouvez choisir les remplisseurs `generic:json` ou `generic:xml`. Deux
 paramètres obligatoires et deux paramètres facultatifs doivent être ajoutés sur
-quatre lignes distinctes :
+quatre lignes distinctes :
 - l’url complète du service,
   Notez que le protocole peut devoir être "http" et non "https" sur certains
   serveurs (celui où Omeka est installé), car la requête est faite par Omeka
@@ -412,7 +428,7 @@ quatre lignes distinctes :
   indiqué par `{__label__}`. S’il est absent, le premier champ sera utilisé.
 
 Par exemple, vous pouvez interroger un autre service Omeka S (essayez avec
-"archives"), ou les services ci-dessus :
+"archives"), ou les services ci-dessus :
 
 ```
 [generic:json #Mall History] Omeka S demo Mall History
@@ -428,7 +444,7 @@ http://api.geonames.org/searchJSON
 ?username=johnsmith&q={query}
 geonames = {list}
 toponymName = dcterms:title
-geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}/
 adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
 countryName = dcterms:isPartOf
 ~ = dcterms:spatial ~ Coordinates: {lat}/{lng}
@@ -450,8 +466,8 @@ TODO
 ----
 
 - [x] Ajouter les modèles pour les annotations de valeur.
-- [ ] Remplacer FieldNameToProperty avec AutomapFields ou TransformSource du module BulkImport.
-- [ ] Remplacer `{__value__}` et `{__label__}` par `{value}` et `{label}` (prêt dans module BulkImport).
+- [x] Remplacer FieldNameToProperty avec AutomapFields ou MetaMapper du module BulkImport.
+- [ ] Remplacer `{__value__}` et `{__label__}` par `{{ value }}` et `{{ label }}` (prêt dans module BulkImport).
 - [ ] Inclure tous les suggesteurs du module [Value Suggest].
 - [ ] Limiter l’autocomplétion aux ressources choisies.
 - [ ] Autocompléter avec des ressources, pas des valeurs.
@@ -525,7 +541,7 @@ Copyright
 ---------
 
 * Copyright Daniel Berthereau, 2020-2023 (voir [Daniel-KM] sur GitLab)
-* Library [jQuery-Autocomplete]: Copyright 2012 DevBridge et autres contributeurs
+* Library [jQuery-Autocomplete] : Copyright 2012 DevBridge et autres contributeurs
 
 Ces fonctionnalités sont destinées à la future bibliothèque numérique [Manioc]
 de l’Université des Antilles et de l’Université de la Guyane, actuellement gérée

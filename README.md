@@ -52,7 +52,8 @@ resources:
 - Automatic value (on save):
 
   This option allows to add a value to the resource. By construction, this value
-  cannot be removed.
+  cannot be removed. The value can be a raw one or created with placeholders and
+  other values. See below.
 
 - Locked values:
 
@@ -67,11 +68,13 @@ resources:
   can use the ";" as separator, so when the user fills "alpha; beta", it will be
   exploded into two values "alpha" and "beta".
 
-- Filter resources with a query:
+- Filter linked resources with a query:
 
   For properties filled with an internal resource, the right sidebar searches in
   all resources by default. The option allows to limit them with a query to find
   them quickly. The query is the arguments of an standard advanced search request.
+
+  ![Filter to select of linked ressources](data/images/filter_linked_resources.png)
 
 - Auto-completion with existing values:
 
@@ -193,6 +196,17 @@ resources:
 - Import and export of templates as spreadsheet (csv/tsv):
 
   ![Export of templates as csv/tsv](data/images/export_spreadsheet.png)
+
+- Automatic attachment of items to item sets
+
+  When a query is set in the tab Advanced of the item set form, all existing and
+  new items will be automatically attached to this item set, according to the
+  request.
+
+  Attention : items that are manually attached to the item set will be
+  automatically detached if they are not in the results of the request.
+
+  ![Automatic attachment of items to item sets](data/images/auto-attach_items_to_item_sets.png)
 
 
 Installation
@@ -341,15 +355,16 @@ For a json service, use the object notation:
 [geonames]
 ?username=demo
 toponymName = dcterms:title
-geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}/
 adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
 countryName = dcterms:isPartOf
 ~ = dcterms:spatial ~ Coordonnées : {lat}/{lng}
 ```
 
 Note that [geonames] requires a user name (that should be the one of your
-institution, but it can be "demo", "kdlinfo", "google", or "johnsmith").
-Test it on https://api.geonames.org/searchJSON?username=demo.
+institution, but it can be "demo", "google", or "johnsmith"). Test it on
+https://api.geonames.org/searchJSON?username=demo. The module [Value Suggest]
+uses "kdlinfo" now, so it is used if no other user name is defined.
 
 If the key contains a `.` or a `\`, it should be escaped with a `\`: `\.` and `\\`.
 
@@ -386,7 +401,7 @@ params should be added on four separate lines:
 - the path to the list of results, when it is not root, in order to loop them,
   indicated with `{list}`,
 - the path to the value to use as a label for each result, indicated with
-  `{__label__}`. If absent, the first field will be used.
+  `{__label__}`. If missing, the first field will be used.
 
 For exemple, you can query another Omeka S service (try with "archives"), or the
 services above:
@@ -405,7 +420,7 @@ http://api.geonames.org/searchJSON
 ?username=johnsmith&q={query}
 geonames = {list}
 toponymName = dcterms:title
-geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}
+geonameId = dcterms:identifier ^^uri ~ https://www.geonames.org/{__value__}/
 adminCodes1.ISO3166_2 = dcterms:identifier ~ ISO 3166-2: {__value__}
 countryName = dcterms:isPartOf
 ~ = dcterms:spatial ~ Coordinates: {lat}/{lng}
@@ -427,7 +442,7 @@ TODO
 ----
 
 - [x] Integrate template for value annotations.
-- [ ] Replace the mapper with AutomapFields or TransformSource from module [Bulk Import].
+- [x] Replace the mapper with AutomapFields or MetaMapper from module [Bulk Import].
 - [ ] Replace `{__value__}` and `{__label__}` by `{{ value }}` and `{{ label }}` (ready in module [Bulk Import]).
 - [ ] Include all suggesters from module [Value Suggest].
 - [ ] Limit autocompletion to selected resources.
