@@ -1035,11 +1035,13 @@ SQL;
          * @var \Omeka\Api\Request $request
          * @var \Omeka\Api\Response $response
          * @var \Omeka\Entity\ItemSet|\Omeka\Api\Representation\ItemSetRepresentation $itemSet
+         * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
          */
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
         $request = $event->getParam('request');
         $response = $event->getParam('response');
+        $messenger = $services->get('ControllerPluginManager')->get('messenger');
 
         $itemSet = $response->getContent();
         $itemSetId = method_exists($itemSet, 'getId') ? $itemSet->getId() : $itemSet->id();
@@ -1061,6 +1063,26 @@ SQL;
                 unset($query['id']);
             } elseif (!is_array($query['id'])) {
                 $query['id'] = [$query['id']];
+            }
+            // Of course, remove the current item set id from the query, else it
+            // won't contains anything.
+            if (!empty($query['item_set_id'])) {
+                // Take care of module Advanced Search, that can search multiple
+                // item set ids.
+                $check = false;
+                if (is_array($query['item_set_id'])) {
+                    $query['item_set_id'] = array_diff($query['item_set_id'], [$itemSetId]);
+                    $check = true;
+                } elseif ((int) $query['item_set_id'] === (int) $itemSetId) {
+                    unset($query['item_set_id']);
+                    $check = true;
+                }
+                if ($check) {
+                    $message = new \Omeka\Stdlib\Message(
+                        'The query to attach items cannot contain the item set itself.' // @translate
+                    );
+                    $messenger->addWarning($message);
+                }
             }
             $queries[$itemSetId] = $query;
         }
@@ -1184,16 +1206,14 @@ SQL;
         $element = $formManager->get(\Omeka\Form\Element\Query::class);
         $element
             ->setName('item_set_query_items')
-            ->setLabel('Search query to attach items automatically to this item set') // @translate
+            ->setLabel('Query to attach items automatically to this item set') // @translate
             ->setOptions([
-                'query_resource_type' => 'item_sets',
-                'query_partial_excludelist' => [],
+                'query_resource_type' => 'items',
             ])
             ->setAttributes([
                 'id' => 'item_set_query_items',
                 'value' => $query,
             ]);
-
         echo $view->formRow($element);
     }
 
