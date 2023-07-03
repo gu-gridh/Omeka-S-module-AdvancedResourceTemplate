@@ -37,7 +37,7 @@ class IdRefAutofiller extends AbstractAutofiller
         ],
         'idref:rameau' => [
             'label' => 'IdRef: Subjects Rameau', // @translate
-            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=recordtype_z%3Ar%20AND%20subjectheading_t%3A',
+            'url' => 'https://www.idref.fr/Sru/Solr?wt=json&version=2.2&start=&rows=30&indent=on&fl=id,ppn_z,affcourt_z&q=recordtype_z%3Aj%20AND%20subjectheading_t%3A',
         ],
         'idref:fmesh' => [
             'label' => 'IdRef: Subjects F-MeSH', // @translate
