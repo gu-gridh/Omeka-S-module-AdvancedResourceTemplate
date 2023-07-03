@@ -111,7 +111,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 'name' => 'unique_value',
                 'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
                 'options' => [
-                    'label' => 'Unique value', // @translate
+                    'label' => 'Unique value among resources', // @translate
                     'checked_value' => 'yes',
                 ],
                 'attributes' => [

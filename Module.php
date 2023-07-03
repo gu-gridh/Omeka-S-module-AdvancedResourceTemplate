@@ -832,7 +832,7 @@ SQL;
         // imports too, or resources with a template that was updated later.
 
         $services = $this->getServiceLocator();
-        $translate = $services->get('ViewHelperManager')->get('translate');
+        $translator = $services->get('MvcTranslator');
 
         // TODO Check if this process can be simplified (three double loops, even if loops are small and for one resource a time).
 
@@ -842,6 +842,7 @@ SQL;
         // Check and prepare values when a property have multiple labels.
         $labelsAndComments = [];
         $hasMultipleLabels = false;
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation $rtp */
         foreach ($templateProperties as $rtp) {
             $property = $rtp->property();
             $term = $property->term();
@@ -868,11 +869,11 @@ SQL;
                     ?? $labelsAndComments[$term]['default']['label']
                     // Manage properties appended to a resource that are not in
                     // the template for various reasons.
-                    ?? $translate($property->label());
+                    ?? $translator->translate($property->label());
                 $valuesWithLabel[$term][$dataTypeLabel]['values'][] = $value;
                 $dataTypesLabelsToComments[$dataTypeLabel] = $labelsAndComments[$term][$dataType]['comment']
                     ?? $labelsAndComments[$term]['default']['comment']
-                    ?? $translate($property->comment());
+                    ?? $translator->translate($property->comment());
             }
         }
 

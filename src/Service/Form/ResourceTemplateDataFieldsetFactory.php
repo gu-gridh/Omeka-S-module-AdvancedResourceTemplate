@@ -17,7 +17,6 @@ class ResourceTemplateDataFieldsetFactory implements FactoryInterface
 
         $form = new ResourceTemplateDataFieldset(null, $options ?? []);
         return $form
-            ->setTranslator($services->get('MvcTranslator'))
             ->setAutofillers($autofillers)
             ->setHasAnnotations($services->get('Omeka\ApiAdapterManager')->has('annotations'))
         ;

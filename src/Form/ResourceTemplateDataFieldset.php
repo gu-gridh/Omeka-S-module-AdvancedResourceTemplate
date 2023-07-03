@@ -5,13 +5,10 @@ namespace AdvancedResourceTemplate\Form;
 use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
-use Laminas\I18n\Translator\TranslatorAwareTrait;
 use Omeka\Form\Element as OmekaElement;
 
 class ResourceTemplateDataFieldset extends Fieldset
 {
-    use TranslatorAwareTrait;
-
     /**
      * @var array
      */
@@ -193,8 +190,8 @@ class ResourceTemplateDataFieldset extends Fieldset
                     'multiple' => true,
                     'class' => 'chosen-select',
                     'data-placeholder' => count($this->autofillers)
-                        ? $this->getTranslator()->translate('Select autofillers…') // @translate
-                        : $this->getTranslator()->translate('No configured autofiller.'), // @translate
+                        ? 'Select autofillers…' // @translate
+                        : 'No configured autofiller.', // @translate
                 ],
             ])
 
