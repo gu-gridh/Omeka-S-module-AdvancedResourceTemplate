@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-05 00:00+0000\n"
-"PO-Revision-Date: 2023-06-05 00:00+0000\n"
+"POT-Creation-Date: 2023-07-03 00:00+0000\n"
+"PO-Revision-Date: 2023-07-03 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -34,14 +34,6 @@ msgstr "Le service est vide."
 #: src/Controller/Admin/IndexController.php:152
 msgid "The template is empty."
 msgstr "Le modèle est vide."
-
-#: src/Form/ResourceTemplateDataFieldset.php:187
-msgid "Select autofillers…"
-msgstr "Choisir des remplisseurs…"
-
-#: src/Form/ResourceTemplateDataFieldset.php:188
-msgid "No configured autofiller."
-msgstr "Aucun remplisseur configuré."
 
 #: src/Generic/AbstractModule.php:80 src/Generic/AbstractModule.php:88
 #: src/Generic/AbstractModule.php:890
@@ -184,7 +176,7 @@ msgstr ""
 "Il est désormais possible de trier les ressources liées par une autre "
 "propriété que le titre (nécessite Omeka S v4.1)."
 
-#: data/scripts/upgrade.php:287
+#: data/scripts/upgrade.php:330
 msgid ""
 "It’s now possible to limit templates available by resource, for example the "
 "template \"Incunable\" for items only and the template \"Folio\" for medias "
@@ -194,32 +186,54 @@ msgstr ""
 "par exemple le modèle « Incunable » pour les contenus seuls et le modèle "
 "« Folio » pour les médias seuls."
 
-#: data/scripts/upgrade.php:292
+#: data/scripts/upgrade.php:335
 msgid ""
 "It’s now possible to specify templates by property for value annotations."
 msgstr ""
 "Il est désormais possible de définir des modèles par propriété pour les "
 "annotations de valeur."
 
-#: Module.php:410
+#: data/scripts/upgrade.php:340
+msgid ""
+"All existing templates are made available by items only. Check your "
+"templates if you need."
+msgstr ""
+"Les modèles existants sont désormais disponibles uniquement par les "
+"contenus. Vérifiez vos modèles si besoin."
+
+#: data/scripts/upgrade.php:345
+msgid ""
+"If you use specific templates, you may have to check this new parameter."
+msgstr ""
+"Si vous utilisez des modèles spécifiques, vous devez vérifier ce nouveau "
+"paramètre."
+
+#: data/scripts/upgrade.php:352
+msgid ""
+"It’s now possible to specify templates for annotations of module Annotate."
+msgstr ""
+"Il est désormais possible de définir des modèles pour les annotations du "
+"module Annotate."
+
+#: Module.php:445
 msgid "This template cannot be used for this resource."
 msgstr "Ce modèle ne peut pas être utilisé pour cette ressource."
 
-#: Module.php:420
+#: Module.php:455
 msgid "A class is required."
 msgstr "Une classe est requise."
 
-#: Module.php:430
+#: Module.php:465
 #, php-format
 msgid "The class should be \"%s\"."
 msgstr "La classe doit être « %s »."
 
-#: Module.php:436
+#: Module.php:471
 #, php-format
 msgid "The class should be one of \"%s\"."
 msgstr "La classe doit être l’une de \"%s\"."
 
-#: Module.php:472
+#: Module.php:507
 #, php-format
 msgid ""
 "The html input pattern \"%1$s\" for template \"%2$s\" cannot be processed."
@@ -227,7 +241,7 @@ msgstr ""
 "Le contrôle de saisie « %1$s » pour le modèle de ressource « %2$s » ne peut "
 "pas être traité."
 
-#: Module.php:481
+#: Module.php:516
 #, php-format
 msgid ""
 "The value \"%1$s\" for term \"%2$s\" does not follow the input pattern \"%3$s"
@@ -236,7 +250,7 @@ msgstr ""
 "La valeur « %1$s » pour la propriété « %2$s » ne correspond pas au format "
 "demandé « %3$s »."
 
-#: Module.php:500
+#: Module.php:535
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is shorter (%2$d characters) than the minimal "
@@ -245,7 +259,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus courte (%2$d caractères) que "
 "la taille minimale (%3$d caractères)."
 
-#: Module.php:510
+#: Module.php:545
 #, php-format
 msgid ""
 "The value for term \"%1$s\" is longer (%2$d characters) than the maximal "
@@ -254,7 +268,7 @@ msgstr ""
 "La valeur pour la propriété « %1$s » est plus longue (%2$d caractères) que "
 "la taille maximale (%3$d caractères)."
 
-#: Module.php:532
+#: Module.php:567
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is lower than the minimal "
@@ -263,7 +277,7 @@ msgstr ""
 "Le nombre de valeur (%1$d) pour la propriété « %2$s » est plus petit que le "
 "nombre minimum (%3$d)."
 
-#: Module.php:543
+#: Module.php:578
 #, php-format
 msgid ""
 "The number of values (%1$d) for term \"%2$s\" is greater than the maximal "
@@ -272,7 +286,7 @@ msgstr ""
 "Le nombre de valeur (%1$d) pour la propriété « %2$s » est plus grand que le "
 "nombre maximum (%3$d)."
 
-#: Module.php:601
+#: Module.php:636
 #, php-format
 msgid ""
 "The value for term \"%1$s\" should be unique, but already set for resource #"
@@ -281,26 +295,162 @@ msgstr ""
 "La valeur pour le terme « %1$s » doit être unique, mais elle est déjà "
 "utilisée pour la ressource #%2$s."
 
-#: Module.php:1205
+#: Module.php:1086
+msgid "The query to attach items cannot contain the item set itself."
+msgstr ""
+"La requête pour attacher les contenus ne peut pas contenir la collection "
+"elle-même."
+
+#: Module.php:1110
+#, php-format
+msgid ""
+"The query for the item set was changed: a job is run in background to detach "
+"and to attach items (%1$sjob #%2$d%3$s, %4$slogs%3$s)."
+msgstr ""
+"La requête pour la collection a changé : une tâche a été lancée en arrière-"
+"plan pour détacher et attacher les contenus (%1$stâche #%2$d%3$s, "
+"%4$sjournaux%3$s)."
+
+#: Module.php:1243
+msgid "Query to attach items automatically to this item set"
+msgstr "Requête pour placer automatiquement les contenus dans cette collection"
+
+#: Module.php:1466
 #, php-format
 msgid "New descriptor appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 "Un nouveau descripteur a été ajouté au vocabulaire personnalisé « %1$s » : "
 "« %2$s »"
 
-#: Module.php:1210
+#: Module.php:1471
 #, php-format
 msgid "New descriptors appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 "De nouveaux descripteurs ont été ajoutés au vocabulaire personnalisé "
 "« %1$s » : \"%2$s\""
 
-#: Module.php:1218
+#: Module.php:1479
 #, php-format
 msgid "Unable to append new descriptors to custom vocab \"%1$s\": %2$s"
 msgstr ""
 "Impossible d’ajouter de nouveaux descripteurs au vocabulaire personnalisé "
 "« %1$s » : %2$s"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1035
+msgid "resource"
+msgstr "ressource"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1036
+msgid "annotation"
+msgstr "annotation"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1038
+msgid "property"
+msgstr "propriété"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1039
+msgid "resource class"
+msgstr "classe de ressource"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1052
+msgid "assets"
+msgstr "fichiers"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1053
+msgid "items"
+msgstr "contenus"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1054
+msgid "item sets"
+msgstr "collections"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1056
+msgid "resources"
+msgstr "ressources"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1057
+msgid "annotations"
+msgstr "annotations"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1058
+msgid "vocabularies"
+msgstr "vocabulaires"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1059
+msgid "properties"
+msgstr "propriétés"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1060
+msgid "resource classes"
+msgstr "classes de ressource"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1061
+msgid "resource templates"
+msgstr "modèles de ressource"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1125
+#: src/Mvc/Controller/Plugin/Bulk.php:1130
+msgid ""
+"Identifier \"{identifier}\" is not unique ({count} values). First is "
+"resource #{id}."
+msgstr ""
+"L’identifiant « {identifier} » n’est pas unique ({count} valeurs). Le "
+"premier est la ressource #{id}."
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1143
+#: src/Mvc/Controller/Plugin/Bulk.php:1147
+msgid "Duplicate identifiers are not allowed."
+msgstr "Les identifiants en double ne sont pas autorisés."
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1247
+#: src/Mvc/Controller/Plugin/Bulk.php:1255
+msgid ""
+"The {resource} #{id} has a linked resource or an annotation for term {term} "
+"that is not available and cannot be serialized."
+msgstr ""
+"La {resource} #{id} a une ressource liée ou une annotation pour la propriété "
+"{term} qui n’est pas disponible et ne peut pas être sérialisée."
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1436
+msgid ""
+"Error when saving \"{filename}\" (temp file: \"{tempfile}\"): {exception}"
+msgstr ""
+"Erreur lors de l’enregistrement de « {filename} » (fichier temporaire : "
+"« {tempfile} ») : {exception}"
+
+#: src/Mvc/Controller/Plugin/Bulk.php:1445
+msgid "Error when saving \"{filename}\" (temp file: \"{tempfile}\"): {error}"
+msgstr ""
+"Erreur lors de l’enregistrement de « {filename} » (fichier temporaire : "
+"« {tempfile} ») : {error}"
+
+#: src/Job/AttachItemsToItemSet.php:33
+msgid "No item set defined."
+msgstr "Aucune collection définie."
+
+#: src/Job/AttachItemsToItemSet.php:42
+#, php-format
+msgid "The item set #%d does not exist."
+msgstr "La collection #%d n’existe pas."
+
+#: src/Job/AttachItemsToItemSet.php:66
+#, php-format
+msgid "%1$d/%2$d items detached from item set #%3$d."
+msgstr "%1$d/%2$d contenus détachés de la collection #%3$d."
+
+#: src/Job/AttachItemsToItemSet.php:82
+#, php-format
+msgid "%1$d/%2$d new items attached to item set #%3$d."
+msgstr "%1$d/%2$d nouveaux contenus attachés à la collection #%3$d."
+
+#: src/Job/AttachItemsToItemSet.php:89
+#, php-format
+msgid ""
+"Process ended for item set #%1$d: %2$d items was attached, %3$d items were "
+"detached, %4$d new items were attached."
+msgstr ""
+"Process terminé pour la collection #%1$d: %2$d contenus étaient attachés, "
+"%3$d contenus ont été détachés, %4$d nouveaux contenus ont été attachés."
 
 #: src/Form/SettingsFieldset.php:11
 msgid "Advanced Resource Template"
@@ -383,7 +533,7 @@ msgid "Forbid"
 msgstr "Interdir"
 
 #: src/Form/SettingsFieldset.php:78
-#: src/Form/ResourceTemplateDataFieldset.php:178
+#: src/Form/ResourceTemplateDataFieldset.php:184
 msgid "Autofillers"
 msgstr "Remplisseurs"
 
@@ -393,84 +543,96 @@ msgstr ""
 "Les autoremplisseurs doivent être indiquées dans les paramètres des modèles."
 
 #: src/Form/ResourceTemplateDataFieldset.php:26
-#: src/Form/ResourceTemplateDataFieldset.php:198
+msgid "Medias"
+msgstr "Médias"
+
+#: src/Form/ResourceTemplateDataFieldset.php:28
+#: src/Form/ResourceTemplateDataFieldset.php:204
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:296
 msgid "Value annotations"
 msgstr "Annotations de valeur"
 
-#: src/Form/ResourceTemplateDataFieldset.php:34
+#: src/Form/ResourceTemplateDataFieldset.php:40
 msgid "Use for resources"
 msgstr "Utiliser pour les ressources"
 
-#: src/Form/ResourceTemplateDataFieldset.php:49
+#: src/Form/ResourceTemplateDataFieldset.php:55
 msgid "Require a class"
 msgstr "Requiert une classe"
 
-#: src/Form/ResourceTemplateDataFieldset.php:60
+#: src/Form/ResourceTemplateDataFieldset.php:66
 msgid "Limit to specified classes"
 msgstr "Limiter aux classes listées"
 
-#: src/Form/ResourceTemplateDataFieldset.php:71
+#: src/Form/ResourceTemplateDataFieldset.php:77
 msgid "Limit to specified properties"
 msgstr "Limiter aux propriétés listées"
 
-#: src/Form/ResourceTemplateDataFieldset.php:83
+#: src/Form/ResourceTemplateDataFieldset.php:89
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:178
 msgid "Allow quick creation of a resource"
 msgstr "Autoriser la création rapide d’une ressource"
 
-#: src/Form/ResourceTemplateDataFieldset.php:95
+#: src/Form/ResourceTemplateDataFieldset.php:101
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:196
 msgid "Autocomplete with existing values"
 msgstr "Auto-compléter avec des valeurs existantes"
 
-#: src/Form/ResourceTemplateDataFieldset.php:98
+#: src/Form/ResourceTemplateDataFieldset.php:104
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:200
 msgid "Starts with"
 msgstr "Commence par"
 
-#: src/Form/ResourceTemplateDataFieldset.php:99
+#: src/Form/ResourceTemplateDataFieldset.php:105
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:201
 msgid "Contains"
 msgstr "Contient"
 
-#: src/Form/ResourceTemplateDataFieldset.php:112
+#: src/Form/ResourceTemplateDataFieldset.php:118
 msgid "Languages for values"
 msgstr "Langues pour les valeurs"
 
-#: src/Form/ResourceTemplateDataFieldset.php:133
+#: src/Form/ResourceTemplateDataFieldset.php:139
 msgid "No language"
 msgstr "Pas de langue"
 
-#: src/Form/ResourceTemplateDataFieldset.php:145
+#: src/Form/ResourceTemplateDataFieldset.php:151
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:259
 msgid "Value Suggest: keep original label"
 msgstr "Value Suggest : conserver le libellé original"
 
-#: src/Form/ResourceTemplateDataFieldset.php:156
+#: src/Form/ResourceTemplateDataFieldset.php:162
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:277
 msgid "Value Suggest: require uri"
 msgstr "Value Suggest : uri obligatoire"
 
-#: src/Form/ResourceTemplateDataFieldset.php:168
+#: src/Form/ResourceTemplateDataFieldset.php:174
 msgid "Automatic values (on save)"
 msgstr "Valeurs automatiques (lors de l’enregistrement)"
 
-#: src/Form/ResourceTemplateDataFieldset.php:201
+#: src/Form/ResourceTemplateDataFieldset.php:193
+msgid "Select autofillers…"
+msgstr "Choisir des remplisseurs…"
+
+#: src/Form/ResourceTemplateDataFieldset.php:194
+msgid "No configured autofiller."
+msgstr "Aucun remplisseur configuré."
+
+#: src/Form/ResourceTemplateDataFieldset.php:207
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:300
 msgid "Manual selection (default)"
 msgstr "Sélection manuelle (défaut)"
 
-#: src/Form/ResourceTemplateDataFieldset.php:202
+#: src/Form/ResourceTemplateDataFieldset.php:208
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:301
 msgid "No value annotation"
 msgstr "Aucune annotation de valeur"
 
-#: src/Form/ResourceTemplateDataFieldset.php:225
+#: src/Form/ResourceTemplateDataFieldset.php:231
 msgid "Groups"
 msgstr "Groupes"
 
-#: src/Form/ResourceTemplateDataFieldset.php:226
+#: src/Form/ResourceTemplateDataFieldset.php:232
 msgid ""
 "Allow to get properties by group for display. This is a list of group names "
 "and properties for each of them. May need a specific theme template."
@@ -479,11 +641,11 @@ msgstr ""
 "de noms de groupes et de propriétés. Dans certains cas, le thème doit être "
 "mis à jour."
 
-#: src/Form/ResourceTemplateDataFieldset.php:260
+#: src/Form/ResourceTemplateDataFieldset.php:266
 msgid "Order of linked values (Omeka v4.1)"
 msgstr "Tri des valeurs liées (Omeka v4.1)"
 
-#: src/Form/ResourceTemplateDataFieldset.php:261
+#: src/Form/ResourceTemplateDataFieldset.php:267
 msgid ""
 "The default order of the linked resources is the title. Another order can be "
 "set for each linking property. For the default order when there is no "
@@ -493,12 +655,12 @@ msgstr ""
 "être défini pour chaque propriété liante. Pour définir le tri par défaut en "
 "l‘absence de propriété, ne pas indiquer le terme."
 
-#: src/Form/ResourceTemplateDataFieldset.php:280
+#: src/Form/ResourceTemplateDataFieldset.php:286
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:323
 msgid "More settings"
 msgstr "Autres paramètres"
 
-#: src/Form/ResourceTemplateDataFieldset.php:281
+#: src/Form/ResourceTemplateDataFieldset.php:287
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:324
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
@@ -536,8 +698,8 @@ msgid "Automatic value (on save)"
 msgstr "Valeur automatique (lors de l’enregistrement)"
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:114
-msgid "Unique value"
-msgstr "Valeur unique"
+msgid "Unique value among resources"
+msgstr "Valeur unique parmi toutes les ressources"
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:127
 msgid "Locked value once saved"
@@ -657,7 +819,7 @@ msgstr "IdRef : PPN"
 msgid "IdRef: Library registry (RCR)"
 msgstr "IdRef : Registre des centres de ressources (RCR)"
 
-#: src/Autofiller/AbstractAutofiller.php:57
+#: src/Autofiller/AbstractAutofiller.php:58
 #, php-format
 msgid "%1$s: %2$s"
 msgstr "%1$s : %2$s"
@@ -733,16 +895,19 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr "Configuration des remplisseurs manquante."
 
-#: config/module.config.php:169
+#: config/module.config.php:165
 msgid "New value"
 msgstr "Nouvelle valeur"
 
-#: config/module.config.php:170
+#: config/module.config.php:166
 msgid "No results"
 msgstr "Pas de résultats"
 
 msgid "No %s found."
 msgstr "Aucun %s trouvé."
+
+#~ msgid "Unique value"
+#~ msgstr "Valeur unique"
 
 #~ msgid "label"
 #~ msgstr "libellé"
@@ -798,9 +963,6 @@ msgstr "Aucun %s trouvé."
 #~ msgid "Delete"
 #~ msgstr "Supprimer"
 
-#~ msgid "Add property"
-#~ msgstr "Ajouter une propriété"
-
 #~ msgid "Original"
 #~ msgstr "Original"
 
@@ -827,9 +989,6 @@ msgstr "Aucun %s trouvé."
 
 #~ msgid "Remove property"
 #~ msgstr "Supprimer la propriété"
-
-#~ msgid "New resource template"
-#~ msgstr "Nouveau modèle de ressource"
 
 #~ msgid "Add"
 #~ msgstr "Ajouter"
