@@ -11,6 +11,7 @@ class GeonamesAutofiller extends AbstractAutofiller
      * The username can be set as sub (username:xxx).
      *
      * @link https://www.geonames.org/export/geonames-search.html
+     * @see \ValueSuggest\Suggester\Geonames\GeonamesSuggest::getSuggestions()
      */
     public function getResults($query, $lang = null)
     {
@@ -26,8 +27,10 @@ class GeonamesAutofiller extends AbstractAutofiller
 
         // The Geonames api requires a username. Some common names can be used:
         // "demo", "johnsmith", "google"… The requests may be limited per hour.
+        // Last Value Suggest version uses "kdlinfo".
+        /** @see \ValueSuggest\Suggester\Geonames\GeonamesSuggest::getSuggestions() */
         if (empty($params['username'])) {
-            return null;
+            $params['username'] = 'kdlinfo';
         }
 
         // "http" is used to avoid issues with certificates on the server.
