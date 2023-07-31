@@ -71,6 +71,17 @@ Warning: you may have to set each resource template as open/close to addition ac
                 ],
             ])
             ->add([
+                'name' => 'advancedresourcetemplate_skip_private_values',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Skip private values on sites, even when user is connected', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_skip_private_values',
+                ],
+            ])
+            ->add([
                 'name' => 'advancedresourcetemplate_autofillers',
                 'type' => Element\Textarea::class,
                 'options' => [

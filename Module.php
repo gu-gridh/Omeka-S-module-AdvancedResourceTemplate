@@ -675,6 +675,27 @@ SQL;
         $resource = $event->getTarget();
         $template = $resource->resourceTemplate();
         $values = $event->getParam('values');
+
+        $services = $this->getServiceLocator();
+        $status = $services->get('Omeka\Status');
+        if ($status->isSiteRequest()
+            && $services->get('Omeka\Settings')->get('advancedresourcetemplate_skip_private_values')
+        ) {
+            foreach ($values as $term => &$propertyData) {
+                /** @var \Omeka\Api\Representation\ValueRepresentation $value */
+                foreach ($propertyData['values'] as $key => $value) {
+                    if (!$value->isPublic()) {
+                        unset($propertyData['values'][$key]);
+                    }
+                }
+                if (count($propertyData['values'])) {
+                    $propertyData['values'] = array_values($propertyData['values']);
+                } else {
+                    unset($values[$term]);
+                }
+            }
+        }
+
         if ($template) {
             $groups = $template->dataValue('groups', []);
             $templateProperties = $template->resourceTemplateProperties();

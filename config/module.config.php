@@ -177,6 +177,7 @@ return [
             ],
             'advancedresourcetemplate_skip_checks' => false,
             'advancedresourcetemplate_closed_property_list' => '0',
+            'advancedresourcetemplate_skip_private_values' => false,
             // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
             // Hidden settings.
