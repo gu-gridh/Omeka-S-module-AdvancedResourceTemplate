@@ -353,7 +353,7 @@ var Omeka = {
                     const match = inputName.match(/property\[(\d+)\]\[text\]/);
                     if (match) {
                         const propertyType = form.find(`[name="property[${match[1]}][type]"]`);
-                        if (['eq', 'neq', 'in', 'nin', 'res', 'nres', 'list', 'nlist', 'sw', 'nsw', 'ew', 'new', 'near', 'nnear', 'lres', 'nlres', 'tp', 'ntp', 'dtp', 'ndtp', 'gt', 'gte', 'lte', 'lt']
+                        if (['eq', 'neq', 'in', 'nin', 'res', 'nres', 'list', 'nlist', 'sw', 'nsw', 'ew', 'new', 'near', 'nnear', 'lres', 'nlres', 'lkq', 'nlkq', 'tp', 'ntp', 'dtp', 'ndtp', 'gt', 'gte', 'lte', 'lt']
                             .includes(propertyType.val())
                         ) {
                             form.find(`[name="property[${match[1]}][joiner]"]`).prop('name', '');
