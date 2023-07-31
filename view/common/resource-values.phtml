@@ -18,6 +18,7 @@ if (!$values || !class_exists('AdvancedResourceTemplate\Api\Representation\Resou
     return;
 }
 
+// Prepare plugins one time, since "include" is used, not partial().
 $plugins = $this->getHelperPluginManager();
 
 /*
@@ -28,6 +29,7 @@ if ($this->status()->isSiteRequest()) {
     $showLocale = (bool) $siteSetting('show_locale_label', true);
     $filterLocale = (bool) $siteSetting('filter_locale_values');
     $lang = $plugins->get('lang')();
+    $valOptions = $filterLocale ? ['lang' => $lang] : [];
     $showValueAnnotations = (bool) $siteSetting('show_value_annotations', false);
 } else {
     $setting = $plugins->get('setting');
@@ -35,6 +37,7 @@ if ($this->status()->isSiteRequest()) {
     $showLocale = true;
     $filterLocale = false;
     $lang = null;
+    $valOptions = $filterLocale ? ['lang' => $lang] : [];
     $showValueAnnotations = true;
 }
 */
@@ -62,6 +65,7 @@ if (!$template || !$groups) {
 
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
+// $escapeAttr = $plugins->get('escapeHtmlAttr');
 ?>
 
 <div class="property-groups">
@@ -87,7 +91,7 @@ $translate = $plugins->get('translate');
         <?php endif;
     endforeach;
     // Display metadata that are not in any group.
-    if ($sourceValues->key()):
+    if ($sourceValues->key() !== null):
         $values = $sourceValues; ?>
     <div class="property-group">
         <h3><?= $escape($translate('Other metadata')) ?></h3>
