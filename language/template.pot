@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-03 00:00+0000\n"
+"POT-Creation-Date: 2023-07-31 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -73,7 +73,7 @@ msgid ""
 "unavailable."
 msgstr ""
 
-#: view/common/resource-values.phtml:93
+#: view/common/resource-values.phtml:97
 msgid "Other metadata"
 msgstr ""
 
@@ -183,6 +183,10 @@ msgid ""
 "It’s now possible to specify templates for annotations of module Annotate."
 msgstr ""
 
+#: data/scripts/upgrade.php:360
+msgid "A new main setting was added to hide private values in public sites."
+msgstr ""
+
 #: Module.php:445
 msgid "This template cannot be used for this resource."
 msgstr ""
@@ -249,32 +253,32 @@ msgid ""
 "%2$s."
 msgstr ""
 
-#: Module.php:1086
+#: Module.php:1101
 msgid "The query to attach items cannot contain the item set itself."
 msgstr ""
 
-#: Module.php:1110
+#: Module.php:1125
 #, php-format
 msgid ""
 "The query for the item set was changed: a job is run in background to detach "
 "and to attach items (%1$sjob #%2$d%3$s, %4$slogs%3$s)."
 msgstr ""
 
-#: Module.php:1243
+#: Module.php:1258
 msgid "Query to attach items automatically to this item set"
 msgstr ""
 
-#: Module.php:1466
+#: Module.php:1481
 #, php-format
 msgid "New descriptor appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 
-#: Module.php:1471
+#: Module.php:1486
 #, php-format
 msgid "New descriptors appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 
-#: Module.php:1479
+#: Module.php:1494
 #, php-format
 msgid "Unable to append new descriptors to custom vocab \"%1$s\": %2$s"
 msgstr ""
@@ -346,8 +350,8 @@ msgstr ""
 #: src/Mvc/Controller/Plugin/Bulk.php:1247
 #: src/Mvc/Controller/Plugin/Bulk.php:1255
 msgid ""
-"The {resource} #{id} has a linked resource or an annotation for term {term} "
-"that is not available and cannot be serialized."
+"The {resource} #{id} has a linked resource or an annotation for property "
+"{term} that is not available and cannot be serialized."
 msgstr ""
 
 #: src/Mvc/Controller/Plugin/Bulk.php:1436
@@ -452,11 +456,15 @@ msgid "Forbid"
 msgstr ""
 
 #: src/Form/SettingsFieldset.php:78
+msgid "Skip private values on sites, even when user is connected"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:89
 #: src/Form/ResourceTemplateDataFieldset.php:184
 msgid "Autofillers"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:79
+#: src/Form/SettingsFieldset.php:90
 msgid "The autofillers should be set in selected templates params."
 msgstr ""
 
@@ -728,7 +736,7 @@ msgstr ""
 msgid "IdRef: Library registry (RCR)"
 msgstr ""
 
-#: src/Autofiller/AbstractAutofiller.php:58
+#: src/Autofiller/AbstractAutofiller.php:57
 #, php-format
 msgid "%1$s: %2$s"
 msgstr ""

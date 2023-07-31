@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-03 00:00+0000\n"
-"PO-Revision-Date: 2023-07-03 00:00+0000\n"
+"POT-Creation-Date: 2023-07-31 00:00+0000\n"
+"PO-Revision-Date: 2023-07-31 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -78,7 +78,7 @@ msgstr ""
 "Le module \"%s\" a été automatiquement désactivé car ses dépendances ne sont "
 "plus disponibles."
 
-#: view/common/resource-values.phtml:93
+#: view/common/resource-values.phtml:97
 msgid "Other metadata"
 msgstr "Autres métadonnées"
 
@@ -133,7 +133,7 @@ msgstr ""
 
 #: data/scripts/upgrade.php:177
 msgid "It’s now possible to group a long list of template properties."
-msgstr "Il est désormais possible de grouper une long liste de propriétés."
+msgstr "Il est désormais possible de grouper une longue liste de propriétés."
 
 #: data/scripts/upgrade.php:221
 msgid "It’s now possible to set a control input for literal values."
@@ -215,6 +215,12 @@ msgstr ""
 "Il est désormais possible de définir des modèles pour les annotations du "
 "module Annotate."
 
+#: data/scripts/upgrade.php:360
+msgid "A new main setting was added to hide private values in public sites."
+msgstr ""
+"Un nouveau paramètre a été ajouté pour cacher les valeurs privées sur les "
+"sites publics."
+
 #: Module.php:445
 msgid "This template cannot be used for this resource."
 msgstr "Ce modèle ne peut pas être utilisé pour cette ressource."
@@ -295,13 +301,13 @@ msgstr ""
 "La valeur pour le terme « %1$s » doit être unique, mais elle est déjà "
 "utilisée pour la ressource #%2$s."
 
-#: Module.php:1086
+#: Module.php:1101
 msgid "The query to attach items cannot contain the item set itself."
 msgstr ""
 "La requête pour attacher les contenus ne peut pas contenir la collection "
 "elle-même."
 
-#: Module.php:1110
+#: Module.php:1125
 #, php-format
 msgid ""
 "The query for the item set was changed: a job is run in background to detach "
@@ -311,25 +317,25 @@ msgstr ""
 "plan pour détacher et attacher les contenus (%1$stâche #%2$d%3$s, "
 "%4$sjournaux%3$s)."
 
-#: Module.php:1243
+#: Module.php:1258
 msgid "Query to attach items automatically to this item set"
 msgstr "Requête pour placer automatiquement les contenus dans cette collection"
 
-#: Module.php:1466
+#: Module.php:1481
 #, php-format
 msgid "New descriptor appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 "Un nouveau descripteur a été ajouté au vocabulaire personnalisé « %1$s » : "
 "« %2$s »"
 
-#: Module.php:1471
+#: Module.php:1486
 #, php-format
 msgid "New descriptors appended to custom vocab \"%1$s\": %2$s"
 msgstr ""
 "De nouveaux descripteurs ont été ajoutés au vocabulaire personnalisé "
 "« %1$s » : \"%2$s\""
 
-#: Module.php:1479
+#: Module.php:1494
 #, php-format
 msgid "Unable to append new descriptors to custom vocab \"%1$s\": %2$s"
 msgstr ""
@@ -405,8 +411,8 @@ msgstr "Les identifiants en double ne sont pas autorisés."
 #: src/Mvc/Controller/Plugin/Bulk.php:1247
 #: src/Mvc/Controller/Plugin/Bulk.php:1255
 msgid ""
-"The {resource} #{id} has a linked resource or an annotation for term {term} "
-"that is not available and cannot be serialized."
+"The {resource} #{id} has a linked resource or an annotation for property "
+"{term} that is not available and cannot be serialized."
 msgstr ""
 "La {resource} #{id} a une ressource liée ou une annotation pour la propriété "
 "{term} qui n’est pas disponible et ne peut pas être sérialisée."
@@ -533,11 +539,17 @@ msgid "Forbid"
 msgstr "Interdir"
 
 #: src/Form/SettingsFieldset.php:78
+msgid "Skip private values on sites, even when user is connected"
+msgstr ""
+"Ne pas afficher les valeurs privées sur les sites, même lorsque "
+"l’utilisateur est connecté"
+
+#: src/Form/SettingsFieldset.php:89
 #: src/Form/ResourceTemplateDataFieldset.php:184
 msgid "Autofillers"
 msgstr "Remplisseurs"
 
-#: src/Form/SettingsFieldset.php:79
+#: src/Form/SettingsFieldset.php:90
 msgid "The autofillers should be set in selected templates params."
 msgstr ""
 "Les autoremplisseurs doivent être indiquées dans les paramètres des modèles."
@@ -819,7 +831,7 @@ msgstr "IdRef : PPN"
 msgid "IdRef: Library registry (RCR)"
 msgstr "IdRef : Registre des centres de ressources (RCR)"
 
-#: src/Autofiller/AbstractAutofiller.php:58
+#: src/Autofiller/AbstractAutofiller.php:57
 #, php-format
 msgid "%1$s: %2$s"
 msgstr "%1$s : %2$s"
