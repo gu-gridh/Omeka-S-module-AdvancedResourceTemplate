@@ -353,3 +353,11 @@ if (version_compare((string) $oldVersion, '3.4.23', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.25', '<')) {
+    $settings->set('advancedresourcetemplate_skip_private_values', false);
+    $message = new Message(
+        'A new main setting was added to hide private values in public sites.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
