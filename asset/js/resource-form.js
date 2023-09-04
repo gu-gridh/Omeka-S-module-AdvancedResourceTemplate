@@ -241,7 +241,6 @@
             applyResourceTemplate(true);
         });
 
-
         $('#resource-values').on('click', 'a.value-language', function(e) {
             e.preventDefault();
             var languageWrapper = $(this).closest('.language-wrapper');
@@ -486,7 +485,7 @@
                 });
                 if (!propIsCompleted) {
                     // No completed values found for this required property.
-                    var propLabel = thisProp.find('.field-label').text();
+                    var propLabel = thisProp.find('.field-label').last().text();
                     errors.push('The following field is required: ' + propLabel);
                 }
             });
@@ -760,8 +759,8 @@
     };
 
     /**
-     * Rewrite an existing property field, or create a new one, following the
-     * rules defined by the selected resource property template.
+     * Rewrite a property field following the rules defined by the selected
+     * resource template property or create a new one.
      */
     var rewritePropertyField = function(templateProperty) {
         var templateId = $('#resource-template-select').val();
