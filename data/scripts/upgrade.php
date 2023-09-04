@@ -12,10 +12,12 @@ use Omeka\Stdlib\Message;
  *
  * @var \Doctrine\DBAL\Connection $connection
  * @var \Doctrine\ORM\EntityManager $entityManager
+ * @var \Laminas\Mvc\Controller\Plugin\Url $url
  * @var \Omeka\Api\Manager $api
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
 $plugins = $services->get('ControllerPluginManager');
+$url = $plugins->get('url');
 $api = $plugins->get('api');
 $config = require dirname(__DIR__, 2) . '/config/module.config.php';
 $settings = $services->get('Omeka\Settings');
@@ -359,5 +361,154 @@ if (version_compare((string) $oldVersion, '3.4.25', '<')) {
     $message = new Message(
         'A new main setting was added to hide private values in public sites.' // @translate
     );
+    $messenger->addSuccess($message);
+}
+
+if (version_compare((string) $oldVersion, '3.4.26', '<')) {
+    // Update tables with new index names.
+    $sql = <<<'SQL'
+ALTER TABLE `resource_template_data`
+    DROP INDEX UNIQ_31D1FFC816131EA,
+    ADD UNIQUE INDEX uniq_resource_template_id (`resource_template_id`);
+ALTER TABLE `resource_template_property_data`
+    DROP INDEX IDX_B133BBAA16131EA,
+    DROP INDEX IDX_B133BBAA2A6B767B,
+    ADD INDEX idx_resource_template_id (`resource_template_id`),
+    ADD INDEX idx_resource_template_property_id (`resource_template_property_id`);
+SQL;
+    $connection->executeStatement($sql);
+
+    // Add the resource template and resource class to value annotations.
+    // TODO Use a single query instead of four requests (or use a temp view).
+
+    // Get the default template id for all templates.
+    $sql = <<<'SQL'
+SELECT
+    `resource_template_id` AS rtid,
+    REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(
+        `data`, '"value_annotations_template":', -1
+    ), ',', 1), '}', 1), '"', '') AS vartid
+FROM `resource_template_data`
+WHERE `data` LIKE '%"value#_annotations#_template":%' ESCAPE "#"
+    AND `data` NOT LIKE '%"value#_annotations#_template":""%' ESCAPE "#"
+    AND `data` NOT LIKE '%"value#_annotations#_template":"none"%' ESCAPE "#"
+;
+SQL;
+    $rtVaTemplates = $connection->executeQuery($sql)->fetchAllKeyValue();
+
+    // Get the specific template id for all property templates.
+    $sql = <<<'SQL'
+SELECT
+    CONCAT(`resource_template_property`.`resource_template_id`, "-", `property_id`),
+    REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(
+        `data`, '"value_annotations_template":', -1
+    ), ',', 1), '}', 1), '"', '') AS vartid
+FROM `resource_template_property_data`
+JOIN `resource_template_property` ON `resource_template_property`.`id` = `resource_template_property_data`.`resource_template_property_id`
+WHERE `data` LIKE '%"value#_annotations#_template":%' ESCAPE "#"
+;
+SQL;
+    $rtpVaTemplates = $connection->executeQuery($sql)->fetchAllKeyValue();
+
+    // Get the main class associated with the templates.
+    $sql = <<<'SQL'
+SELECT `id`, `resource_class_id`
+FROM `resource_template`
+WHERE `resource_class_id` IS NOT NULL
+;
+SQL;
+    $templateClasses = $connection->executeQuery($sql)->fetchAllKeyValue();
+
+    // Set default value annotation template when there is no specific property
+    // value annotation template.
+    foreach ($rtpVaTemplates as $rtProp => &$rtpVaTemplate) {
+        $rtpVaTemplate = $rtpVaTemplate ?: ($rtVaTemplates[strtok($rtProp, '-')] ?? null);
+    }
+    unset($rtpVaTemplate);
+
+    $rtpVaTemplates = array_filter($rtpVaTemplates);
+
+    if (count($rtpVaTemplates)) {
+        $rtVaTemplatesString = '';
+        $rtVaClassesString = '';
+        $rtVaTemplatesCase = '';
+        $rtVaClassesCase = '';
+        foreach ($rtpVaTemplates as $rtProp => $rtpVaTemplate) {
+            $rtVaTemplatesCase .= is_numeric($rtpVaTemplate)
+                ? sprintf("        WHEN '%s' THEN %s\n", $rtProp, $rtpVaTemplate)
+                : '';
+            $rtVaClassesCase .= isset($templateClasses[$rtpVaTemplate])
+                ? sprintf("        WHEN '%s' THEN %s\n", $rtProp, $templateClasses[$rtpVaTemplate])
+                : '';
+        }
+        if (trim($rtVaTemplatesCase)) {
+            $rtVaTemplatesString = '    CASE CONCAT(`resource_main`.`resource_template_id`, "-", `value`.`property_id`)' . "\n        "
+                . $rtVaTemplatesCase
+                . "        ELSE NULL\n    END";
+        }
+        if (trim($rtVaClassesCase)) {
+            $rtVaClassesString = '    CASE CONCAT(`resource_main`.`resource_template_id`, "-", `value`.`property_id`)' . "\n        "
+                . $rtVaClassesCase
+                . "        ELSE NULL\n    END";
+        }
+    }
+    if (empty($rtVaTemplatesString)) {
+        $rtVaTemplatesString = 'NULL';
+    }
+    if (empty($rtVaClassesString)) {
+        $rtVaClassesString = 'NULL';
+    }
+
+    // Do the update.
+    $sql = <<<SQL
+UPDATE `resource`
+INNER JOIN `value` ON `value`.`value_annotation_id` = `resource`.`id`
+LEFT JOIN `resource` AS `resource_main` ON `resource_main`.`id` = `value`.`resource_id`
+SET
+    `resource`.`resource_class_id` = $rtVaClassesString,
+    `resource`.`resource_template_id` = $rtVaTemplatesString
+WHERE `value`.`value_annotation_id` IS NOT NULL
+;
+SQL;
+    $connection->executeStatement($sql);
+
+    // Update new names of geometric data types that is not managed in the module.
+    $sql = <<<SQL
+UPDATE `resource_template_property`
+SET
+    `resource_template_property`.`data_type` = REPLACE(REPLACE(`resource_template_property`.`data_type`,
+        "geometry:geometry", "geometry"),
+        "geometry:geography", "geography")
+WHERE `resource_template_property`.`data_type` LIKE "%geometry%"
+;
+UPDATE `resource_template_property_data`
+SET
+    `resource_template_property_data`.`data` = REPLACE(REPLACE(`resource_template_property_data`.`data`,
+        "geometry:geometry", "geometry"),
+        "geometry:geography", "geography")
+WHERE `resource_template_property_data`.`data` LIKE "%geometry%"
+;
+UPDATE `resource_template_data`
+SET
+    `resource_template_data`.`data` = REPLACE(REPLACE(`resource_template_data`.`data`,
+        "geometry:geometry", "geometry"),
+        "geometry:geography", "geography")
+WHERE `resource_template_data`.`data` LIKE "%geometry%"
+;
+SQL;
+    $connection->executeStatement($sql);
+
+    $message = new Message(
+        'Value annotations can now have a resource class and an alternative label or comment.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    $hasEasyAdmin = $this->isModuleActive('EasyAdmin');
+    $message = new Message(
+        'A job is added in tasks of the module %1$sEasy Admin%2$s to fill the annotation templates and classes when needed.', // @translate
+        sprintf('<a href="%s">', $hasEasyAdmin ? $url->fromRoute('admin/default', ['controller' => 'easy-admin', 'action' => 'check-and-fix'], ['fragment' => 'resource_values']) : 'https://omeka.org/s/modules/EasyAdmin'),
+        '</a>'
+    );
+    $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
