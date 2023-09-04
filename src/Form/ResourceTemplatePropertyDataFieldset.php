@@ -87,6 +87,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 'name' => 'default_value',
                 'type' => Element\Textarea::class,
                 'options' => [
+                    // May be a string or a json with keys used in the form:
+                    // "@value", "@language", "display_title", "value_resource_id",
+                    // "value_resource_name", "url", "thumbnail_url", "@id", "@o:label",
+                    // "default" and any other key managed by the data type element.
                     'label' => 'Default value', // @translate
                 ],
                 'attributes' => [

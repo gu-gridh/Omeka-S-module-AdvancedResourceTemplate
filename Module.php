@@ -14,6 +14,7 @@ use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Mvc\Status;
+use Omeka\Stdlib\ErrorStore;
 
 class Module extends AbstractModule
 {
@@ -481,9 +482,20 @@ class Module extends AbstractModule
         // Some checks can be done simpler via representation.
         /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
         $resource = $adapter->getRepresentation($entity);
-        $resourceId = (int) $resource->id();
 
         // Property level.
+        $this->validateResourceProperty($resource, $errorStore, $directMessage);
+    }
+
+    protected function validateResourceProperty(
+        AbstractResourceEntityRepresentation $resource,
+        ErrorStore $errorStore,
+        bool $directMessage
+    ) {
+        $services = $this->getServiceLocator();
+        $template = $resource->resourceTemplate();
+        $resourceId = (int) $resource->id();
+        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
 
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
@@ -1126,18 +1138,18 @@ SQL;
             'item_set_id' => $itemSetId,
         ];
         $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\AdvancedResourceTemplate\Job\AttachItemsToItemSet::class, $args);
-        $urlHelper = $services->get('ControllerPluginManager')->get('url');
+        $urlPlugin = $services->get('ControllerPluginManager')->get('url');
         $message = new \Omeka\Stdlib\Message(
             'The query for the item set was changed: a job is run in background to detach and to attach items (%1$sjob #%2$d%3$s, %4$slogs%3$s).', // @translate
             sprintf('<a href="%s">',
-                htmlspecialchars($urlHelper->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
             ),
             $job->getId(),
             '</a>',
             sprintf('<a href="%s">',
                 htmlspecialchars($this->isModuleActive('Log')
-                    ? $urlHelper->fromRoute('admin/log', [], ['query' => ['job_id' => $job->getId()]])
-                    : $urlHelper->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId(), 'action' => 'log'])
+                    ? $urlPlugin->fromRoute('admin/log', [], ['query' => ['job_id' => $job->getId()]])
+                    : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId(), 'action' => 'log'])
                 )
             )
         );
