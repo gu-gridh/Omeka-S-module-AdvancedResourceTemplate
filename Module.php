@@ -192,6 +192,16 @@ class Module extends AbstractModule
             [$this, 'validateEntityHydratePost']
         );
 
+        // Store the template and the class of the value annotation.
+        // Ideally, use api.hydrate.pre on value annotation.
+        // But it is complex to get the main value and the resource from the
+        // annotation during a creation, so use post for it.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ValueAnnotationAdapter::class,
+            'api.hydrate.post',
+            [$this, 'hydrateValueAnnotationPost']
+        );
+
         // Manage the items to append to item sets.
         // The item should be created to be able to do a search on it.
         $sharedEventManager->attach(
@@ -471,6 +481,78 @@ class Module extends AbstractModule
         }
 
         return $resource;
+    }
+
+    /**
+     * The resource template of the value annotation is not stored, so get it
+     * from main resource template and term.
+     *
+     * The template is saved in all cases, even if there is no main template.
+     */
+    public function hydrateValueAnnotationPost(Event $event): void
+    {
+        /**
+         * @var \Omeka\Entity\ValueAnnotation $valueAnnotation
+         * @var \Omeka\Api\Request $request
+         */
+        $valueAnnotation = $event->getParam('entity');
+        if ($valueAnnotation->getResourceTemplate()) {
+            return;
+        }
+
+        // If the value annotation has no value, it will be removed, so it is
+        // useless to add a template.
+        // Not possible anyway.
+        if ($valueAnnotation->getValues()->isEmpty()) {
+            return;
+        }
+
+        // It is complex to get the main value and the resource from the
+        // annotation during a creation, so use resource post.
+        $valueAnnotationId = $valueAnnotation->getId();
+        if (!$valueAnnotationId) {
+            return;
+        }
+
+        $services = $this->getServiceLocator();
+
+        /**
+         * @var \Doctrine\ORM\EntityManager $entityManager
+         * @var \Omeka\Entity\Resource $resource
+         * @var \Omeka\Entity\ResourceTemplate $resourceTemplate
+         * @var \Omeka\Entity\ResourceTemplate $vaTemplate
+         * @var \Omeka\Entity\Value $value
+         * @var \Omeka\Entity\ValueAnnotation $valueAnnotation
+         * @var \Omeka\Entity\ResourceTemplateProperty $rtp
+         * @var \AdvancedResourceTemplate\Entity\ResourceTemplateData $rtData
+         * @var \AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData $rtpData
+         */
+        $entityManager = $services->get('Omeka\EntityManager');
+
+        // Get the value at which the value annotation is attached.
+        // Unlike resource from value or item from media, it is not managed.
+        // TODO Add reverse value from annotation in Omeka.
+        $value = $entityManager->getRepository(\Omeka\Entity\Value::class)
+            ->findOneBy(['valueAnnotation' => $valueAnnotationId]);
+        if (!$value) {
+            return;
+        }
+
+        // If there is no template, there is no specific annotation template.
+        // TODO Add a way to add specific default template and class for annotations. If really useful.
+        $vaTemplate = $this->getVaTemplate($value);
+
+        $valueAnnotation->setResourceTemplate($vaTemplate);
+
+        // It is possible to set a class, but useless in most of the cases.
+        if ($vaTemplate) {
+            $valueAnnotation->setResourceClass($vaTemplate->getResourceClass());
+        }
+
+        // Here, it is value annotation hydrate post normally called only inside
+        // ValueHydrator, so the entity will be persisted with the value.
+        // Nevertheless, persist it for other special edge cases.
+        $entityManager->persist($valueAnnotation);
     }
 
     public function validateEntityHydratePost(Event $event): void
@@ -2069,6 +2151,63 @@ SQL;
         ;
         $this->propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
         $this->propertiesByTermsAndIds = array_replace($this->propertiesByTerms, array_combine($this->propertiesByTerms, $this->propertiesByTerms));
+    }
+
+    /**
+     * Get the value annotation template associated with a value.
+     *
+     * For now, there can be one value annotation template by property, even if
+     * there may be multiple times the same term. The case is very rare anyway.
+     *
+     * @todo Manage specific value annotation template by data type.
+     */
+    protected function getVaTemplate(ValueRepresentation $value): ?ResourceTemplateRepresentation
+    {
+        $resource = $value->getResource();
+        $template = $resource->getResourceTemplate();
+
+        if (!$template) {
+            return null;
+        }
+
+        $vaTemplate = null;
+        $vaTemplateOption = null;
+
+        $property = $value->getProperty();
+        $rtp = $entityManager->getRepository(\Omeka\Entity\ResourceTemplateProperty::class)
+            ->findOneBy([
+                'resourceTemplate' => $template->getId(),
+                'property' => $property->getId(),
+            ]);
+        if ($rtp) {
+            $rtpData = $entityManager->getRepository(\AdvancedResourceTemplate\Entity\ResourceTemplatePropertyData::class)
+                ->findOneBy([
+                    'resourceTemplate' => $template->getId(),
+                    'resourceTemplateProperty' => $rtp->getId(),
+                ], ['id' => 'ASC']);
+            if ($rtpData) {
+                // Options "none" and "manual" are possible.
+                $vaTemplateOption = $rtpData->getDataValue('value_annotations_template');
+                if (is_numeric($vaTemplateOption)) {
+                    $vaTemplate = $entityManager->find(\Omeka\Entity\ResourceTemplate::class, (int) $vaTemplateOption);
+                }
+            }
+        }
+
+        if (!$vaTemplate && empty($vaTemplateOption)) {
+            $rtData = $entityManager->getRepository(\AdvancedResourceTemplate\Entity\ResourceTemplateData::class)
+                ->findOneBy(['resourceTemplate' => $template->getId()]);
+            if ($rtData) {
+                // Option "none" is managed like empty here.
+                $vaDefaultTemplateId = (int) $rtData->getDataValue('value_annotations_template');
+                if ($vaDefaultTemplateId) {
+                    $vaDefaultTemplate = $entityManager->find(\Omeka\Entity\ResourceTemplate::class, $vaDefaultTemplateId);
+                    $vaTemplate = $vaDefaultTemplate;
+                }
+            }
+        }
+
+        return $vaTemplate;
     }
 
     /**
