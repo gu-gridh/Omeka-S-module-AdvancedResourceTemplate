@@ -8,6 +8,8 @@ if (!class_exists(\Generic\AbstractModule::class)) {
         : __DIR__ . '/src/Generic/AbstractModule.php';
 }
 
+use AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation;
+use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
 use Generic\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
@@ -19,6 +21,11 @@ use Omeka\Stdlib\ErrorStore;
 class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
+
+    /**
+     * @var \Omeka\Api\Manager
+     */
+    protected $api;
 
     /**
      * @var array
@@ -374,15 +381,24 @@ class Module extends AbstractModule
             return;
         }
 
-        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $this->api = $this->getServiceLocator()->get('Omeka\ApiManager');
         try {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
-            $template = $api->read('resource_templates', ['id' => $templateId])->getContent();
+            $template = $this->api->read('resource_templates', ['id' => $templateId])->getContent();
         } catch (\Exception $e) {
             return;
         }
 
-        // Simply add the value if not present.
+        // Prepare value annotations level.
+        $vaTemplateDefault = null;
+        $vaTemplateDefaultId = $template->dataValue('value_annotations_template');
+        if (is_numeric($vaTemplateDefault)) {
+            try {
+                /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $vaTemplateDefault */
+                $vaTemplateDefault = $this->api->read('resource_templates', ['id' => $vaTemplateDefaultId])->getContent();
+            } catch (\Exception $e) {
+            }
+        }
 
         // Template level.
         $resource = $this->appendAutomaticValuesFromTemplateData($template, $resource);
@@ -395,10 +411,66 @@ class Module extends AbstractModule
                 if (!is_null($automaticValue)) {
                     $resource[$templateProperty->property()->term()][] = $automaticValue;
                 }
+                // Value annotations level.
+                $resource = $this->handleVaTemplateSettings($resource, $rtpData, $vaTemplateDefault);
             }
         }
 
         $request->setContent($resource);
+    }
+
+    protected function handleVaTemplateSettings(
+        array $resource,
+        ResourceTemplatePropertyDataRepresentation $rtpData,
+        ?ResourceTemplateRepresentation $vaTemplateDefault
+    ): array {
+        // Check if there is something to process.
+        // Unlike resource, don't add default value if there is no value.
+        $term = $rtpData->property()->term();
+        if (empty($resource[$term])) {
+            return $resource;
+        }
+
+        $vaTemplate = null;
+        $vaTemplateDefaultId = $vaTemplateDefault ? $vaTemplateDefault->id() : null;
+        $vaTemplateId = $rtpData->dataValue('value_annotations_template');
+        if (empty($vaTemplateId) || (int) $vaTemplateId === $vaTemplateDefaultId) {
+            $vaTemplate = $vaTemplateDefault;
+        } elseif (is_numeric($vaTemplateId)) {
+            try {
+                /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $vaTemplate */
+                $vaTemplate = $this->api->read('resource_templates', ['id' => $vaTemplateId])->getContent();
+            } catch (\Exception $e) {
+            }
+        }
+
+        if (!$vaTemplate) {
+            return $resource;
+        }
+
+        // Here the resource is the value annotation.
+
+        foreach ($resource[$term] as $index => $value) {
+            $vaResource = $value['@annotation'] ?? [];
+
+            // Value annotation template level.
+            $vaResource = $this->appendAutomaticValuesFromTemplateData($vaTemplate, $vaResource);
+
+            // Value annotation property level.
+            foreach ($vaTemplate->resourceTemplateProperties() as $vaTemplateProperty) {
+                foreach ($vaTemplateProperty->data() as $vaRtpData) {
+                    $vaResource = $this->explodeValueFromTemplatePropertyData($vaRtpData, $vaResource);
+                    $automaticValue = $this->automaticValueFromTemplatePropertyData($vaRtpData, $vaResource);
+                    if (!is_null($automaticValue)) {
+                        $vaResource[$vaTemplateProperty->property()->term()][] = $automaticValue;
+                    }
+                }
+            }
+
+            $resource[$term][$index]['@annotation'] = $vaResource;
+        }
+
+        return $resource;
     }
 
     public function validateEntityHydratePost(Event $event): void
