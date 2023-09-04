@@ -59,6 +59,11 @@ class ArtMapper extends AbstractPlugin
     protected $isSimpleExtract = false;
 
     /**
+     * @var bool
+     */
+    protected $isInternalSource = false;
+
+    /**
      * @var ArrayObject
      */
     protected $result;
@@ -439,7 +444,7 @@ class ArtMapper extends AbstractPlugin
      * @fixme The args extractor does not manage escaped quote and double quote in arguments.
      *
      * Adapted from BulkImport.
-     * @see \BulkImport\Mvc\Controller\Plugin\MetaMapper::twig()
+     * @see \BulkImport\Stdlib\TwigTrait
      */
     protected function twig($value, $target): string
     {
@@ -910,7 +915,7 @@ class ArtMapper extends AbstractPlugin
      * ]
      * ```
      *
-     * @see \BulkImport\Mvc\Controller\Plugin\MetaMapper::flatArray()
+     * @see \BulkImport\Stdlib\MetaMapper::flatArray()
      * @see \ValueSuggestAny\Suggester\JsonLd\JsonLdSuggester::flatArray()
      * @todo Factorize flatArray() between modules.
      */
@@ -936,7 +941,7 @@ class ArtMapper extends AbstractPlugin
     private function _flatArray(array &$array, &$flatArray, $keys = null): void
     {
         foreach ($array as $key => $value) {
-            $nKey = str_replace(['.', '\\'], ['\.', '\\\\'], $key);
+            $nKey = str_replace(['.', '\\'], ['\.', '\\\\'], (string) $key);
             if (is_array($value)) {
                 $this->_flatArray($value, $flatArray, $keys . '.' . $nKey);
             } else {

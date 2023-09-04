@@ -2164,18 +2164,18 @@ SQL;
                 $pos = $first === '~'
                     ? mb_strpos($line, '=')
                     : mb_strrpos(strtok($line, '~'), '=');
-                $from = trim(mb_substr($line, 0, $pos));
-                $to = trim(mb_substr($line, $pos + 1));
+                $from = $pos === false ? '' : trim(mb_substr($line, 0, $pos));
+                $to = $pos === false ? trim($line) : trim(mb_substr($line, $pos + 1));
                 if (!$from || !$to) {
                     continue;
                 }
-                $to = $fieldNameToProperty($to);
-                if (!$to) {
+                $ton = $fieldNameToProperty($to);
+                if (!$ton) {
                     continue;
                 }
                 $result[$autofillerKey]['mapping'][] = [
                     'from' => $from,
-                    'to' => array_filter($to, function ($v) {
+                    'to' => array_filter($ton, function ($v) {
                         return !is_null($v);
                     }),
                 ];
