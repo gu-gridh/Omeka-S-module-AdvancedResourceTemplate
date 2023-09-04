@@ -4,9 +4,17 @@
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
  * @var array|\AppendIterator $values
  * @var array $templateProperties
+ *
+ * Warning: this template is used by default by value-annotations.
+ * In that case, only $values is available in version 4.0.
+ * The same issue was fixed in #1634 and #1958.
+ * @var \Omeka\Api\Representation\ValueAnnotationRepresentation|null $valueAnnotation
  */
 
 // Wrap the core template view/common/resource-values with group labels, if any.
+
+// Required as long as the value annotation is not passed.
+// $isValueAnnotation = empty($resource) || !empty($valueAnnotation);
 
 // This path should be updated to override it.
 $mainViewTemplate = OMEKA_PATH . '/application/view/common/resource-values.phtml';

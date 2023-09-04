@@ -306,6 +306,14 @@ class Module extends AbstractModule
             [$this, 'handleResourceDisplayValues'],
             -100
         );
+        // Handle value annotations like values, since they may have a template
+        // and all display settings are managed with it.
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ValueAnnotationRepresentation::class,
+            'rep.resource.value_annotation_display_values',
+            [$this, 'handleResourceDisplayValues'],
+            -100
+        );
 
         // Display subject values according to options of the resource template.
         $sharedEventManager->attach(
@@ -817,29 +825,24 @@ SQL;
          * @var array $values
          * @var array $groups
          */
-        $resource = $event->getTarget();
-        $template = $resource->resourceTemplate();
         $values = $event->getParam('values');
+        if (!count($values)) {
+            return;
+        }
 
         $services = $this->getServiceLocator();
         $status = $services->get('Omeka\Status');
         if ($status->isSiteRequest()
             && $services->get('Omeka\Settings')->get('advancedresourcetemplate_skip_private_values')
         ) {
-            foreach ($values as $term => &$propertyData) {
-                /** @var \Omeka\Api\Representation\ValueRepresentation $value */
-                foreach ($propertyData['values'] as $key => $value) {
-                    if (!$value->isPublic()) {
-                        unset($propertyData['values'][$key]);
-                    }
-                }
-                if (count($propertyData['values'])) {
-                    $propertyData['values'] = array_values($propertyData['values']);
-                } else {
-                    unset($values[$term]);
-                }
+            $values = $this->hidePrivateValues($values);
+            if (!count($values)) {
+                return;
             }
         }
+
+        $resource = $event->getTarget();
+        $template = $resource->resourceTemplate();
 
         if ($template) {
             $groups = $template->dataValue('groups') ?: [];
@@ -854,6 +857,25 @@ SQL;
             : $this->prependGroupsToValues($resource, $values, $groups);
 
         $event->setParam('values', $newValues);
+    }
+
+    protected function hidePrivateValues(array $values): array
+    {
+        foreach ($values as $term => &$propertyData) {
+            /** @var \Omeka\Api\Representation\ValueRepresentation $value */
+            foreach ($propertyData['values'] as $key => $value) {
+                if (!$value->isPublic()) {
+                    unset($propertyData['values'][$key]);
+                }
+            }
+            if (count($propertyData['values'])) {
+                $propertyData['values'] = array_values($propertyData['values']);
+            } else {
+                unset($values[$term]);
+            }
+        }
+        unset($propertyData);
+        return $values;
     }
 
     /**
