@@ -440,7 +440,7 @@ class Module extends AbstractModule
 
         // Template level.
 
-        $useForResources = $template->dataValue('use_for_resources', []);
+        $useForResources = $template->dataValue('use_for_resources') ?: [];
         $resourceName = $entity->getResourceName();
         if ($useForResources && !in_array($resourceName, $useForResources)) {
             $message = new \Omeka\Stdlib\Message('This template cannot be used for this resource.'); // @translate
@@ -459,7 +459,7 @@ class Module extends AbstractModule
 
         $closedClassList = $this->valueIsTrue($template->dataValue('closed_class_list'));
         if ($closedClassList && $resourceClass) {
-            $suggestedClasses = $template->dataValue('suggested_resource_class_ids', []);
+            $suggestedClasses = $template->dataValue('suggested_resource_class_ids') ?: [];
             if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
                 if (count($suggestedClasses) === 1) {
                     $message = new \Omeka\Stdlib\Message(
@@ -501,7 +501,7 @@ class Module extends AbstractModule
             foreach ($templateProperty->data() as $rtpData) {
                 $term = $templateProperty->property()->term();
 
-                $inputControl = $rtpData->dataValue('input_control', '');
+                $inputControl = (string) $rtpData->dataValue('input_control');
                 if (strlen($inputControl)) {
                     // Check that the input control is a valid regex first.
                     $anchors = ['/', '#', '~', '%', '`', ';', '§', 'µ'];
@@ -709,7 +709,7 @@ SQL;
         }
 
         if ($template) {
-            $groups = $template->dataValue('groups', []);
+            $groups = $template->dataValue('groups') ?: [];
             $templateProperties = $template->resourceTemplateProperties();
         } else {
             $groups = [];
@@ -1416,7 +1416,7 @@ SQL;
         $hasCustomVocabOpen = false;
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                if ($this->valueIsTrue($rtpData->dataValue('custom_vocab_open', false))) {
+                if ($this->valueIsTrue($rtpData->dataValue('custom_vocab_open'))) {
                     $hasCustomVocabOpen = true;
                     break 2;
                 }
@@ -1456,7 +1456,7 @@ SQL;
 
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                if (!$this->valueIsTrue($rtpData->dataValue('custom_vocab_open', false))) {
+                if (!$this->valueIsTrue($rtpData->dataValue('custom_vocab_open'))) {
                     continue;
                 }
                 $term = $templateProperty->property()->term();

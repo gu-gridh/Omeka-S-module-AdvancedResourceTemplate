@@ -39,7 +39,8 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
      */
     public function data(): array
     {
-        // TODO Currently, static data return are always the same, so use id.
+        // Static data should store all resource templates to avoid to return
+        // the same data for any template.
         static $datas = [];
         $id = $this->id();
         if (!isset($datas[$id])) {
@@ -52,24 +53,22 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
     }
 
     /**
-     * @param string $name
-     * @param mixed $default
      * @return mixed
      */
-    public function dataValue($name, $default = null)
+    public function dataValue($name)
     {
         $data = $this->data();
-        return $data[$name] ?? $default;
+        return $data[$name] ?? null;
     }
 
     /**
      * Get a value metadata from the data of the current template.
      */
-    public function dataValueMetadata(string $name, ?string $metadata = null, $default = null)
+    public function dataValueMetadata(string $name, ?string $metadata = null)
     {
         $data = $this->data();
         if (!isset($data[$name])) {
-            return $default;
+            return null;
         }
         $meta = $data[$name];
         switch ($metadata) {

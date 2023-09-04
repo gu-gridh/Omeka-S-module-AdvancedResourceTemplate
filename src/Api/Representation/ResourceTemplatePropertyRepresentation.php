@@ -170,7 +170,8 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
      */
     public function data(?int $index = null)
     {
-        // TODO Currently, static data returns are always the same, so use id.
+        // Static data should store all resource templates to avoid to return
+        // the same data for any template.
         static $lists = [];
         $id = $this->templateProperty->getId();
         if (!isset($lists[$id])) {
@@ -210,22 +211,18 @@ class ResourceTemplatePropertyRepresentation extends \Omeka\Api\Representation\R
     /**
      * Get a value from the main data of the current template property.
      */
-    public function mainDataValue(string $name, $default = null)
+    public function mainDataValue(string $name)
     {
         $dt = $this->data(0);
-        return is_null($dt)
-            ? $default
-            : $dt->dataValue($name, $default);
+        return $dt ? $dt->dataValue($name) : null;
     }
 
     /**
      * Get a value metadata from the main data of the current template property.
      */
-    public function mainDataValueMetadata(string $name, ?string $metadata = null, $default = null)
+    public function mainDataValueMetadata(string $name, ?string $metadata = null)
     {
         $dt = $this->data(0);
-        return is_null($dt)
-            ? $default
-            : $dt->dataValueMetadata($name, $metadata, $default);
+        return $dt ? $dt->dataValueMetadata($name, $metadata) : null;
     }
 }

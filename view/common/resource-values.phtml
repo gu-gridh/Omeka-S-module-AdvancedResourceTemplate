@@ -56,7 +56,7 @@ $templateProperties ??= [];
  * @var array $groups
  */
 $template = $resource->resourceTemplate();
-$groups = $template ? $template->dataValue('groups', []) : null;
+$groups = $template ? $template->dataValue('groups') : null;
 
 if (!$template || !$groups) {
     include $mainViewTemplate;

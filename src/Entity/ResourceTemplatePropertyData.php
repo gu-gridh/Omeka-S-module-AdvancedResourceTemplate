@@ -9,7 +9,17 @@ use Omeka\Entity\ResourceTemplateProperty;
 /**
  * @Entity
  * @Table(
- *     name="resource_template_property_data"
+ *     name="resource_template_property_data",
+ *     indexes={
+ *         @Index(
+ *             name="idx_resource_template_id",
+ *             columns={"resource_template_id"}
+ *         ),
+ *         @Index(
+ *             name="idx_resource_template_property_id",
+ *             columns={"resource_template_property_id"}
+ *         )
+ *     }
  * )
  */
 class ResourceTemplatePropertyData extends AbstractEntity
@@ -27,6 +37,7 @@ class ResourceTemplatePropertyData extends AbstractEntity
      * no setter.
      *
      * @var ResourceTemplate
+     *
      * @ManyToOne(
      *     targetEntity=\Omeka\Entity\ResourceTemplate::class,
      *     fetch="EXTRA_LAZY"
@@ -46,6 +57,7 @@ class ResourceTemplatePropertyData extends AbstractEntity
      * property data, like a value has only one data type.
      *
      * @var ResourceTemplateProperty
+     *
      * @ManyToOne(
      *     targetEntity=\Omeka\Entity\ResourceTemplateProperty::class,
      *     fetch="EXTRA_LAZY"
@@ -58,6 +70,8 @@ class ResourceTemplatePropertyData extends AbstractEntity
     protected $resourceTemplateProperty;
 
     /**
+     * @var array
+     *
      * @Column(
      *     type="json",
      *     nullable=false
@@ -70,18 +84,11 @@ class ResourceTemplatePropertyData extends AbstractEntity
         return $this->id;
     }
 
-    /**
-     * @return \Omeka\Entity\ResourceTemplate
-     */
     public function getResourceTemplate(): ResourceTemplate
     {
         return $this->resourceTemplate;
     }
 
-    /**
-     * @param ResourceTemplateProperty $resourceTemplateProperty
-     * @return self
-     */
     public function setResourceTemplateProperty(ResourceTemplateProperty $resourceTemplateProperty)
     {
         $this->resourceTemplate = $resourceTemplateProperty->getResourceTemplate();
@@ -89,29 +96,24 @@ class ResourceTemplatePropertyData extends AbstractEntity
         return $this;
     }
 
-    /**
-     * @return \Omeka\Entity\ResourceTemplateProperty
-     */
     public function getResourceTemplateProperty(): ResourceTemplateProperty
     {
         return $this->resourceTemplateProperty;
     }
 
-    /**
-     * @param array $data
-     * @return self
-     */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getData(): array
     {
         return $this->data;
+    }
+
+    public function getDataValue(string $name)
+    {
+        return $this->data[$name] ?? null;
     }
 }

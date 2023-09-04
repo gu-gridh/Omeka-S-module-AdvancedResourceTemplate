@@ -35,16 +35,16 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         return $this->resource->getData();
     }
 
-    public function dataValue(string $name, $default = null)
+    public function dataValue(string $name)
     {
-        return $this->resource->getData()[$name] ?? $default;
+        return $this->resource->getDataValue($name);
     }
 
-    public function dataValueMetadata(string $name, ?string $metadata = null, $default = null)
+    public function dataValueMetadata(string $name, ?string $metadata = null)
     {
         $dt = $this->resource->getData();
         if (!isset($dt[$name])) {
-            return $default;
+            return null;
         }
         $meta = $dt[$name];
         switch ($metadata) {
@@ -111,13 +111,13 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
 
     public function dataType(): ?string
     {
-        $datatypes = $this->dataValue('o:data_type', []);
+        $datatypes = $this->dataValue('o:data_type');
         return $datatypes ? reset($datatypes) : null;
     }
 
     public function dataTypes(): array
     {
-        return $this->dataValue('o:data_type', []);
+        return $this->dataValue('o:data_type') ?: [];
     }
 
     /**

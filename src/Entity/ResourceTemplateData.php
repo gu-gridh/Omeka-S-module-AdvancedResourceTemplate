@@ -8,12 +8,20 @@ use Omeka\Entity\ResourceTemplate;
 /**
  * @Entity
  * @Table(
- *     name="resource_template_data"
+ *     name="resource_template_data",
+ *     uniqueConstraints={
+ *         @UniqueConstraint(
+ *             name="uniq_resource_template_id",
+ *             columns={"resource_template_id"}
+ *         )
+ *     }
  * )
  */
 class ResourceTemplateData extends AbstractEntity
 {
     /**
+     * @var int
+     *
      * @Id
      * @Column(type="integer")
      * @GeneratedValue
@@ -22,6 +30,7 @@ class ResourceTemplateData extends AbstractEntity
 
     /**
      * @var ResourceTemplate
+     *
      * @OneToOne(
      *     targetEntity=\Omeka\Entity\ResourceTemplate::class,
      *     fetch="EXTRA_LAZY"
@@ -34,6 +43,8 @@ class ResourceTemplateData extends AbstractEntity
     protected $resourceTemplate;
 
     /**
+     * @var array
+     *
      * @Column(
      *     type="json",
      *     nullable=false
@@ -46,39 +57,30 @@ class ResourceTemplateData extends AbstractEntity
         return $this->id;
     }
 
-    /**
-     * @param ResourceTemplate $resourceTemplate
-     * @return self
-     */
     public function setResourceTemplate(ResourceTemplate $resourceTemplate)
     {
         $this->resourceTemplate = $resourceTemplate;
         return $this;
     }
 
-    /**
-     * @return \Omeka\Entity\ResourceTemplate
-     */
     public function getResourceTemplate(): ResourceTemplate
     {
         return $this->resourceTemplate;
     }
 
-    /**
-     * @param array $data
-     * @return self
-     */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getData(): array
     {
         return $this->data;
+    }
+
+    public function getDataValue(string $name)
+    {
+        return $this->data[$name] ?? null;
     }
 }
