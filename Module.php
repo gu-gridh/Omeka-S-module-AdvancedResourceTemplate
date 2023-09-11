@@ -743,6 +743,7 @@ class Module extends AbstractModule
                 if ($uniqueValue) {
                     $values = $resource->value($term, ['all' => true]);
                     if ($values) {
+                        $connection = $services->get('Omeka\Connection');
                         $sqlWhere = [];
                         // Get all values by main type in one query.
                         $bind = [
