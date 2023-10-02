@@ -30,6 +30,11 @@ class Module extends AbstractModule
     protected $api;
 
     /**
+     * @var bool
+     */
+    protected $isBatchUpdate;
+
+    /**
      * @var array
      */
     protected $propertiesByTerms;
@@ -255,6 +260,13 @@ class Module extends AbstractModule
 
         // Manage the items to append to item sets.
         // The item should be created to be able to do a search on it.
+        // An event is needed early to update item set queries one time only.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.batch_update.pre',
+            [$this, 'preBatchUpdateItems'],
+            -100
+        );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
@@ -1221,6 +1233,11 @@ SQL;
             : null;
     }
 
+    public function preBatchUpdateItems(Event $event): void
+    {
+        $this->isBatchUpdate = true;
+    }
+
     /**
      * Append item to items sets according to each request.
      *
@@ -1424,12 +1441,16 @@ SQL;
     /**
      * Update list of all item sets.
      *
-     * @todo Avoid to do this check multiple times during a batch process.
-     *
      * @return array List of queries.
      */
     protected function updateItemSetsQueries(): array
     {
+        static $queries;
+
+        if ($this->isBatchUpdate && $queries !== null) {
+            return $queries;
+        }
+
         /**
          * @var \Omeka\Settings\Settings $settings
          * @var \Doctrine\DBAL\Connection $connection
