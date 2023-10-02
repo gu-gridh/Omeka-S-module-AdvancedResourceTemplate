@@ -275,6 +275,11 @@ class Module extends AbstractModule
             'api.update.post',
             [$this, 'handleApiSavePostItemSet']
         );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemSetAdapter::class,
+            'api.delete.post',
+            [$this, 'handleApiDeletePostItemSet']
+        );
 
         // Display values according to options of the resource template.
         // For compatibility with other modules (HideProperties, Internationalisation)
@@ -1224,6 +1229,11 @@ SQL;
      */
     public function handleApiSavePostItem(Event $event): void
     {
+        $queries = $this->updateItemSetsQueries();
+        if (!$queries) {
+            return;
+        }
+
         /**
          * @var \Omeka\Api\Manager $api
          * @var \Omeka\Api\Request $request
@@ -1234,17 +1244,7 @@ SQL;
          */
         $services = $this->getServiceLocator();
         $request = $event->getParam('request');
-
-        if ($request->getOption('advancedresourcetemplate_save_post_item')) {
-            return;
-        }
-
         $settings = $services->get('Omeka\Settings');
-
-        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
-        if (!$queries) {
-            return;
-        }
 
         $adapter = $event->getTarget();
         $response = $event->getParam('response');
@@ -1252,6 +1252,7 @@ SQL;
         $item = $response->getContent();
 
         if ($item instanceof \Omeka\Api\Representation\ItemRepresentation) {
+            /** @var \Omeka\Entity\Item $item */
             $item = $adapter->getEntityManager()->find(\Omeka\Entity\Item::class, $item->id());
         }
 
@@ -1334,7 +1335,7 @@ SQL;
         $itemSet = $response->getContent();
         $itemSetId = method_exists($itemSet, 'getId') ? $itemSet->getId() : $itemSet->id();
 
-        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
+        $queries = $this->updateItemSetsQueries();
 
         $existingQuery = $queries[$itemSetId] ?? null;
 
@@ -1410,6 +1411,49 @@ SQL;
         );
         $message->setEscapeHtml(false);
         $messenger->addSuccess($message);
+    }
+
+    /**
+     * Handle event to update list of all item sets queries.
+     */
+    public function handleApiDeletePostItemSet(Event $event): void
+    {
+        $this->updateItemSetsQueries();
+    }
+
+    /**
+     * Update list of all item sets.
+     *
+     * @todo Avoid to do this check multiple times during a batch process.
+     *
+     * @return array List of queries.
+     */
+    protected function updateItemSetsQueries(): array
+    {
+        /**
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Doctrine\DBAL\Connection $connection
+         */
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        $queries = $settings->get('advancedresourcetemplate_item_set_queries') ?: [];
+        if ($queries) {
+            // Use connection because the current user may not have access to all
+            // item sets. Check all item sets one time.
+            $connection = $services->get('Omeka\Connection');
+            $itemSetIds = $connection
+                ->executeQuery(
+                    'SELECT `id`, `id` FROM `item_set` WHERE `id` IN (:ids)',
+                    ['ids' => array_keys($queries)],
+                    ['ids' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+                )
+                ->fetchAllKeyValue();
+            $queries = array_intersect_key($queries, $itemSetIds);
+            $settings->set('advancedresourcetemplate_item_set_queries', $queries);
+        }
+
+        return $queries;
     }
 
     public function addAdminResourceHeaders(Event $event): void
