@@ -512,3 +512,7 @@ SQL;
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.27', '<')) {
+    $this->updateItemSetsQueries();
+}
