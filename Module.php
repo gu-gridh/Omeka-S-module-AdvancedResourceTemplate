@@ -1524,7 +1524,7 @@ SQL;
 
         $isModal = $params->fromQuery('window') === 'modal';
         if ($isModal) {
-            $classes[] = 'modal';
+            $classes['modal'] = true;
         }
 
         if (count($classes)) {
