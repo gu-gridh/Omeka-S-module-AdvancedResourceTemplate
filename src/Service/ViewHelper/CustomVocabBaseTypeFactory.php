@@ -11,7 +11,6 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  * @see \BulkEdit\View\Helper\CustomVocabBaseType
  * @see \BulkExport\View\Helper\CustomVocabBaseType
  * @see \BulkImport\View\Helper\CustomVocabBaseType
- * Used in Contribute.
  */
 class CustomVocabBaseTypeFactory implements FactoryInterface
 {

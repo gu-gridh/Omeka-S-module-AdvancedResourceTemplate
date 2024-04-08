@@ -515,4 +515,12 @@ SQL;
 
 if (version_compare((string) $oldVersion, '3.4.27', '<')) {
     $this->updateItemSetsQueries();
+
+    $hasCommon = $this->isModuleActive('Common');
+    if (!$hasCommon) {
+        $message = new Message(
+            'Next version of the module will depend on module Common, that replaces module Generic. You will have to install it first.' // @translate
+        );
+        $messenger->addWarning($message);
+    }
 }
