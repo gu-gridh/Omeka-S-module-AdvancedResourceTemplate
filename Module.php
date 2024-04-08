@@ -497,6 +497,8 @@ class Module extends AbstractModule
                 if (!is_null($automaticValue)) {
                     $resource[$templateProperty->property()->term()][] = $automaticValue;
                 }
+                // Order by linked resource property values.
+                $resource = $this->orderByLinkedResourcePropertyData($rtpData, $resource);
                 // Value annotations level.
                 $resource = $this->handleVaTemplateSettings($resource, $rtpData, $vaTemplateDefault);
             }
@@ -550,6 +552,8 @@ class Module extends AbstractModule
                     if (!is_null($automaticValue)) {
                         $vaResource[$vaTemplateProperty->property()->term()][] = $automaticValue;
                     }
+                    // Order by linked resource property values.
+                    $resource = $this->orderByLinkedResourcePropertyData($vaRtpData, $vaResource);
                 }
             }
 
@@ -2155,6 +2159,58 @@ SQL;
         return ['property_id' => $propertyId]
             + $automaticValueArray
             + ['is_public' => $isPublic];
+    }
+
+    protected function orderByLinkedResourcePropertyData(
+        \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation $rtpData,
+        array $resource
+    ): array {
+        $orderByLinkedResourceProperties = $rtpData->dataValue('order_by_linked_resource_properties');
+        if (!$orderByLinkedResourceProperties) {
+            return $resource;
+        }
+
+        $term = $rtpData->property()->term();
+        if (!isset($resource[$term]) || count($resource[$term]) < 2) {
+            return $resource;
+        }
+
+        /** @var \Omeka\Api\Manager $api */
+        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+
+
+        $sortByLinkedProperty = function ($a, $b) use ($api, $orderByLinkedResourceProperties): int {
+            $aId = empty($a['value_resource_id']) ? 0 : (int) $a['value_resource_id'];
+            $bId = empty($b['value_resource_id']) ? 0 : (int) $b['value_resource_id'];
+            if (!$aId && !$bId) {
+                return 0;
+            } elseif (!$aId) {
+                return 1;
+            } elseif (!$bId) {
+                return -1;
+            }
+            foreach ($orderByLinkedResourceProperties as $term => $order) {
+                $order = strtolower($order) === 'desc' ? -1 : 1;
+                $aResource = $api->read('resources', $aId)->getContent();
+                $bResource = $api->read('resources', $bId)->getContent();
+                $aVal = (string) $aResource->value($term);
+                $bVal = (string) $bResource->value($term);
+                if (!strlen($aVal) && !strlen($bVal)) {
+                    // Do nothing with this term.
+                } elseif (!strlen($aVal)) {
+                    return 1 * $order;
+                } elseif (!strlen($bVal)) {
+                    return -1 * $order;
+                } elseif ($result = strnatcasecmp($aVal, $bVal)) {
+                    return $result * $order;
+                }
+            }
+            return 0;
+        };
+
+        usort($resource[$term], $sortByLinkedProperty);
+
+        return $resource;
     }
 
     protected function getRouteResourceName(?Status $status = null): ?string
