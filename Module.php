@@ -1577,6 +1577,18 @@ SQL;
             $form = $event->getTarget();
             $form->setAttribute('class', trim($form->getAttribute('class') . ' closed-property-list on-load'));
         }
+
+        // Set the resource template id from the query for a new resource.
+        // Else, it will be the user setting one.
+        // This feature requires to override file appliction/view/common/resource-fields.phtml.
+        if ($status->getRouteParam('action') === 'add') {
+            $resourceTemplateId = $services->get('ControllerPluginManager')->get('Params')->fromQuery('resource_template_id');
+            if ($resourceTemplateId && $form->has('o:resource_template[o:id]')) {
+                /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
+                $templateSelect = $form->get('o:resource_template[o:id]');
+                $templateSelect->setValue($resourceTemplateId);
+            }
+        }
     }
 
     public function addAdvancedTabElements(Event $event): void
