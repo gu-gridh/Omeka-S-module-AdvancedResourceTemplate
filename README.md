@@ -506,7 +506,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2020-2023 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2020-2024 (see [Daniel-KM] on GitLab)
 * Library [jQuery-Autocomplete]: Copyright 2012 DevBridge and other contributors
 
 These features were built for the future digital library [Manioc] of the
@@ -518,7 +518,7 @@ and for the institutional repository of student works [Dante] of the [Universit√
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [Lisez-moi]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/LISEZMOI.md
 [Omeka S]: https://omeka.org/s
-[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Generic]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generic
 [AdvancedResourceTemplate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/releases
 [Omeka/Omeka-S#2054]: https://github.com/omeka/omeka-s/pull/2054
