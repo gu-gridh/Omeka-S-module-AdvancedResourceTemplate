@@ -30,16 +30,27 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         return $this->data();
     }
 
+    /**
+     * Get all resource template data or settings.
+     */
     public function data(): array
     {
         return $this->resource->getData();
     }
 
+    /**
+     * Get a specific resource template data (setting).
+     *
+     * @return mixed
+     */
     public function dataValue(string $name)
     {
         return $this->resource->getDataValue($name);
     }
 
+    /**
+     * Get a value metadata from the data of the current template property.
+     */
     public function dataValueMetadata(string $name, ?string $metadata = null)
     {
         $dt = $this->resource->getData();

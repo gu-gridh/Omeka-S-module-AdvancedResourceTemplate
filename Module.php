@@ -115,7 +115,8 @@ class Module extends AbstractModule
             [$this, 'handleTemplateConfigOnSave']
         );
 
-        // Manage the auto-value setting for each resource type.
+        // Manage some settings (auto-value, exploding, order, etc.) for each
+        // resource type.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.pre',
@@ -492,7 +493,9 @@ class Module extends AbstractModule
         // Property level.
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
+                // Manage the split separator.
                 $resource = $this->explodeValueFromTemplatePropertyData($rtpData, $resource);
+                // Append the automatic value.
                 $automaticValue = $this->automaticValueFromTemplatePropertyData($rtpData, $resource);
                 if (!is_null($automaticValue)) {
                     $resource[$templateProperty->property()->term()][] = $automaticValue;
@@ -547,7 +550,9 @@ class Module extends AbstractModule
             // Value annotation property level.
             foreach ($vaTemplate->resourceTemplateProperties() as $vaTemplateProperty) {
                 foreach ($vaTemplateProperty->data() as $vaRtpData) {
+                    // Manage the split separator.
                     $vaResource = $this->explodeValueFromTemplatePropertyData($vaRtpData, $vaResource);
+                    // Append the automatic value.
                     $automaticValue = $this->automaticValueFromTemplatePropertyData($vaRtpData, $vaResource);
                     if (!is_null($automaticValue)) {
                         $vaResource[$vaTemplateProperty->property()->term()][] = $automaticValue;
@@ -1555,20 +1560,19 @@ SQL;
 
         $settings = $services->get('Omeka\Settings');
 
+        /** @var \Omeka\Form\ResourceForm $form */
+        $form = $event->getTarget();
+
         // Limit resource templates to the current resource type.
         $resourceName = $this->getRouteResourceName($status);
-        if ($resourceName) {
-            /** @var \Omeka\Form\ResourceForm $form */
-            $form = $event->getTarget();
-            if ($form->has('o:resource_template[o:id]')) {
-                /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
-                $templateSelect = $form->get('o:resource_template[o:id]');
-                $templateSelectOptions = $templateSelect->getOptions();
-                $templateSelectOptions['resource_value_options']['query'] = $templateSelectOptions['resource_value_options']['query'] ?? [];
-                $templateSelectOptions['resource_value_options']['query']['resource'] = $resourceName;
-                // TODO The process is not optimal in the core, since the value options are set early when options are set.
-                $templateSelect->setOptions($templateSelectOptions);
-            }
+        if ($resourceName && $form->has('o:resource_template[o:id]')) {
+            /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
+            $templateSelect = $form->get('o:resource_template[o:id]');
+            $templateSelectOptions = $templateSelect->getOptions();
+            $templateSelectOptions['resource_value_options']['query'] = $templateSelectOptions['resource_value_options']['query'] ?? [];
+            $templateSelectOptions['resource_value_options']['query']['resource'] = $resourceName;
+            // TODO The process is not optimal in the core, since the value options are set early when options are set.
+            $templateSelect->setOptions($templateSelectOptions);
         }
 
         $closedPropertyList = (bool) (int) $settings->get('advancedresourcetemplate_closed_property_list');
@@ -2189,7 +2193,6 @@ SQL;
 
         /** @var \Omeka\Api\Manager $api */
         $api = $this->getServiceLocator()->get('Omeka\ApiManager');
-
 
         $sortByLinkedProperty = function ($a, $b) use ($api, $orderByLinkedResourceProperties): int {
             $aId = empty($a['value_resource_id']) ? 0 : (int) $a['value_resource_id'];

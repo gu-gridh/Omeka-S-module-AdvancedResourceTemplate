@@ -5,11 +5,13 @@
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
  */
 
-// Copy of original file + resource template data and resource template properties data + export csv/tsv.
+// Copy of original file + css + resource template data and resource template properties data + export csv/tsv.
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
-$url = $this->plugin('url');
+$plugins = $this->getHelperPluginManager();
+$translate = $plugins->get('translate');
+$escape = $plugins->get('escapeHtml');
+$url = $plugins->get('url');
+$hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()->appendStylesheet($this->assetUrl('css/advanced-resource-template-admin.css', 'AdvancedResourceTemplate'));
 $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
@@ -27,12 +29,13 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
         <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item-set', 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= $translate('New item set') ?></a>
         <?php endif; ?>
         <a href="#" class="button expand" aria-label="<?= $translate('Expand') ?>" title="<?= $translate('Expand') ?>">
-            <?= $translate('Export') ?></a>
-            <ul class="collapsible">
-                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'csv']], true)) ?>"><?= $translate('As csv') ?></a></li>
-                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'tsv']], true)) ?>"><?= $translate('As tsv') ?></a></li>
-                <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'json']], true)) ?>"><?= $translate('As json') ?></a></li>
-            </ul>
+            <?= $translate('Export') ?>
+        </a>
+        <ul class="collapsible">
+            <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'csv']], true)) ?>"><?= $translate('As csv') ?></a></li>
+            <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'tsv']], true)) ?>"><?= $translate('As tsv') ?></a></li>
+            <li><a class="link" href="<?= $escape($url(null, ['action' => 'export'], ['query' => ['output' => 'json']], true)) ?>"><?= $translate('As json') ?></a></li>
+        </ul>
     </div>
     <?php if ($resourceTemplate->userIsAllowed('update')): ?>
     <a class="button" href="<?= $escape($resourceTemplate->url('edit')) ?>"><?= $translate('Edit') ?></a>
@@ -71,7 +74,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
                     <span class="property-term"><?php echo $escape($translate($property->term())); ?></span>
                 </span>
                 <ul class="actions">
-                    <li><?php echo $this->hyperlink('', '#', [
+                    <li><?php echo $hyperlink('', '#', [
                         'data-sidebar-content-url' => $property->url('show-details'),
                         'class' => 'o-icon-more sidebar-content',
                         'title' => $translate('Details'),
@@ -109,7 +112,7 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 </table>
 
 <div class="sidebar">
-    <?php echo $this->hyperlink('', '#', [
+    <?php echo $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
     ]); ?>

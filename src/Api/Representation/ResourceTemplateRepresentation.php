@@ -35,7 +35,7 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
     }
 
     /**
-     * @return array
+     * Get all resource template data or settings.
      */
     public function data(): array
     {
@@ -53,9 +53,11 @@ class ResourceTemplateRepresentation extends \Omeka\Api\Representation\ResourceT
     }
 
     /**
+     * Get a specific resource template data (setting).
+     *
      * @return mixed
      */
-    public function dataValue($name)
+    public function dataValue(string $name)
     {
         $data = $this->data();
         return $data[$name] ?? null;
