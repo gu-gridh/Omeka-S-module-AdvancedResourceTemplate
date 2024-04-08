@@ -1,7 +1,8 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+ * @var \Omeka\Api\Representation\VocabularyRepresentation $resourceTemplate
+ * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
  */
 
 // Copy of original file + resource template data and resource template properties data + export csv/tsv.
@@ -18,6 +19,13 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
 
 <div id="page-actions">
     <div id="page-action-menu">
+        <?php $useForResources = $resourceTemplate->dataValue('use_for_resources'); ?>
+        <?php if (!$useForResources || in_array('items', $useForResources)): ?>
+        <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item', 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= $translate('New item') ?></a>
+        <?php endif; ?>
+        <?php if (!$useForResources || in_array('item_sets', $useForResources)): ?>
+        <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item-set', 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= $translate('New item set') ?></a>
+        <?php endif; ?>
         <a href="#" class="button expand" aria-label="<?= $translate('Expand') ?>" title="<?= $translate('Expand') ?>">
             <?= $translate('Export') ?></a>
             <ul class="collapsible">
