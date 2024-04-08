@@ -118,7 +118,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 }
             } else {
                 $import['o:resource_template_property'][$key]['o:data'][0] = $rtp['o:data'][0] ?? $rtp;
-                $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'];
+                $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type']
+                    ?? $import['o:resource_template_property'][$key]['data_types'];
             }
             unset($import['o:resource_template_property'][$key]['o:data'][0]['o:data']);
             foreach (array_keys($rtp['o:data']) as $k) {
