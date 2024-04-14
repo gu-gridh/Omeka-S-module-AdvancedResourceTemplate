@@ -25,6 +25,8 @@ class GeonamesAutofiller extends AbstractAutofiller
         }
         $params['q'] = $query;
 
+        $params['maxRows'] = 1000;
+
         // The Geonames api requires a username. Some common names can be used:
         // "demo", "johnsmith", "google"… The requests may be limited per hour.
         // Last Value Suggest version uses "kdlinfo".
