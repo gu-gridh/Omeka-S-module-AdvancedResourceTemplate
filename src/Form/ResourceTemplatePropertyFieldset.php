@@ -2,7 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
-use AdvancedResourceTemplate\Form\Element\DataTypeSelect;
+use Common\Form\Element as CommonElement;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
@@ -118,7 +118,7 @@ class ResourceTemplatePropertyFieldset extends Fieldset implements InputFilterPr
             ])
             ->add([
                 'name' => 'o:data_type',
-                'type' => DataTypeSelect::class,
+                'type' => CommonElement\DataTypeSelect::class,
                 'options' => [
                     'label' => 'Data types', // @translate
                 ],

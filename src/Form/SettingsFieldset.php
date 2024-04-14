@@ -2,7 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
-use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
+use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 
@@ -21,7 +21,7 @@ class SettingsFieldset extends Fieldset
             ->setOption('element_groups', $this->elementGroups)
             ->add([
                 'name' => 'advancedresourcetemplate_resource_form_elements',
-                'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,
+                'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'element_group' => 'resources',
                     'label' => 'Elements of resource form to display', // @translate

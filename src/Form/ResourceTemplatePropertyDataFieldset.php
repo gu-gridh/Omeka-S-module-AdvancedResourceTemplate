@@ -2,7 +2,7 @@
 
 namespace AdvancedResourceTemplate\Form;
 
-use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
+use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Omeka\Form\Element as OmekaElement;
@@ -113,7 +113,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'unique_value',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Unique value among resources', // @translate
                     'checked_value' => 'yes',
@@ -139,7 +139,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'locked_value',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Locked value once saved', // @translate
                     'checked_value' => 'yes',
@@ -152,7 +152,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'property_read_only',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Property disabled in form (editable only by api/job)', // @translate
                     'checked_value' => 'yes',
@@ -258,7 +258,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'custom_vocab_open',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Custom vocab: open authority list', // @translate
                     'checked_value' => 'yes',
@@ -308,7 +308,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'value_annotations_template',
-                'type' => AdvancedResourceTemplateElement\OptionalResourceSelect::class,
+                'type' => CommonElement\OptionalResourceSelect::class,
                 'options' => [
                     'label' => 'Value annotations', // @translate
                     'disable_group_by_owner' => true,

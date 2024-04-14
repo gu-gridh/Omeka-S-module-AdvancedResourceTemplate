@@ -2,26 +2,34 @@
 
 namespace AdvancedResourceTemplate;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation;
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
-use Generic\AbstractModule;
+use Common\Stdlib\PsrMessage;
+use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Entity\ResourceTemplate;
 use Omeka\Entity\Value;
+use Omeka\Module\AbstractModule;
 use Omeka\Mvc\Status;
 use Omeka\Stdlib\ErrorStore;
 
+/**
+ * Advanced Resource Template.
+ *
+ * @copyright Daniel Berthereau, 2020-2024
+ * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
+ */
 class Module extends AbstractModule
 {
+    use TraitModule;
+
     const NAMESPACE = __NAMESPACE__;
 
     /**
@@ -34,15 +42,20 @@ class Module extends AbstractModule
      */
     protected $isBatchUpdate;
 
-    /**
-     * @var array
-     */
-    protected $propertiesByTerms;
+    protected function preInstall(): void
+    {
+        $services = $this->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
+        $translate = $plugins->get('translate');
 
-    /**
-     * @var array
-     */
-    protected $propertiesByTermsAndIds;
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.55')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.55'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+    }
 
     protected function postInstall(): void
     {
@@ -58,6 +71,7 @@ class Module extends AbstractModule
     public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
+
         // Copy or rights of the main Resource Template.
         /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
@@ -923,6 +937,7 @@ SQL;
          * @var string|null $resourceType
          * @var int|null $siteId
          * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template
+         * @var \Common\Stdlib\EasyMeta $easyMeta
          *
          * Warning: the property id may not be the property id, but the property
          * id and a resource template property id like "123-234".
@@ -944,9 +959,12 @@ SQL;
             return;
         }
 
+        $services = $this->getServiceLocator();
+        $easyMeta = $services->get('EasyMeta');
+
         $propertyId = $event->getParam('propertyId');
         $propertyTerm = $propertyId
-            ? $this->getPropertyTerm(strtok((string) $propertyId, '-'))
+            ? $easyMeta->propertyTerm(strtok((string) $propertyId, '-'))
             : null;
         if (empty($order[$propertyTerm])) {
             return;
@@ -955,7 +973,7 @@ SQL;
         $order = $order[$propertyTerm];
 
         // Filter order early.
-        $orderPropertyIds = $this->getPropertyIds(array_keys($order));
+        $orderPropertyIds = $easyMeta->propertyIds(array_keys($order));
         $order = array_replace($orderPropertyIds, array_intersect_key($order, $orderPropertyIds));
         if (!$order) {
             return;
@@ -967,7 +985,7 @@ SQL;
             ->orderBy('property.id, resource_template_property.alternateLabel');
 
         foreach ($order as $property => $sort) {
-            $property = $this->getPropertyId($property);
+            $property = $easyMeta->propertyId($property);
             if (!$property) {
                 continue;
             }
@@ -1626,7 +1644,7 @@ SQL;
 
     public function handleMainSettings(Event $event): void
     {
-        parent::handleMainSettings($event);
+        $this->handleAnySettings($event, 'settings');
 
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
@@ -2261,133 +2279,6 @@ SQL;
         $controller = $params['controller'] ?? $params['__CONTROLLER__'] ?? null;
 
         return $controllerToResourceNames[$controller] ?? null;
-    }
-
-    /**
-     * Get a property id by JSON-LD term or by numeric id.
-     *
-     * @param int|string|null $termsOrId An id or a term.
-     */
-    protected function getPropertyId($termOrId): ?int
-    {
-        if ($this->propertiesByTermsAndIds === null) {
-            $this->prepareProperties();
-        }
-        return $termOrId
-            ? $this->propertiesByTermsAndIds[$termOrId] ?? null
-            : null;
-    }
-
-    /**
-     * Get a property JSON-LD term or by JSON-LD term or numeric id.
-     *
-     * @param int|string|null $termsOrId An id or a term.
-     */
-    protected function getPropertyTerm($termOrId): ?string
-    {
-        if ($this->propertiesByTermsAndIds === null) {
-            $this->prepareProperties();
-        }
-        return $termOrId && !empty($this->propertiesByTermsAndIds[$termOrId])
-            ? array_search($this->propertiesByTermsAndIds[$termOrId], $this->propertiesByTerms)
-            : null;
-    }
-
-    /**
-     * Get property ids by JSON-LD terms or by numeric ids.
-     *
-     * @param array|int|string|null $termsOrIds One or multiple ids or terms.
-     * @return int[] The property ids matching terms or ids, or all properties
-     * by term. Order of input is kept.
-     *
-     * Replace feature in the adapter to get the id, that is heavy, because most
-     * of the time only the property id is needed.
-     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::isTerm()
-     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getPropertyByTerm()
-     *
-     * @see \AdvancedResourceTemplate\Module::getPropertyIds()
-     */
-    protected function getPropertyIds($termsOrIds = null): array
-    {
-        if ($this->propertiesByTermsAndIds === null) {
-            $this->prepareProperties();
-        }
-
-        if ($termsOrIds === null) {
-            return $this->propertiesByTerms;
-        }
-
-        if (is_scalar($termsOrIds)) {
-            return isset($this->propertiesByTermsAndIds[$termsOrIds])
-                ? [$termsOrIds => $this->propertiesByTermsAndIds[$termsOrIds]]
-                : [];
-        }
-
-        // Keep original order of ids.
-        // return array_intersect_key($propertiesByTermsAndIds, array_flip($termsOrIds));
-        $input = array_fill_keys($termsOrIds, null);
-        return array_filter(array_replace($input, array_intersect_key($this->propertiesByTermsAndIds, $input)));
-    }
-
-    /**
-     * Get property JSON-LD terms by JSON-LD terms or by numeric ids.
-     *
-     * @param array|int|string|null $termsOrIds One or multiple ids or terms.
-     * @return string[] The property terms matching terms or ids, or all
-     * properties by id. Order of input is kept.
-     */
-    protected function getPropertyTerms($termsOrIds = null): array
-    {
-        if ($this->propertiesByTermsAndIds === null) {
-            $this->prepareProperties();
-        }
-
-        if ($termsOrIds === null) {
-            return array_flip($this->propertiesByTerms);
-        }
-
-        if (is_scalar($termsOrIds)) {
-            return isset($this->propertiesByTermsAndIds[$termsOrIds])
-                ? [$termsOrIds => array_search($this->propertiesByTermsAndIds[$termsOrIds], $this->propertiesByTerms)]
-                : [];
-        }
-
-        // TODO Should table of property terms by terms and ids be stored? Not use often.
-        $propertyTermsByTermsAndIds = array_combine(array_keys($this->propertiesByTerms), array_keys($this->propertiesByTerms))
-            + array_flip($this->propertiesByTerms);
-
-        // Keep original order of ids.
-        $input = array_fill_keys($termsOrIds, null);
-        return array_filter(array_replace($input, array_intersect_key($propertyTermsByTermsAndIds, $input)));
-    }
-
-    /**
-     * Store properties ids and terms one time.
-     */
-    protected function prepareProperties(): void
-    {
-        if ($this->propertiesByTermsAndIds !== null) {
-            return;
-        }
-
-        /** @var \Doctrine\DBAL\Connection $connection */
-        $connection = $this->getServiceLocator()->get('Omeka\Connection');
-        $qb = $connection->createQueryBuilder();
-        $qb
-            ->select(
-                'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
-                'property.id AS id',
-                // Required with only_full_group_by.
-                'vocabulary.id',
-                'property.id'
-            )
-            ->from('property', 'property')
-            ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
-            ->orderBy('vocabulary.id', 'asc')
-            ->addOrderBy('property.id', 'asc')
-        ;
-        $this->propertiesByTerms = array_map('intval', $connection->executeQuery($qb)->fetchAllKeyValue());
-        $this->propertiesByTermsAndIds = array_replace($this->propertiesByTerms, array_combine($this->propertiesByTerms, $this->propertiesByTerms));
     }
 
     /**

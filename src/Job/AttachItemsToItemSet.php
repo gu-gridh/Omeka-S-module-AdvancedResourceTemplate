@@ -21,7 +21,7 @@ class AttachItemsToItemSet extends AbstractJob
         $logger = $services->get('Omeka\Logger');
 
         // The reference id is the job id for now.
-        if (class_exists('Log\Stdlib\PsrMessage')) {
+        if (class_exists('Common\Stdlib\PsrMessage')) {
             $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
             $referenceIdProcessor->setReferenceId('art/attach_to_itemset/job_' . $this->job->getId());
             $logger->addProcessor($referenceIdProcessor);

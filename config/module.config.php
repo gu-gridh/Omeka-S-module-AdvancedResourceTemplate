@@ -46,8 +46,6 @@ return [
     ],
     'view_helpers' => [
         'factories' => [
-            // Used in AdvancedResourceTemplate, AdvancedSearch and BlockPlus.
-            'assetUrl' => Service\ViewHelper\AssetUrlFactory::class,
             // Copy from AdvancedResourceTemplate. Copy in BulkExport, BulkEdit and BulkImport. Used in Contribute.
             'customVocabBaseType' => Service\ViewHelper\CustomVocabBaseTypeFactory::class,
             'dataType' => Service\ViewHelper\DataTypeFactory::class,
@@ -56,28 +54,19 @@ return [
     'form_elements' => [
         'invokables' => [
             Form\Element\GroupTextarea::class => Form\Element\GroupTextarea::class,
-            Form\Element\OptionalCheckbox::class => Form\Element\OptionalCheckbox::class,
-            Form\Element\OptionalMultiCheckbox::class => Form\Element\OptionalMultiCheckbox::class,
-            Form\Element\OptionalRadio::class => Form\Element\OptionalRadio::class,
-            Form\Element\OptionalSelect::class => Form\Element\OptionalSelect::class,
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
             'Omeka\Form\ResourceTemplateImportForm' => Form\ResourceTemplateImportForm::class,
         ],
         'factories' => [
             Form\Element\OptionalPropertySelect::class => Service\Form\Element\OptionalPropertySelectFactory::class,
-            Form\Element\OptionalResourceSelect::class => Service\Form\Element\OptionalResourceSelectFactory::class,
-            Form\Element\OptionalResourceTemplateSelect::class => Service\Form\Element\OptionalResourceTemplateSelectFactory::class,
-            Form\Element\OptionalRoleSelect::class => Service\Form\Element\OptionalRoleSelectFactory::class,
             Form\Element\PropertySelect::class => Service\Form\Element\PropertySelectFactory::class,
             Form\ResourceTemplateDataFieldset::class => Service\Form\ResourceTemplateDataFieldsetFactory::class,
-            'Omeka\Form\Element\DataTypeSelect' => Service\Form\Element\DataTypeSelectFactory::class,
             'Omeka\Form\ResourceTemplateForm' => Service\Form\ResourceTemplateFormFactory::class,
             'Omeka\Form\ResourceTemplatePropertyFieldset' => Service\Form\ResourceTemplatePropertyFieldsetFactory::class,
         ],
         'aliases' => [
             // Use aliases to keep core keys.
-            Form\Element\DataTypeSelect::class => 'Omeka\Form\Element\DataTypeSelect',
             Form\ResourceTemplateForm::class => 'Omeka\Form\ResourceTemplateForm',
             Form\ResourceTemplatePropertyFieldset::class => 'Omeka\Form\ResourceTemplatePropertyFieldset',
         ],

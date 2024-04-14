@@ -3,6 +3,7 @@
 namespace AdvancedResourceTemplate\Form;
 
 use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
+use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Omeka\Form\Element as OmekaElement;
@@ -35,7 +36,7 @@ class ResourceTemplateDataFieldset extends Fieldset
         $this
             ->add([
                 'name' => 'use_for_resources',
-                'type' => AdvancedResourceTemplateElement\OptionalMultiCheckbox::class,
+                'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'label' => 'Use for resources', // @translate
                     'value_options' => $resourceNames,
@@ -50,7 +51,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'require_resource_class',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Require a class', // @translate
                     'checked_value' => 'yes',
@@ -61,7 +62,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'closed_class_list',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Limit to specified classes', // @translate
                     'checked_value' => 'yes',
@@ -72,7 +73,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'closed_property_list',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Limit to specified properties', // @translate
                     'checked_value' => 'yes',
@@ -84,7 +85,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'quick_new_resource',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Allow quick creation of a resource', // @translate
                     'checked_value' => 'yes',
@@ -96,7 +97,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'autocomplete',
-                'type' => AdvancedResourceTemplateElement\OptionalRadio::class,
+                'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'label' => 'Autocomplete with existing values', // @translate
                     'value_options' => [
@@ -134,7 +135,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'no_language',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'No language', // @translate
                     'checked_value' => 'yes',
@@ -146,7 +147,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'value_suggest_keep_original_label',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Value Suggest: keep original label', // @translate
                     'checked_value' => 'yes',
@@ -157,7 +158,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'value_suggest_require_uri',
-                'type' => AdvancedResourceTemplateElement\OptionalCheckbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'label' => 'Value Suggest: require uri', // @translate
                     'checked_value' => 'yes',
@@ -179,7 +180,7 @@ class ResourceTemplateDataFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'autofillers',
-                'type' => AdvancedResourceTemplateElement\OptionalSelect::class,
+                'type' => CommonElement\OptionalSelect::class,
                 'options' => [
                     'label' => 'Autofillers', // @translate
                     'value_options' => $this->autofillers,
@@ -199,7 +200,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'value_annotations_template',
-                'type' => AdvancedResourceTemplateElement\OptionalResourceSelect::class,
+                'type' => CommonElement\OptionalResourceSelect::class,
                 'options' => [
                     'label' => 'Value annotations', // @translate
                     'disable_group_by_owner' => true,
@@ -226,7 +227,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'groups',
-                'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
+                'type' => AdvancedResourceTemplate\GroupTextarea::class,
                 'options' => [
                     'label' => 'Groups', // @translate
                     'info' => 'Allow to get properties by group for display. This is a list of group names and properties for each of them. May need a specific theme template.', // @translate
@@ -261,7 +262,7 @@ dcterms:language
             ])
             ->add([
                 'name' => 'subject_values_order',
-                'type' => AdvancedResourceTemplateElement\GroupTextarea::class,
+                'type' => AdvancedResourceTemplate\GroupTextarea::class,
                 'options' => [
                     'label' => 'Order of linked values (Omeka v4.1)', // @translate
                     'info' => 'The default order of the linked resources is the title. Another order can be set for each linking property. For the default order when there is no property, just skip the property term.', // @translate
