@@ -951,12 +951,18 @@ SQL;
         }
 
         // Check if the value is already set on the main value data.
+
+        // Avoid false different strings.
+        $fixValue = fn ($value) => is_string($value) ? trim($value) : $value;
+        $check = array_map($fixValue, $check);
         ksort($check);
+
         foreach ($resource[$term] ?? [] as $value) {
             $checkValue = array_intersect_key($value, $check);
             if (isset($checkValue['value_resource_id'])) {
                 $checkValue['value_resource_id'] = (int) $checkValue['value_resource_id'];
             }
+            $checkValue = array_map($fixValue, $checkValue);
             ksort($checkValue);
             if ($check === $checkValue) {
                 return null;
