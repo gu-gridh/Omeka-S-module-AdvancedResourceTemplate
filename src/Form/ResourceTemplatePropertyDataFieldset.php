@@ -320,9 +320,7 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                     'resource_value_options' => [
                         'resource' => 'resource_templates',
                         'query' => ['resource' => 'value_annotations'],
-                        'option_text_callback' => function ($resourceTemplate) {
-                            return $resourceTemplate->label();
-                        },
+                        'option_text_callback' => fn ($resourceTemplate) => $resourceTemplate->label(),
                     ],
                 ],
                 'attributes' => [

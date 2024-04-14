@@ -427,9 +427,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                 && $cellValue($v, $k) !== null;
         };
         // Is empty except values like "0".
-        $isEmpty = function ($v) {
-            return is_array($v) ? !count($v) : !strlen((string) $v);
-        };
+        $isEmpty = fn ($v) => is_array($v) ? !count($v) : !strlen((string) $v);
 
         // Convert to json.
         $json = [];
@@ -472,9 +470,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                     }
                     $rtp['o:alternate_label'] = $row['Alternate label'] ?: '';
                     $rtp['o:alternate_comment'] = $row['Alternate comment'] ?: '';
-                    $rtp['data_types'] = array_filter(array_map(function ($v) {
-                        return $v ? ['name' => $v, 'label' => $v] : null;
-                    }, $stringToArray($row['Data types'])));
+                    $rtp['data_types'] = array_filter(array_map(fn ($v) => $v ? ['name' => $v, 'label' => $v] : null, $stringToArray($row['Data types'])));
                     $rtp['o:is_required'] = (bool) $row['Required'];
                     $rtp['o:is_private'] = (bool) $row['Private'];
                     $rtp['o:default_lang'] = $row['Default language'];
@@ -836,11 +832,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $this->api()->read('resource_templates', $this->params('id'))->getContent();
 
-        $isFlatArray = function (array $v) {
-            return !array_filter($v, function ($vv) {
-                return !is_scalar($vv);
-            });
-        };
+        $isFlatArray = fn (array $v) => !array_filter($v, fn ($vv) => !is_scalar($vv));
 
         $templateHeaders = [
             'Type',
@@ -1429,9 +1421,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         }
 
         $first = true;
-        $rows = array_map(function ($v) use ($delimiter, $enclosure) {
-            return str_getcsv($v, $delimiter, $enclosure);
-        }, array_map('trim', explode("\n", $content)));
+        $rows = array_map(fn ($v) => str_getcsv($v, $delimiter, $enclosure), array_map('trim', explode("\n", $content)));
         foreach ($rows as $key => $row) {
             if (empty(array_filter($row))) {
                 unset($rows[$key]);

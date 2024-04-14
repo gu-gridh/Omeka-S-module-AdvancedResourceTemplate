@@ -15,7 +15,7 @@ class ResourceTemplateAdapter extends \Omeka\Api\Adapter\ResourceTemplateAdapter
         return \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation::class;
     }
 
-    public function buildQuery(QueryBuilder $qb, array $query)
+    public function buildQuery(QueryBuilder $qb, array $query): void
     {
         parent::buildQuery($qb, $query);
 

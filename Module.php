@@ -968,7 +968,7 @@ class Module extends AbstractModule
         // Don't use a sql query, but a batch update in order to manage api
         // calls (indexations).
         // Use a job: the process via api can be long with many items.
-        $args =[
+        $args = [
             'item_set_id' => $itemSetId,
         ];
         $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\AdvancedResourceTemplate\Job\AttachItemsToItemSet::class, $args);
@@ -1121,7 +1121,7 @@ class Module extends AbstractModule
             /** @var \Omeka\Form\Element\ResourceSelect $templateSelect */
             $templateSelect = $form->get('o:resource_template[o:id]');
             $templateSelectOptions = $templateSelect->getOptions();
-            $templateSelectOptions['resource_value_options']['query'] = $templateSelectOptions['resource_value_options']['query'] ?? [];
+            $templateSelectOptions['resource_value_options']['query'] ??= [];
             $templateSelectOptions['resource_value_options']['query']['resource'] = $resourceName;
             // TODO The process is not optimal in the core, since the value options are set early when options are set.
             $templateSelect->setOptions($templateSelectOptions);
@@ -1464,9 +1464,7 @@ class Module extends AbstractModule
                 }
                 $result[$autofillerKey]['mapping'][] = [
                     'from' => $from,
-                    'to' => array_filter($ton, function ($v) {
-                        return !is_null($v);
-                    }),
+                    'to' => array_filter($ton, fn ($v) => !is_null($v)),
                 ];
             }
         }
