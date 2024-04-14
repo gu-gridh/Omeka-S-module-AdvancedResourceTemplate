@@ -44,11 +44,6 @@ return [
             Controller\Admin\ResourceTemplateControllerDelegator::class => 'omeka/admin/resource-template',
         ],
     ],
-    'view_helpers' => [
-        'factories' => [
-            'dataType' => Service\ViewHelper\DataTypeFactory::class,
-        ],
-    ],
     'form_elements' => [
         'invokables' => [
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
