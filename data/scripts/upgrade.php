@@ -26,10 +26,10 @@ $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 // $entityManager = $services->get('Omeka\EntityManager');
 
-if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.55')) {
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.56')) {
     $message = new \Omeka\Stdlib\Message(
         'The module %1$s should be upgraded to version %2$s or later.', // @translate
-        'Common', '3.4.55'
+        'Common', '3.4.56'
     );
     throw new ModuleCannotInstallException((string) $message);
 }
@@ -531,12 +531,16 @@ SQL;
 
 if (version_compare((string) $oldVersion, '3.4.27', '<')) {
     $this->updateItemSetsQueries();
+}
 
-    $hasCommon = $this->isModuleActive('Common');
-    if (!$hasCommon) {
-        $message = new PsrMessage(
-            'Next version of the module will depend on module Common, that replaces module Generic. You will have to install it first.' // @translate
-        );
-        $messenger->addWarning($message);
-    }
+if (version_compare((string) $oldVersion, '3.4.29', '<')) {
+    $message = new PsrMessage(
+        'The feature to display the property select with all alternative labels of templates was moved to a new module {link}Alternative Label Select{link_end}. You should install it if you need it.', // @translate
+        [
+            'link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AlternativeLabelSelect" _target="blank" rel="noopener">',
+            'link_end' => '</a>',
+        ]
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addWarning($message);
 }
