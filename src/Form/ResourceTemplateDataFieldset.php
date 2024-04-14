@@ -2,7 +2,6 @@
 
 namespace AdvancedResourceTemplate\Form;
 
-use AdvancedResourceTemplate\Form\Element as AdvancedResourceTemplateElement;
 use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
@@ -227,7 +226,7 @@ class ResourceTemplateDataFieldset extends Fieldset
 
             ->add([
                 'name' => 'groups',
-                'type' => AdvancedResourceTemplate\GroupTextarea::class,
+                'type' => CommonElement\GroupTextarea::class,
                 'options' => [
                     'label' => 'Groups', // @translate
                     'info' => 'Allow to get properties by group for display. This is a list of group names and properties for each of them. May need a specific theme template.', // @translate
@@ -262,7 +261,7 @@ dcterms:language
             ])
             ->add([
                 'name' => 'subject_values_order',
-                'type' => AdvancedResourceTemplate\GroupTextarea::class,
+                'type' => CommonElement\GroupTextarea::class,
                 'options' => [
                     'label' => 'Order of linked values (Omeka v4.1)', // @translate
                     'info' => 'The default order of the linked resources is the title. Another order can be set for each linking property. For the default order when there is no property, just skip the property term.', // @translate

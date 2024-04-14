@@ -51,7 +51,6 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
-            Form\Element\GroupTextarea::class => Form\Element\GroupTextarea::class,
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
             'Omeka\Form\ResourceTemplateImportForm' => Form\ResourceTemplateImportForm::class,
