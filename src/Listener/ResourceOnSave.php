@@ -4,6 +4,7 @@ namespace AdvancedResourceTemplate\Listener;
 
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation;
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
+use Exception;
 use Laminas\EventManager\Event;
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -49,7 +50,7 @@ class ResourceOnSave
         try {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
             $template = $this->api->read('resource_templates', ['id' => $templateId])->getContent();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return;
         }
 
@@ -60,7 +61,7 @@ class ResourceOnSave
             try {
                 /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $vaTemplateDefault */
                 $vaTemplateDefault = $this->api->read('resource_templates', ['id' => $vaTemplateDefaultId])->getContent();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -108,7 +109,7 @@ class ResourceOnSave
             try {
                 /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $vaTemplate */
                 $vaTemplate = $this->api->read('resource_templates', ['id' => $vaTemplateId])->getContent();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -652,7 +653,7 @@ SQL;
                     }
                     $messenger->addSuccess($message);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $message = new \Omeka\Stdlib\Message(
                     'Unable to append new descriptors to custom vocab "%1$s": %2$s', // @translate
                     $customVocab['label'], $e->getMessage()
@@ -680,11 +681,11 @@ SQL;
         }
 
         /**
-         * @var array $customVocabBaseTypes
+         * @var \Common\Stdlib\EasyMeta $easyMeta
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
-        $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
+        $easyMeta = $services->get('EasyMeta');
         $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
         $newResourceData = $mapper
@@ -697,24 +698,18 @@ SQL;
         foreach ($newResourceData as $term => $newValues) {
             foreach ($newValues as $newValue) {
                 $dataType = $newValue['type'];
-                $dataTypeColon = strtok($dataType, ':');
-                $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($dataType, 12)] ?? 'literal' : null;
-                switch ($dataType) {
-                    case $dataTypeColon === 'resource':
-                    case $baseType === 'resource':
+                $mainType = $easyMeta->dataTypeMain($dataType);
+                switch ($mainType) {
+                    case 'resource':
                         $check = [
                             'type' => $dataType,
                             'value_resource_id' => (int) $newValue['value_resource_id'],
                         ];
                         break;
                     case 'uri':
-                    case $dataTypeColon === 'valuesuggest':
-                    case $dataTypeColon === 'valuesuggestall':
-                    case $baseType === 'uri':
                         $check = array_intersect_key($newValue, ['type' => null, '@id' => null]);
                         break;
                     case 'literal':
-                    // case $baseType === 'literal':
                     default:
                         $check = array_intersect_key($newValue, ['type' => null, '@value' => null]);
                         break;
@@ -811,15 +806,16 @@ SQL;
 
         /**
          * @var \Omeka\Api\Manager $api
-         * @var array $customVocabBaseTypes
+         * @var \Common\Stdlib\EasyMeta $easyMeta
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
         $api = $services->get('Omeka\ApiManager');
-        $customVocabBaseTypes = $services->get('ViewHelperManager')->get('customVocabBaseType')();
-        $fieldNameToProperty = $services->get('ControllerPluginManager')->get('fieldNameToProperty');
-        $mapper = $services->get('ControllerPluginManager')->get('artMapper');
+        $easyMeta = $services->get('EasyMeta');
+        $fieldNameToProperty = $plugins->get('fieldNameToProperty');
+        $mapper = $plugins->get('artMapper');
 
         // TODO Use mapper metaMapper from module Bulk Import (json dot notation or jmespath + basic twig).
 
@@ -841,17 +837,16 @@ SQL;
                 }
             }
             // Check the validity of the data with the data type.
-            $dataTypeColon = strtok($automaticValueArray['type'], ':');
-            $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($automaticValueArray['type'], 12)] ?? 'literal' : null;
+            $dataType = $automaticValueArray['type'];
+            $mainType = $easyMeta->dataTypeMain($dataType);
 
-            switch ($automaticValueArray['type']) {
-                case $dataTypeColon === 'resource':
-                case $baseType === 'resource':
+            switch ($mainType) {
+                case 'resource':
                     if (empty($automaticValue['value_resource_id'])) {
                         return null;
                     }
-
-                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['value_resource_id']}";
+                    $vrid = $automaticValue['value_resource_id'];
+                    $to = "$term ^^$dataType ~ $vrid";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -864,21 +859,19 @@ SQL;
 
                     // Check the value.
                     try {
-                        $api->read('resources', ['id' => $automaticValue['value_resource_id']], ['initialize' => false, 'finalize' => false]);
-                    } catch (\Exception $e) {
+                        $api->read('resources', ['id' => $vrid], ['initialize' => false, 'finalize' => false]);
+                    } catch (Exception $e) {
                         return null;
                     }
                     $check = array_intersect_key($automaticValueArray, ['type' => null, 'value_resource_id' => null]);
                     break;
+
                 case 'uri':
-                case $dataTypeColon === 'valuesuggest':
-                case $dataTypeColon === 'valuesuggestall':
-                case $baseType === 'uri':
                     if (empty($automaticValue['@id'])) {
                         return null;
                     }
-
-                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['@id']}";
+                    $uri = $automaticValue['@id'];
+                    $to = "$term ^^$dataType ~ $uri";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -891,14 +884,15 @@ SQL;
 
                     $check = array_intersect_key($automaticValueArray, ['type' => null, '@id' => null]);
                     break;
+
                 case 'literal':
-                // case $baseType === 'literal':
                 default:
                     if (!isset($automaticValueArray['@value']) || !strlen((string) $automaticValueArray['@value'])) {
                         return null;
                     }
 
-                    $to = "$term ^^{$automaticValueArray['type']} ~ {$automaticValue['@value']}";
+                    $val = $automaticValue['@value'];
+                    $to = "$term ^^$dataType ~ $val";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -913,9 +907,7 @@ SQL;
                     break;
             }
         } else {
-            $dataTypeColon = strtok($dataType, ':');
-            $baseType = $dataTypeColon === 'customvocab' ? $customVocabBaseTypes[(int) substr($dataType, 12)] ?? 'literal' : null;
-
+            $mainType = $easyMeta->dataTypeMain($dataType);
             $to = "$term ^^$dataType ~ $automaticValue";
             $to = $fieldNameToProperty($to);
             if (!$to) {
@@ -927,14 +919,13 @@ SQL;
                 ->setIsInternalSource(true)
                 ->extractValueOnly($resource, ['from' => '~', 'to' => $to]);
 
-            switch ($dataType) {
-                case $dataTypeColon === 'resource':
-                case $baseType === 'resource':
+            switch ($mainType) {
+                case 'resource':
                     // Check the value.
                     $automaticValueTransformed = (int) $automaticValueTransformed;
                     try {
                         $api->read('resources', ['id' => $automaticValueTransformed], ['initialize' => false, 'finalize' => false]);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         return null;
                     }
                     $automaticValueArray = [
@@ -943,16 +934,12 @@ SQL;
                     ];
                     break;
                 case 'uri':
-                case $dataTypeColon === 'valuesuggest':
-                case $dataTypeColon === 'valuesuggestall':
-                case $baseType === 'uri':
                     $automaticValueArray = [
                         'type' => $dataType,
                         '@id' => $automaticValueTransformed,
                     ];
                     break;
                 case 'literal':
-                // case $baseType === 'literal':
                 default:
                     $automaticValueArray = [
                         'type' => $dataType,

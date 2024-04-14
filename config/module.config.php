@@ -46,8 +46,6 @@ return [
     ],
     'view_helpers' => [
         'factories' => [
-            // Copy from AdvancedResourceTemplate. Copy in BulkExport, BulkEdit and BulkImport. Used in Contribute.
-            'customVocabBaseType' => Service\ViewHelper\CustomVocabBaseTypeFactory::class,
             'dataType' => Service\ViewHelper\DataTypeFactory::class,
         ],
     ],
@@ -85,7 +83,6 @@ return [
         ],
         'factories' => [
             'artMapper' => Service\ControllerPlugin\ArtMapperFactory::class,
-            'mapperHelper' => Service\ControllerPlugin\MapperHelperFactory::class,
         ],
     ],
     'router' => [

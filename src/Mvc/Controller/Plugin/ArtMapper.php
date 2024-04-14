@@ -3,6 +3,7 @@
 namespace AdvancedResourceTemplate\Mvc\Controller\Plugin;
 
 use ArrayObject;
+use Common\Stdlib\EasyMeta;
 use DOMDocument;
 use DOMXPath;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -24,19 +25,14 @@ class ArtMapper extends AbstractPlugin
     protected $api;
 
     /**
-     * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\MapperHelper
+     * @var \Common\Stdlib\EasyMeta
      */
-    protected $mapperHelper;
+    protected $easyMeta;
 
     /**
      * @var \Omeka\Mvc\Controller\Plugin\Translate
      */
     protected $translate;
-
-    /**
-     * @var array
-     */
-    protected $customVocabBaseTypes;
 
     /**
      * Normalize a mapping.
@@ -75,16 +71,14 @@ class ArtMapper extends AbstractPlugin
 
     public function __construct(
         ApiManager $api,
-        MapperHelper $mapperHelper,
-        Translate $translate,
-        array $customVocabBaseTypes
+        EasyMeta $easyMeta,
+        Translate $translate
     ) {
         // Don't use api plugin, because a form may be set and will be removed
         // when recalled (nearly anywhere), even for a simple read.
         $this->api = $api;
-        $this->mapperHelper = $mapperHelper;
+        $this->easyMeta = $easyMeta;
         $this->translate = $translate;
-        $this->customVocabBaseTypes = $customVocabBaseTypes;
     }
 
     public function __invoke(): self
@@ -396,12 +390,10 @@ class ArtMapper extends AbstractPlugin
             $value = $transformed;
         }
 
-        $dataTypeColon = strtok($v['type'], ':');
-        $baseType = $dataTypeColon === 'customvocab' ? $this->customVocabBaseTypes[(int) substr($v['type'], 12)] ?? 'literal' : null;
+        $mainType = $this->easyMeta->dataTypeMain($v['type']) ?? null;
 
-        switch ($v['type']) {
-            case $dataTypeColon === 'resource':
-            case $baseType === 'resource':
+        switch ($mainType) {
+            case 'resource':
                 // The mapping from an external service cannot be an internal
                 // resource.
                 // Nevertheless, for internal source, the result is checked and
@@ -416,14 +408,10 @@ class ArtMapper extends AbstractPlugin
                 }
                 break;
             case 'uri':
-            case $dataTypeColon === 'valuesuggest':
-            case $dataTypeColon === 'valuesuggestall':
-            case $baseType === 'uri':
                 $v['@id'] = $value;
                 $this->result[$target['field']][] = $v;
                 break;
             case 'literal':
-            // case $baseType === 'literal':
             default:
                 $v['@value'] = $value;
                 $this->result[$target['field']][] = $v;
@@ -885,12 +873,12 @@ class ArtMapper extends AbstractPlugin
         $translate = $this->translate;
         foreach ($mapping as &$map) {
             $to = &$map['to'];
-            $to['property_id'] = $this->mapperHelper->getPropertyId($to['field']);
+            $to['property_id'] = $this->easyMeta->propertyId($to['field']);
             if (empty($to['type'])) {
                 $to['type'] = 'literal';
             }
             if (empty($to['property_label'])) {
-                $to['property_label'] = $translate($this->mapperHelper->getPropertyLabel($to['field']));
+                $to['property_label'] = $translate($this->easyMeta->propertyLabel($to['field']));
             }
         }
         return $mapping;
