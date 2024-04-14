@@ -21,6 +21,11 @@ class ResourceOnSave
     protected $api;
 
     /**
+     * @var \Commont\Stdlib\EasyMeta
+     */
+    protected $easyMeta;
+
+    /**
      * @var \Laminas\ServiceManager\ServiceLocatorInterface
      */
     protected $services;
@@ -31,6 +36,7 @@ class ResourceOnSave
     public function __construct(ServiceLocatorInterface $services)
     {
         $this->services = $services;
+        $this->easyMeta = $services->get('EasyMeta');
     }
 
     public function handleTemplateSettingsOnSave(Event $event): void
@@ -96,8 +102,8 @@ class ResourceOnSave
     ): array {
         // Check if there is something to process.
         // Unlike resource, don't add default value if there is no value.
-        $term = $rtpData->property()->term();
-        if (empty($resource[$term])) {
+        $propertyTerm = $rtpData->property()->term();
+        if (empty($resource[$propertyTerm])) {
             return $resource;
         }
 
@@ -120,7 +126,7 @@ class ResourceOnSave
 
         // Here the resource is the value annotation.
 
-        foreach ($resource[$term] as $index => $value) {
+        foreach ($resource[$propertyTerm] as $index => $value) {
             $vaResource = $value['@annotation'] ?? [];
 
             // Value annotation template level.
@@ -141,7 +147,7 @@ class ResourceOnSave
                 }
             }
 
-            $resource[$term][$index]['@annotation'] = $vaResource;
+            $resource[$propertyTerm][$index]['@annotation'] = $vaResource;
         }
 
         return $resource;
@@ -187,6 +193,7 @@ class ResourceOnSave
 
         $useForResources = $template->dataValue('use_for_resources') ?: [];
         $resourceName = $entity->getResourceName();
+
         if ($useForResources && !in_array($resourceName, $useForResources)) {
             $message = new PsrMessage('This template cannot be used for this resource.'); // @translate
             $errorStore->addError('o:resource_template[o:id]', $message);
@@ -242,10 +249,12 @@ class ResourceOnSave
         $resourceId = (int) $resource->id();
         $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
 
+        // Warning: to use $resource->jsonSerialize() here for debug output a doctrine error.
+
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                $term = $templateProperty->property()->term();
-
+                $propertyId = $templateProperty->property()->id();
+                $propertyTerm = $this->easyMeta->propertyTerm($propertyId);
                 $inputControl = (string) $rtpData->dataValue('input_control');
                 if (strlen($inputControl)) {
                     // Check that the input control is a valid regex first.
@@ -266,14 +275,14 @@ class ResourceOnSave
                         );
                         $services->get('Omeka\Logger')->warn((string) $message);
                     } else {
-                        foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
+                        foreach ($resource->value($propertyTerm, ['all' => true, 'type' => 'literal']) as $value) {
                             $val = $value->value();
                             if (!preg_match($regex, $val)) {
                                 $message = new PsrMessage(
                                     'The value "{value}" for term {property} does not follow the input pattern "{pattern}".', // @translate
-                                    ['value' => $val, 'property' => $term, 'pattern' => $inputControl]
+                                    ['value' => $val, 'property' => $propertyTerm, 'pattern' => $inputControl]
                                 );
-                                $errorStore->addError($term, $message);
+                                $errorStore->addError($propertyTerm, $message);
                                 if ($directMessage) {
                                     $messenger->addError($message);
                                 }
@@ -285,14 +294,14 @@ class ResourceOnSave
                 $minLength = (int) $rtpData->dataValue('min_length');
                 $maxLength = (int) $rtpData->dataValue('max_length');
                 if ($minLength || $maxLength) {
-                    foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
+                    foreach ($resource->value($propertyTerm, ['all' => true, 'type' => 'literal']) as $value) {
                         $length = mb_strlen($value->value());
                         if ($minLength && $length < $minLength) {
                             $message = new PsrMessage(
                                 'The value for term {property} is shorter ({length} characters) than the minimal size ({number} characters).', // @translate
-                                ['property' => $term, 'length' => $length, 'number' => $minLength]
+                                ['property' => $propertyTerm, 'length' => $length, 'number' => $minLength]
                             );
-                            $errorStore->addError($term, $message);
+                            $errorStore->addError($propertyTerm, $message);
                             if ($directMessage) {
                                 $messenger->addError($message);
                             }
@@ -300,9 +309,9 @@ class ResourceOnSave
                         if ($maxLength && $length > $maxLength) {
                             $message = new PsrMessage(
                                 'The value for term {property} is longer ({length} characters) than the maximal size ({number} characters).', // @translate
-                                ['property' => $term, 'length' => $length, 'number' => $maxLength]
+                                ['property' => $propertyTerm, 'length' => $length, 'number' => $maxLength]
                             );
-                            $errorStore->addError($term, $message);
+                            $errorStore->addError($propertyTerm, $message);
                             if ($directMessage) {
                                 $messenger->addError($message);
                             }
@@ -317,14 +326,14 @@ class ResourceOnSave
                 if (!$directMessage && ($minValues || $maxValues)) {
                     // The number of values may be specific for each type.
                     $isRequired = $rtpData->isRequired();
-                    $values = $resource->value($term, ['all' => true, 'type' => $rtpData->dataTypes()]);
+                    $values = $resource->value($propertyTerm, ['all' => true, 'type' => $rtpData->dataTypes()]);
                     $countValues = count($values);
                     if ($isRequired && $minValues && $countValues < $minValues) {
                         $message = new PsrMessage(
                             'The number of values ({count}) for term {property} is lower than the minimal number of {number}.', // @translate
-                            ['count' => $countValues, 'property' => $term, 'number' => $minValues]
+                            ['count' => $countValues, 'property' => $propertyTerm, 'number' => $minValues]
                         );
-                        $errorStore->addError($term, $message);
+                        $errorStore->addError($propertyTerm, $message);
                         if ($directMessage) {
                             $messenger->addError($message);
                         }
@@ -333,9 +342,9 @@ class ResourceOnSave
                     if ($maxValues && $countValues > $maxValues) {
                         $message = new PsrMessage(
                             'The number of values ({count}) for term {property} is greater than the maximal number of {number}.', // @translate
-                            ['count' => $countValues, 'property' => $term, 'number' => $maxValues]
+                            ['count' => $countValues, 'property' => $propertyTerm, 'number' => $maxValues]
                         );
-                        $errorStore->addError($term, $message);
+                        $errorStore->addError($propertyTerm, $message);
                         if ($directMessage) {
                             $messenger->addError($message);
                         }
@@ -345,14 +354,14 @@ class ResourceOnSave
 
                 $uniqueValue = (bool) $rtpData->dataValue('unique_value');
                 if ($uniqueValue) {
-                    $values = $resource->value($term, ['all' => true]);
+                    $values = $resource->value($propertyTerm, ['all' => true]);
                     if ($values) {
                         $connection = $services->get('Omeka\Connection');
                         $sqlWhere = [];
                         // Get all values by main type in one query.
                         $bind = [
                             'resource_id' => $resourceId,
-                            'property_id' => $templateProperty->property()->id(),
+                            'property_id' => $propertyId,
                         ];
                         $types = [
                             'resource_id' => \Doctrine\DBAL\ParameterType::INTEGER,
@@ -392,9 +401,9 @@ SQL;
                         if ($resId) {
                             $message = new PsrMessage(
                                 'The value for term {property} should be unique, but already set for resource #{resource_id}.', // @translate
-                                ['property' => $term, 'resource_id' => $resId]
+                                ['property' => $propertyTerm, 'resource_id' => $resId]
                             );
-                            $errorStore->addError($term, $message);
+                            $errorStore->addError($propertyTerm, $message);
                             if ($directMessage) {
                                 $messenger->addError($message);
                             }
@@ -605,12 +614,12 @@ SQL;
                 if (!$this->valueIsTrue($rtpData->dataValue('custom_vocab_open'))) {
                     continue;
                 }
-                $term = $templateProperty->property()->term();
-                foreach ($resource->value($term, ['all' => true, 'type' => array_keys($customVocabs)]) as $value) {
+                $propertyTerm = $templateProperty->property()->term();
+                foreach ($resource->value($propertyTerm, ['all' => true, 'type' => array_keys($customVocabs)]) as $value) {
                     $val = trim((string) $value->value());
                     $dataType = $value->type();
                     if (strlen($val) && !in_array($val, $customVocabs[$dataType]['terms'])) {
-                        $customVocabs[$dataType]['term'] = $term;
+                        $customVocabs[$dataType]['term'] = $propertyTerm;
                         $customVocabs[$dataType]['new'][] = $val;
                     }
                 }
@@ -681,11 +690,9 @@ SQL;
         }
 
         /**
-         * @var \Common\Stdlib\EasyMeta $easyMeta
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
-        $easyMeta = $services->get('EasyMeta');
         $mapper = $services->get('ControllerPluginManager')->get('artMapper');
 
         $newResourceData = $mapper
@@ -695,10 +702,10 @@ SQL;
             ->array($resource);
 
         // Append only new data.
-        foreach ($newResourceData as $term => $newValues) {
+        foreach ($newResourceData as $propertyTerm => $newValues) {
             foreach ($newValues as $newValue) {
                 $dataType = $newValue['type'];
-                $mainType = $easyMeta->dataTypeMain($dataType);
+                $mainType = $this->easyMeta->dataTypeMain($dataType);
                 switch ($mainType) {
                     case 'resource':
                         $check = [
@@ -715,7 +722,7 @@ SQL;
                         break;
                 }
                 ksort($check);
-                foreach ($resource[$term] ?? [] as $value) {
+                foreach ($resource[$propertyTerm] ?? [] as $value) {
                     $checkValue = array_intersect_key($value, $check);
                     if (isset($checkValue['value_resource_id'])) {
                         $checkValue['value_resource_id'] = (int) $checkValue['value_resource_id'];
@@ -725,7 +732,7 @@ SQL;
                         continue 2;
                     }
                 }
-                $resource[$term][] = $newValue;
+                $resource[$propertyTerm][] = $newValue;
             }
         }
 
@@ -746,14 +753,14 @@ SQL;
             return $resource;
         }
 
-        $term = $rtpData->property()->term();
-        if (!isset($resource[$term])) {
+        $propertyTerm = $rtpData->property()->term();
+        if (!isset($resource[$propertyTerm])) {
             return $resource;
         }
 
         // Check for literal value and explode when possible.
         $result = [];
-        foreach ($resource[$term] as $value) {
+        foreach ($resource[$propertyTerm] as $value) {
             if ($value['type'] !== 'literal' || !isset($value['@value'])) {
                 $result[] = $value;
                 continue;
@@ -764,7 +771,7 @@ SQL;
                 $result[] = $v;
             }
         }
-        $resource[$term] = $result;
+        $resource[$propertyTerm] = $result;
 
         return $resource;
     }
@@ -796,7 +803,7 @@ SQL;
             return null;
         }
 
-        $term = $map['term'];
+        $propertyTerm = $map['term'];
         $propertyId = $map['property_id'];
         $automaticValue = $map['value'];
         $dataTypes = $map['data_types'];
@@ -806,14 +813,12 @@ SQL;
 
         /**
          * @var \Omeka\Api\Manager $api
-         * @var \Common\Stdlib\EasyMeta $easyMeta
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
         $services = $this->getServiceLocator();
         $plugins = $services->get('ControllerPluginManager');
         $api = $services->get('Omeka\ApiManager');
-        $easyMeta = $services->get('EasyMeta');
         $fieldNameToProperty = $plugins->get('fieldNameToProperty');
         $mapper = $plugins->get('artMapper');
 
@@ -838,7 +843,7 @@ SQL;
             }
             // Check the validity of the data with the data type.
             $dataType = $automaticValueArray['type'];
-            $mainType = $easyMeta->dataTypeMain($dataType);
+            $mainType = $this->easyMeta->dataTypeMain($dataType);
 
             switch ($mainType) {
                 case 'resource':
@@ -846,7 +851,7 @@ SQL;
                         return null;
                     }
                     $vrid = $automaticValue['value_resource_id'];
-                    $to = "$term ^^$dataType ~ $vrid";
+                    $to = "$propertyTerm ^^$dataType ~ $vrid";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -871,7 +876,7 @@ SQL;
                         return null;
                     }
                     $uri = $automaticValue['@id'];
-                    $to = "$term ^^$dataType ~ $uri";
+                    $to = "$propertyTerm ^^$dataType ~ $uri";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -892,7 +897,7 @@ SQL;
                     }
 
                     $val = $automaticValue['@value'];
-                    $to = "$term ^^$dataType ~ $val";
+                    $to = "$propertyTerm ^^$dataType ~ $val";
                     $to = $fieldNameToProperty($to);
                     if (!$to) {
                         return null;
@@ -907,8 +912,8 @@ SQL;
                     break;
             }
         } else {
-            $mainType = $easyMeta->dataTypeMain($dataType);
-            $to = "$term ^^$dataType ~ $automaticValue";
+            $mainType = $this->easyMeta->dataTypeMain($dataType);
+            $to = "$propertyTerm ^^$dataType ~ $automaticValue";
             $to = $fieldNameToProperty($to);
             if (!$to) {
                 return null;
@@ -957,7 +962,7 @@ SQL;
         $check = array_map($fixValue, $check);
         ksort($check);
 
-        foreach ($resource[$term] ?? [] as $value) {
+        foreach ($resource[$propertyTerm] ?? [] as $value) {
             $checkValue = array_intersect_key($value, $check);
             if (isset($checkValue['value_resource_id'])) {
                 $checkValue['value_resource_id'] = (int) $checkValue['value_resource_id'];
@@ -984,8 +989,8 @@ SQL;
             return $resource;
         }
 
-        $term = $rtpData->property()->term();
-        if (!isset($resource[$term]) || count($resource[$term]) < 2) {
+        $propertyTerm = $rtpData->property()->term();
+        if (!isset($resource[$propertyTerm]) || count($resource[$propertyTerm]) < 2) {
             return $resource;
         }
 
@@ -1002,12 +1007,12 @@ SQL;
             } elseif (!$bId) {
                 return -1;
             }
-            foreach ($orderByLinkedResourceProperties as $term => $order) {
+            foreach ($orderByLinkedResourceProperties as $propertyTerm => $order) {
                 $order = strtolower($order) === 'desc' ? -1 : 1;
                 $aResource = $api->read('resources', $aId)->getContent();
                 $bResource = $api->read('resources', $bId)->getContent();
-                $aVal = (string) $aResource->value($term);
-                $bVal = (string) $bResource->value($term);
+                $aVal = (string) $aResource->value($propertyTerm);
+                $bVal = (string) $bResource->value($propertyTerm);
                 if (!strlen($aVal) && !strlen($bVal)) {
                     // Do nothing with this term.
                 } elseif (!strlen($aVal)) {
@@ -1021,7 +1026,7 @@ SQL;
             return 0;
         };
 
-        usort($resource[$term], $sortByLinkedProperty);
+        usort($resource[$propertyTerm], $sortByLinkedProperty);
 
         return $resource;
     }
