@@ -4,6 +4,7 @@ namespace AdvancedResourceTemplate\Listener;
 
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyDataRepresentation;
 use AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation;
+use Common\Stdlib\PsrMessage;
 use Exception;
 use Laminas\EventManager\Event;
 use Laminas\ServiceManager\ServiceLocatorInterface;
@@ -178,7 +179,6 @@ class ResourceOnSave
         $template = $adapter->getAdapter('resource_templates')->getRepresentation($templateEntity);
         // $request = $event->getParam('request');
         $errorStore = $event->getParam('errorStore');
-        $connection = $services->get('Omeka\Connection');
 
         $directMessage = $this->displayDirectMessage();
         $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
@@ -188,7 +188,7 @@ class ResourceOnSave
         $useForResources = $template->dataValue('use_for_resources') ?: [];
         $resourceName = $entity->getResourceName();
         if ($useForResources && !in_array($resourceName, $useForResources)) {
-            $message = new \Omeka\Stdlib\Message('This template cannot be used for this resource.'); // @translate
+            $message = new PsrMessage('This template cannot be used for this resource.'); // @translate
             $errorStore->addError('o:resource_template[o:id]', $message);
             if ($directMessage) {
                 $messenger->addError($message);
@@ -198,7 +198,7 @@ class ResourceOnSave
         $resourceClass = $entity->getResourceClass();
         $requireClass = $this->valueIsTrue($template->dataValue('require_resource_class'));
         if ($requireClass && !$resourceClass) {
-            $message = new \Omeka\Stdlib\Message('A class is required.'); // @translate
+            $message = new PsrMessage('A class is required.'); // @translate
             $errorStore->addError('o:resource_class[o:id]', $message);
         }
 
@@ -207,15 +207,15 @@ class ResourceOnSave
             $suggestedClasses = $template->dataValue('suggested_resource_class_ids') ?: [];
             if ($suggestedClasses && !in_array($resourceClass->getId(), $suggestedClasses)) {
                 if (count($suggestedClasses) === 1) {
-                    $message = new \Omeka\Stdlib\Message(
-                        'The class should be "%s".', // @translate
-                        key($suggestedClasses)
+                    $message = new PsrMessage(
+                        'The class should be {resource_class}.', // @translate
+                        ['resource_class' => key($suggestedClasses)]
                     );
                     $errorStore->addError('o:resource_class[o:id]', $message);
                 } else {
-                    $message = new \Omeka\Stdlib\Message(
-                        'The class should be one of "%s".', // @translate
-                        implode('", "', array_keys($suggestedClasses))
+                    $message = new PsrMessage(
+                        'The class should be one of {resource_classes}.', // @translate
+                        ['resource_classes' => implode(', ', array_keys($suggestedClasses))]
                     );
                     $errorStore->addError('o:resource_class[o:id]', $message);
                 }
@@ -260,18 +260,18 @@ class ResourceOnSave
                         }
                     }
                     if (empty($anchor) || empty($regex)) {
-                        $message = new \Omeka\Stdlib\Message(
-                            'The html input pattern "%1$s" for template "%2$s" cannot be processed.', // @translate
-                            $inputControl, $template->label()
+                        $message = new PsrMessage(
+                            'The html input pattern "{pattern}" for template {template} cannot be processed.', // @translate
+                            ['pattern' => $inputControl, 'template' => $template->label()]
                         );
                         $services->get('Omeka\Logger')->warn((string) $message);
                     } else {
                         foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
                             $val = $value->value();
                             if (!preg_match($regex, $val)) {
-                                $message = new \Omeka\Stdlib\Message(
-                                    'The value "%1$s" for term "%2$s" does not follow the input pattern "%3$s".', // @translate
-                                    $val, $term, $inputControl
+                                $message = new PsrMessage(
+                                    'The value "{value}" for term {property} does not follow the input pattern "{pattern}".', // @translate
+                                    ['value' => $val, 'property' => $term, 'pattern' => $inputControl]
                                 );
                                 $errorStore->addError($term, $message);
                                 if ($directMessage) {
@@ -288,9 +288,9 @@ class ResourceOnSave
                     foreach ($resource->value($term, ['all' => true, 'type' => 'literal']) as $value) {
                         $length = mb_strlen($value->value());
                         if ($minLength && $length < $minLength) {
-                            $message = new \Omeka\Stdlib\Message(
-                                'The value for term "%1$s" is shorter (%2$d characters) than the minimal size (%3$d characters).', // @translate
-                                $term, $length, $minLength
+                            $message = new PsrMessage(
+                                'The value for term {property} is shorter ({length} characters) than the minimal size ({number} characters).', // @translate
+                                ['property' => $term, 'length' => $length, 'number' => $minLength]
                             );
                             $errorStore->addError($term, $message);
                             if ($directMessage) {
@@ -298,9 +298,9 @@ class ResourceOnSave
                             }
                         }
                         if ($maxLength && $length > $maxLength) {
-                            $message = new \Omeka\Stdlib\Message(
-                                'The value for term "%1$s" is longer (%2$d characters) than the maximal size (%3$d characters).', // @translate
-                                $term, $length, $maxLength
+                            $message = new PsrMessage(
+                                'The value for term {property} is longer ({length} characters) than the maximal size ({number} characters).', // @translate
+                                ['property' => $term, 'length' => $length, 'number' => $maxLength]
                             );
                             $errorStore->addError($term, $message);
                             if ($directMessage) {
@@ -320,9 +320,9 @@ class ResourceOnSave
                     $values = $resource->value($term, ['all' => true, 'type' => $rtpData->dataTypes()]);
                     $countValues = count($values);
                     if ($isRequired && $minValues && $countValues < $minValues) {
-                        $message = new \Omeka\Stdlib\Message(
-                            'The number of values (%1$d) for term "%2$s" is lower than the minimal number (%3$d).', // @translate
-                            $countValues, $term, $minValues
+                        $message = new PsrMessage(
+                            'The number of values ({count}) for term {property} is lower than the minimal number of {number}.', // @translate
+                            ['count' => $countValues, 'property' => $term, 'number' => $minValues]
                         );
                         $errorStore->addError($term, $message);
                         if ($directMessage) {
@@ -331,9 +331,9 @@ class ResourceOnSave
                         break;
                     }
                     if ($maxValues && $countValues > $maxValues) {
-                        $message = new \Omeka\Stdlib\Message(
-                            'The number of values (%1$d) for term "%2$s" is greater than the maximal number (%3$d).', // @translate
-                            $countValues, $term, $maxValues
+                        $message = new PsrMessage(
+                            'The number of values ({count}) for term {property} is greater than the maximal number of {number}.', // @translate
+                            ['count' => $countValues, 'property' => $term, 'number' => $maxValues]
                         );
                         $errorStore->addError($term, $message);
                         if ($directMessage) {
@@ -390,9 +390,9 @@ LIMIT 1;
 SQL;
                         $resId = $connection->executeQuery($sql, $bind, $types)->fetchOne();
                         if ($resId) {
-                            $message = new \Omeka\Stdlib\Message(
-                                'The value for term "%1$s" should be unique, but already set for resource #%2$s.', // @translate
-                                $term, $resId
+                            $message = new PsrMessage(
+                                'The value for term {property} should be unique, but already set for resource #{resource_id}.', // @translate
+                                ['property' => $term, 'resource_id' => $resId]
                             );
                             $errorStore->addError($term, $message);
                             if ($directMessage) {
@@ -641,22 +641,22 @@ SQL;
                 $api->update('custom_vocabs', $customVocab['id'], ['o:terms' => $newTerms], [], ['isPartial' => true]);
                 if ($directMessage) {
                     if (count($customVocab['new']) <= 1) {
-                        $message = new \Omeka\Stdlib\Message(
-                            'New descriptor appended to custom vocab "%1$s": %2$s', // @translate
-                            $customVocab['label'], $customVocab['new']
+                        $message = new PsrMessage(
+                            'New descriptor appended to custom vocab "{custom_vocab}": {value}.', // @translate
+                            ['custom_vocab' => $customVocab['label'], 'value' => $customVocab['new']]
                         );
                     } else {
-                        $message = new \Omeka\Stdlib\Message(
-                            'New descriptors appended to custom vocab "%1$s": %2$s', // @translate
-                            $customVocab['label'], implode('", "', $customVocab['new'])
+                        $message = new PsrMessage(
+                            'New descriptors appended to custom vocab "{custom_vocab}": {values}.', // @translate
+                            ['custom_vocab' => $customVocab['label'], 'values' => implode('", "', $customVocab['new'])]
                         );
                     }
                     $messenger->addSuccess($message);
                 }
             } catch (Exception $e) {
-                $message = new \Omeka\Stdlib\Message(
-                    'Unable to append new descriptors to custom vocab "%1$s": %2$s', // @translate
-                    $customVocab['label'], $e->getMessage()
+                $message = new PsrMessage(
+                    'Unable to append new descriptors to custom vocab "{custom_vocab}":  {error}', // @translate
+                    ['custom_vocab' => $customVocab['label'], 'error' => $e->getMessage()]
                 );
                 $errorStore->addError($customVocab['term'], $message);
                 if ($directMessage) {

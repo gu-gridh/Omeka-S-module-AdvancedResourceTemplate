@@ -2,7 +2,8 @@
 
 namespace AdvancedResourceTemplate;
 
-use Omeka\Stdlib\Message;
+use Common\Stdlib\PsrMessage;
+use Omeka\Module\Exception\ModuleCannotInstallException;
 
 /**
  * @var Module $this
@@ -24,6 +25,14 @@ $settings = $services->get('Omeka\Settings');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 // $entityManager = $services->get('Omeka\EntityManager');
+
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.55')) {
+    $message = new \Omeka\Stdlib\Message(
+        'The module %1$s should be upgraded to version %2$s or later.', // @translate
+        'Common', '3.4.55'
+    );
+    throw new ModuleCannotInstallException((string) $message);
+}
 
 if (version_compare((string) $oldVersion, '3.3.3.3', '<')) {
     $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
@@ -82,11 +91,11 @@ SQL;
         $connection->executeStatement($sql);
     }
 
-    $message = new Message(
+    $message = new PsrMessage(
         'New settings were added to the resource templates.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'Values are now validated against settings in all cases, included background or direct api process.' // @translate
     );
     $messenger->addWarning($message);
@@ -162,20 +171,23 @@ SQL;
     $settings->set('advancedresourcetemplate_resource_form_elements',
         $config['advancedresourcetemplate']['settings']['advancedresourcetemplate_resource_form_elements']);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'New settings were added to the template.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
-        'New settings were added to the %1$smain settings%2$s to simplify resource form.', // @translate
-        '<a href="' . $plugins->get('url')->fromRoute('admin/default', ['controller' => 'setting', 'action' => 'browse']) . '#advanded-resource-template">', '</a>'
+    $message = new PsrMessage(
+        'New settings were added to the {link}main settings{link_end} to simplify resource form.', // @translate
+        [
+            'link' => '<a href="' . $url->fromRoute('admin/default', ['controller' => 'setting', 'action' => 'browse']) . '#advanded-resource-template">',
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
 
 if (version_compare((string) $oldVersion, '3.3.4.15', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to group a long list of template properties.' // @translate
     );
     $messenger->addSuccess($message);
@@ -219,32 +231,34 @@ SQL;
 }
 
 if (version_compare((string) $oldVersion, '3.4.4.18', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to set a control input for literal values.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to set a custom vocab open, so the user can complete the authority list when filiing data for a resource.' // @translate
     );
     $messenger->addSuccess($message);
 }
 
 if (version_compare((string) $oldVersion, '3.4.20', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to set resource template for annotations on each property.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
-        'The format for automatic value and autofilling has changed slightly and upgrade is not automatic. You should check them if you use this feature. See %1$sreadme%2$s for more info.', // @translate
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate#automatic-value" _target="blank">',
-        '</a>'
+    $message = new PsrMessage(
+        'The format for automatic value and autofilling has changed slightly and upgrade is not automatic. You should check them if you use this feature. See {link}readme{link_end} for more info.', // @translate
+        [
+            'link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate#automatic-value" _target="blank" rel="noopener">',
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
 }
 
 if (version_compare((string) $oldVersion, '3.4.21', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to order linked resources by another property than title (require Omeka S v4.1).' // @translate
     );
     $messenger->addSuccess($message);
@@ -328,29 +342,29 @@ SQL;
 
     $this->storeResourceTemplateSettings();
 
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to limit templates available by resource, for example the template "Incunable" for items only and the template "Folio" for medias only.' // @translate
     );
     $messenger->addSuccess($message);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to specify templates by property for value annotations.' // @translate
     );
     $messenger->addSuccess($message);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'All existing templates are made available by items only. Check your templates if you need.' // @translate
     );
     $messenger->addWarning($message);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'If you use specific templates, you may have to check this new parameter.' // @translate
     );
     $messenger->addWarning($message);
 }
 
 if (version_compare((string) $oldVersion, '3.4.23', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'It’s now possible to specify templates for annotations of module Annotate.' // @translate
     );
     $messenger->addSuccess($message);
@@ -358,7 +372,7 @@ if (version_compare((string) $oldVersion, '3.4.23', '<')) {
 
 if (version_compare((string) $oldVersion, '3.4.25', '<')) {
     $settings->set('advancedresourcetemplate_skip_private_values', false);
-    $message = new Message(
+    $message = new PsrMessage(
         'A new main setting was added to hide private values in public sites.' // @translate
     );
     $messenger->addSuccess($message);
@@ -498,16 +512,18 @@ WHERE `resource_template_data`.`data` LIKE "%geometry%"
 SQL;
     $connection->executeStatement($sql);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'Value annotations can now have a resource class and an alternative label or comment.' // @translate
     );
     $messenger->addSuccess($message);
 
     $hasEasyAdmin = $this->isModuleActive('EasyAdmin');
-    $message = new Message(
-        'A job is added in tasks of the module %1$sEasy Admin%2$s to fill the annotation templates and classes when needed.', // @translate
-        sprintf('<a href="%s">', $hasEasyAdmin ? $url->fromRoute('admin/default', ['controller' => 'easy-admin', 'action' => 'check-and-fix'], ['fragment' => 'resource_values']) : 'https://omeka.org/s/modules/EasyAdmin'),
-        '</a>'
+    $message = new PsrMessage(
+        'A job is added in tasks of the module {link}Easy Admin{link_end} to fill the annotation templates and classes when needed.', // @translate
+        [
+            'link' => sprintf('<a href="%s">', $hasEasyAdmin ? $url->fromRoute('admin/default', ['controller' => 'easy-admin', 'action' => 'check-and-fix'], ['fragment' => 'resource_values']) : 'https://omeka.org/s/modules/EasyAdmin'),
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
@@ -518,7 +534,7 @@ if (version_compare((string) $oldVersion, '3.4.27', '<')) {
 
     $hasCommon = $this->isModuleActive('Common');
     if (!$hasCommon) {
-        $message = new Message(
+        $message = new PsrMessage(
             'Next version of the module will depend on module Common, that replaces module Generic. You will have to install it first.' // @translate
         );
         $messenger->addWarning($message);

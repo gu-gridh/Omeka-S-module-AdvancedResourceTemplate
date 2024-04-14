@@ -140,10 +140,10 @@ class ResourceTemplatePropertyDataRepresentation extends AbstractRepresentation
         $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
         foreach ($this->dataTypes() as $dataType) {
             if (!$dataTypeManager->has($dataType)) {
-                $this->getServiceLocator()->get('Omeka\Logger')->err(new \Omeka\Stdlib\Message(
-                    'The data type "%1$s" is not available.', // @translate
-                    $dataType
-                ));
+                $this->getServiceLocator()->get('Omeka\Logger')->err(
+                    'The data type "{data_type}" is not available.', // @translate
+                    ['data_type' => $dataType]
+                );
                 continue;
             }
             $result[] = [

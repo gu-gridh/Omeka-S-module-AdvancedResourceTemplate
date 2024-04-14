@@ -3,6 +3,7 @@
 namespace AdvancedResourceTemplate\Controller\Admin;
 
 use AdvancedResourceTemplate\Form\ResourceTemplatePropertyFieldset;
+use Common\Stdlib\PsrMessage;
 use Laminas\View\Model\ViewModel;
 use Omeka\Form\ResourceTemplateForm;
 use Omeka\Form\ResourceTemplateImportForm;
@@ -363,9 +364,9 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
 
         $checkedFileData = $this->checkFile($fileData);
         if (!$checkedFileData) {
-            $this->messenger()->addError(new Message(
-                'Wrong media type ("%s") for file.', // @translate
-                $fileData['type']
+            $this->messenger()->addError(new PsrMessage(
+                'Wrong media type "{media_type}" for file.', // @translate
+                ['media_type' => $fileData['type']]
             ));
             return false;
         }
@@ -1096,6 +1097,7 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
                         if ($isUpdate) {
                             $successMessage = 'Resource template successfully updated'; // @translate
                         } else {
+                            // Upstream message.
                             $successMessage = new Message(
                                 'Resource template successfully created. %s', // @translate
                                 sprintf(
@@ -1134,6 +1136,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
         $data['o:resource_class'] = empty($data['o:resource_class']) ? null : $data['o:resource_class']['o:id'];
         $data['o:title_property'] = empty($data['o:title_property']) ? null : $data['o:title_property']['o:id'];
         $data['o:description_property'] = empty($data['o:description_property']) ? null : $data['o:description_property']['o:id'];
+        // Must include the o:resource_template_property key if all properties
+        // are removed, else nothing is removed.
         if (empty($data['o:resource_template_property'])) {
             $data['o:resource_template_property'] = [];
         }

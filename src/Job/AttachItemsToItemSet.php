@@ -3,7 +3,6 @@
 namespace AdvancedResourceTemplate\Job;
 
 use Omeka\Job\AbstractJob;
-use Omeka\Stdlib\Message;
 
 class AttachItemsToItemSet extends AbstractJob
 {
@@ -21,27 +20,23 @@ class AttachItemsToItemSet extends AbstractJob
         $logger = $services->get('Omeka\Logger');
 
         // The reference id is the job id for now.
-        if (class_exists('Common\Stdlib\PsrMessage')) {
-            $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
-            $referenceIdProcessor->setReferenceId('art/attach_to_itemset/job_' . $this->job->getId());
-            $logger->addProcessor($referenceIdProcessor);
-        }
+        $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
+        $referenceIdProcessor->setReferenceId('art/attach_to_itemset/job_' . $this->job->getId());
+        $logger->addProcessor($referenceIdProcessor);
 
         $itemSetId = (int) $this->getArg('item_set_id');
         if (!$itemSetId) {
-            $logger->err(new Message(
-                'No item set defined.' // @translate
-            ));
+            $logger->err('No item set defined.'); // @translate
             return;
         }
 
         try {
             $api->read('item_sets', ['id' => $itemSetId]);
         } catch (\Exception $e) {
-            $logger->err(new Message(
-                'The item set #%d does not exist.', // @translate
-                $itemSetId
-            ));
+            $logger->err(
+                'The item set #{item_set_id} does not exist.', // @translate
+                ['item_set_id' => $itemSetId]
+            );
             return;
         }
 
@@ -62,10 +57,10 @@ class AttachItemsToItemSet extends AbstractJob
                     return;
                 }
                 $api->batchUpdate('items', $idsChunk, ['o:item_set' => [$itemSetId]], ['continueOnError' => true, 'collectionAction' => 'remove']);
-                $logger->info(new Message(
-                    '%1$d/%2$d items detached from item set #%3$d.', // @translate
-                    min(++$i * 100, count($detachItemIds)), count($detachItemIds), $itemSetId
-                ));
+                $logger->info(
+                    '{count}/{total} items detached from item set #{item_set_id}.', // @translate
+                    ['count' => min(++$i * 100, count($detachItemIds)), 'total' => count($detachItemIds), 'item_set_id' => $itemSetId]
+                );
             }
         }
 
@@ -78,16 +73,16 @@ class AttachItemsToItemSet extends AbstractJob
                     return;
                 }
                 $api->batchUpdate('items', $idsChunk, ['o:item_set' => [$itemSetId]], ['continueOnError' => true, 'collectionAction' => 'append']);
-                $logger->info(new Message(
-                    '%1$d/%2$d new items attached to item set #%3$d.', // @translate
-                    min(++$i * 100, count($newItemIds)), count($newItemIds), $itemSetId
-                ));
+                $logger->info(
+                    '{count}/{total} new items attached to item set #{item_set_id}.', // @translate
+                    ['count' => min(++$i * 100, count($newItemIds)), 'total' => count($newItemIds), 'item_set_id' => $itemSetId]
+                );
             }
         }
 
-        $logger->notice(new Message(
-            'Process ended for item set #%1$d: %2$d items was attached, %3$d items were detached, %4$d new items were attached.', // @translate
-            $itemSetId, count($existingItemIds), count($detachItemIds), count($newItemIds)
-        ));
+        $logger->notice(
+            'Process ended for item set #{item_set_id}: {count} items were attached, {count_2} items were detached, {count_3} new items were attached.', // @translate
+            ['item_set_id' => $itemSetId, 'count' => count($existingItemIds), 'count_2' => count($detachItemIds), 'count_3' => count($newItemIds)]
+        );
     }
 }

@@ -3,12 +3,12 @@
 namespace AdvancedResourceTemplate\Controller\Admin;
 
 use AdvancedResourceTemplate\Autofiller\AutofillerPluginManager as AutofillerManager;
+use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\EntityManager;
 use Laminas\Http\Response as HttpResponse;
 use Laminas\Mvc\Controller\AbstractRestfulController;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
-use Omeka\Stdlib\Message;
 use Omeka\View\Model\ApiJsonModel;
 
 class IndexController extends AbstractRestfulController
@@ -42,7 +42,9 @@ class IndexController extends AbstractRestfulController
         $query = $this->params()->fromQuery();
         $q = isset($query['q']) ? trim($query['q']) : '';
         if (!strlen($q)) {
-            return $this->returnError(['suggestions' => $this->translate('The query is empty.')]); // @translate
+            return $this->returnError([
+                'suggestions' => new PsrMessage('The query is empty.'), // @translate
+            ]);
         }
 
         $qq = isset($query['type']) && $query['type'] === 'in'
@@ -102,10 +104,10 @@ class IndexController extends AbstractRestfulController
             ->getResults($q, $lang);
 
         if (is_null($results)) {
-            return $this->returnError($this->translate(new Message(
-                'The remote service "%s" seems unavailable.', // @translate
+            return $this->returnError(new PsrMessage(
+                'The remote service "{service}" seems unavailable.', // @translate
                 $autofiller->getLabel()
-            )), HttpResponse::STATUS_CODE_502);
+            ), HttpResponse::STATUS_CODE_502);
         }
 
         return new ApiJsonModel([
@@ -145,11 +147,15 @@ class IndexController extends AbstractRestfulController
     {
         $query = $this->params()->fromQuery();
         if (empty($query['service'])) {
-            return $this->returnError(['suggestions' => $this->translate('The service is empty.')]); // @translate
+            return $this->returnError([
+                'suggestions' => new PsrMessage('The service is empty.'), // @translate
+            ]);
         }
 
         if (empty($query['template'])) {
-            return $this->returnError(['suggestions' => $this->translate('The template is empty.')]); // @translate
+            return $this->returnError([
+                'suggestions' => new PsrMessage('The template is empty.'), // @translate
+            ]);
         }
 
         try {
@@ -157,25 +163,27 @@ class IndexController extends AbstractRestfulController
             /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
             $template = $this->api()->read('resource_templates', ['id' => $query['template']])->getContent();
         } catch (NotFoundException $e) {
-            return $this->returnError(['suggestions' => $this->translate(new Message(
-                'The template "%s" is not available.', // @translate
-                $query['template']
-            ))]);
+            return $this->returnError([
+                'suggestions' => new PsrMessage(
+                    'The template "{template_id}" is not available.', // @translate
+                    ['template_id' => $query['template']]
+                ),
+            ]);
         }
 
         $serviceMapping = $this->prepareServiceMapping($template, $query['service']);
         if (empty($serviceMapping)) {
-            return $this->returnError($this->translate(new Message(
-                'The service "%1" has no mapping.', // @translate
-                $query['service']
-            )), HttpResponse::STATUS_CODE_501);
+            return $this->returnError(new PsrMessage(
+                'The service "{service}" has no mapping.', // @translate
+                ['service' => $query['service']]
+            ), HttpResponse::STATUS_CODE_501);
         }
 
         if (!$this->autofillerManager->has($serviceMapping['service'])) {
-            return $this->returnError($this->translate(new Message(
-                'The service "%s" is not available.', // @translate
-                $query['service']
-            )), HttpResponse::STATUS_CODE_501);
+            return $this->returnError(new PsrMessage(
+                'The service "{service}" is not available.', // @translate
+                ['service' => $query['service']]
+            ), HttpResponse::STATUS_CODE_501);
         }
 
         $serviceOptions = $serviceMapping;
@@ -223,22 +231,31 @@ class IndexController extends AbstractRestfulController
      * @param array $errors
      * @return \Laminas\Http\Response
      */
-    protected function returnError($message, $statusCode = HttpResponse::STATUS_CODE_400, array $errors = null)
+    protected function returnError($message, int $statusCode = HttpResponse::STATUS_CODE_400, array $errors = null)
     {
+        $translator = $this->translator();
+        $messages = is_array($message) ? $message : ['message' => $message];
+        foreach ($messages as &$msg) {
+            is_object($msg) ? $msg->setTranslator($translator) : $this->translate($msg);
+        }
+        unset($msg);
+
         if ($statusCode >= 500) {
             $result = [
                 'status' => 'error',
-                'message' => is_array($message) ? reset($message) : $message,
+                'message' => reset($messages),
             ];
         } else {
             $result = [
                 'status' => 'fail',
-                'data' => is_array($message) ? $message : ['message' => $message],
+                'data' => $messages,
             ];
         }
+
         if (is_array($errors)) {
             $result['data]']['errors'] = $errors;
         }
+
         $response = $this->getResponse()
             ->setStatusCode($statusCode)
             ->setContent(json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));

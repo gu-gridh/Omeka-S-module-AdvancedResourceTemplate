@@ -7,6 +7,7 @@ if (!class_exists(\Common\TraitModule::class)) {
 }
 
 use AdvancedResourceTemplate\Listener\ResourceOnSave;
+use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
@@ -949,7 +950,7 @@ class Module extends AbstractModule
                     $check = true;
                 }
                 if ($check) {
-                    $message = new \Omeka\Stdlib\Message(
+                    $message = new PsrMessage(
                         'The query to attach items cannot contain the item set itself.' // @translate
                     );
                     $messenger->addWarning($message);
@@ -973,19 +974,23 @@ class Module extends AbstractModule
         ];
         $job = $services->get(\Omeka\Job\Dispatcher::class)->dispatch(\AdvancedResourceTemplate\Job\AttachItemsToItemSet::class, $args);
         $urlPlugin = $services->get('ControllerPluginManager')->get('url');
-        $message = new \Omeka\Stdlib\Message(
-            'The query for the item set was changed: a job is run in background to detach and to attach items (%1$sjob #%2$d%3$s, %4$slogs%3$s).', // @translate
-            sprintf('<a href="%s">',
-                htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
-            ),
-            $job->getId(),
-            '</a>',
-            sprintf('<a href="%s">',
-                htmlspecialchars($this->isModuleActive('Log')
-                    ? $urlPlugin->fromRoute('admin/log', [], ['query' => ['job_id' => $job->getId()]])
-                    : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId(), 'action' => 'log'])
-                )
-            )
+        $message = new PsrMessage(
+            'The query for the item set was changed: a job is run in background to detach and to attach items (job {link_job}#{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
+            [
+                'link_job' => sprintf(
+                    '<a href="%s">',
+                    htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                ),
+                'job_id' => $job->getId(),
+                'link_end' => '</a>',
+                'link_log' => sprintf(
+                    '<a href="%s">',
+                    // Check if module Log is enabled (avoid issue when disabled).
+                    htmlspecialchars(class_exists(\Log\Module::class)
+                        ? $urlPlugin->fromRoute('admin/log/default', [], ['query' => ['job_id' => $job->getId()]])
+                        : $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId(), 'action' => 'log'])
+                    )),
+            ]
         );
         $message->setEscapeHtml(false);
         $messenger->addSuccess($message);
