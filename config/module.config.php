@@ -82,7 +82,6 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'fieldNameToProperty' => Mvc\Controller\Plugin\FieldNameToProperty::class,
-            'messenger' => Mvc\Controller\Plugin\Messenger::class,
         ],
         'factories' => [
             'artMapper' => Service\ControllerPlugin\ArtMapperFactory::class,
