@@ -56,6 +56,16 @@ class GeonamesAutofiller extends AbstractAutofiller
         // Prepare mapper one time.
         $this->mapper->setMapping($this->mapping);
 
+        // Get all the totals for the data type one time.
+        $sql = <<<'SQL'
+SELECT `value`.`uri`, COUNT(`value`.`uri`)
+FROM `value`
+WHERE `value`.`type` = "valuesuggest:geonames:geonames"
+GROUP BY `value`.`uri`
+;
+SQL;
+        $totals = $this->connection->executeQuery($sql)->fetchAllKeyValue();
+
         foreach ($results['geonames'] as $result) {
             $metadata = $this->mapper->array($result);
             if (!$metadata) {
@@ -63,6 +73,7 @@ class GeonamesAutofiller extends AbstractAutofiller
             }
             $suggestions[] = [
                 'value' => $result['name'],
+                'value' => sprintf('%s (%s)', $result['name'], $totals[$result['name']] ?? 0),
                 'data' => $metadata,
             ];
         }

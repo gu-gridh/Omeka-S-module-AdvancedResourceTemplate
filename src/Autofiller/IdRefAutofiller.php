@@ -111,6 +111,17 @@ class IdRefAutofiller extends AbstractAutofiller
         if (empty($results['response']['docs'])) {
             return [];
         }
+
+        // Get all the totals for the data type one time.
+        $sql = <<<'SQL'
+SELECT `value`.`uri`, COUNT(`value`.`uri`)
+FROM `value`
+WHERE `value`.`type` = :service
+GROUP BY `value`.`uri`
+;
+SQL;
+        $totals = $this->connection->executeQuery($sql, ['service' => $service])->fetchAllKeyValue();
+
         $total = 0;
         foreach ($results['response']['docs'] as $result) {
             if (empty($result['ppn_z'])) {
@@ -133,7 +144,7 @@ class IdRefAutofiller extends AbstractAutofiller
                 continue;
             }
             $suggestions[] = [
-                'value' => $value,
+                'value' => sprintf('%s (%s)', $value, $totals[$value] ?? 0),
                 'data' => $metadata,
             ];
             if (++$total >= $maxResult) {
