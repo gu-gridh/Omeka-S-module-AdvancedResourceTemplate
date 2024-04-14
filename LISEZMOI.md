@@ -485,6 +485,8 @@ TODO
 - [ ] Choisir les vocabulaires personnalisés par défaut lorsque l’on importe du même serveur.
 - [ ] Grouper les propriétés dans le formulaire de ressource.
 - [ ] Permettre de grouper les propriétés différemment selon les sites ?
+- [ ] Créer un élément pour le remplisseur ou un alignement simple.
+- [ ] Déplacer le remplisseur dans un nouveau module ?
 
 
 Avertissement

@@ -461,6 +461,8 @@ TODO
 - [ ] Select default custom vocabs when importing a template from the same server.
 - [ ] Group properties in resource form.
 - [ ] Allow to group properties differently between sites?
+- [ ] Create a form element for the autofiller or simple mapping.
+- [ ] Move the autofiller into a new module?
 
 
 Warning
