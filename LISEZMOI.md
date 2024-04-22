@@ -9,7 +9,7 @@ See [English readme].
 
 [Advanced Resource Template] est un module pour [Omeka S] qui ajoute de
 nouvelles options aux modèles de ressources afin de faciliter et d’améliorer
-l’édition des ressources :
+l’édition des ressources. Si vous ne voyez pas les images, allez au [dépôt original] :
 
 - Indiquer les modèles à utiliser pour chaque ressource (contenus, media,
   collections) et annotation de valeur :
@@ -553,6 +553,7 @@ des travaux étudiants [Dante] de l’[Université de Toulouse Jean-Jaurès].
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
+[dépôt original]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [English readme]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/README.md
 [Omeka S]: https://omeka.org/s
 [installer un module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules

@@ -9,7 +9,7 @@ Voir le [Lisez-moi] en fran√ßais.
 
 [Advanced Resource Template] is a module for [Omeka S] that adds new settings to
 the resource templates in order to simplify and to improve the edition of
-resources:
+resources. If you do not see images, go to the [original repository]:
 
 - Specify templates to be used for each resource (items, media, item sets) and
   value annotations:
@@ -518,6 +518,7 @@ and for the institutional repository of student works [Dante] of the [Universit√
 
 
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
+[original repository]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [Lisez-moi]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate/-/blob/master/LISEZMOI.md
 [Omeka S]: https://omeka.org/s
 [installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
