@@ -40,8 +40,6 @@ class GenericAutofiller extends AbstractAutofiller
 
     protected function getResultsJson($content)
     {
-        $suggestions = [];
-
         // Parse the JSON response.
         $results = json_decode($content, true);
 
@@ -59,6 +57,9 @@ class GenericAutofiller extends AbstractAutofiller
 
         $defaultLabel = $this->services->get('MvcTranslator')->translate('[Result]');
 
+        // Get all uris and prepare all data one time.
+        $uriLabels = [];
+        $uriData = [];
         foreach ($results as $result) {
             $metadata = $this->mapper->array($result);
             if (!$metadata) {
@@ -72,19 +73,15 @@ class GenericAutofiller extends AbstractAutofiller
                 $labelResult = $metadata['{__label__}'][0]['@value'];
                 unset($metadata['{__label__}']);
             }
-            $suggestions[] = [
-                'value' => $labelResult,
-                'data' => $metadata,
-            ];
+            $uriLabels[] = $labelResult;
+            $uriData[] = $metadata;
         }
 
-        return $suggestions;
+        return $this->finalizeSuggestions($uriLabels, $uriData, null);
     }
 
     protected function getResultsXml($content)
     {
-        $suggestions = [];
-
         // Get the root if needed.
         $hasRoot = false;
         foreach ($this->mapping as $key => $map) {
@@ -105,6 +102,9 @@ class GenericAutofiller extends AbstractAutofiller
 
         $defaultLabel = $this->services->get('MvcTranslator')->translate('[Result]');
 
+        // Get all uris and prepare all data one time.
+        $uriLabels = [];
+        $uriData = [];
         foreach ($results as $result) {
             $metadata = $this->mapper->xml($result);
             if (!$metadata) {
@@ -118,12 +118,10 @@ class GenericAutofiller extends AbstractAutofiller
                 $labelResult = $metadata['{__label__}'][0]['@value'];
                 unset($metadata['{__label__}']);
             }
-            $suggestions[] = [
-                'value' => $labelResult,
-                'data' => $metadata,
-            ];
+            $uriLabels[] = $labelResult;
+            $uriData[] = $metadata;
         }
 
-        return $suggestions;
+        return $this->finalizeSuggestions($uriLabels, $uriData, null);
     }
 }

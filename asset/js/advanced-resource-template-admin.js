@@ -884,6 +884,8 @@
                                 });
                             },
                             onSelect: function(suggestion) {
+                                const autofillerId = 'autofiller-' + autofillerName.replace(/[\W_]+/g, '-');
+                                $('#' + autofillerId).val(suggestion.info.label);
                                 autofill(suggestion.data);
                             },
                         });

@@ -75,7 +75,10 @@ class IdRefAutofiller extends AbstractAutofiller
 
     public function getResults($query, $lang = null): ?array
     {
-        $maxResult = 12;
+        // Because there is a subquery for each result, it is not recommended to
+        // output too much results.
+        // About 0,1 second by result on a standard server with current mapper.
+        $maxResult = 50;
 
         $service = empty($this->options['sub']) ? 'idref' : 'idref:' . $this->options['sub'];
         if (empty($this->types[$service])) {
@@ -99,29 +102,20 @@ class IdRefAutofiller extends AbstractAutofiller
             return null;
         }
 
-        $suggestions = [];
-
         // Parse the JSON response.
         $results = json_decode($response->getBody(), true);
-
-        // Prepare mapper one time.
-        $this->mapper->setMapping($this->mapping);
 
         // First clean results.
         if (empty($results['response']['docs'])) {
             return [];
         }
 
-        // Get all the totals for the data type one time.
-        $sql = <<<'SQL'
-SELECT `value`.`uri`, COUNT(`value`.`uri`)
-FROM `value`
-WHERE `value`.`type` = :service
-GROUP BY `value`.`uri`
-;
-SQL;
-        $totals = $this->connection->executeQuery($sql, ['service' => $service])->fetchAllKeyValue();
+        // Prepare mapper one time.
+        $this->mapper->setMapping($this->mapping);
 
+        // Get all uris and prepare all data one time.
+        $uriLabels = [];
+        $uriData = [];
         $total = 0;
         foreach ($results['response']['docs'] as $result) {
             if (empty($result['ppn_z'])) {
@@ -143,15 +137,17 @@ SQL;
             if (!$metadata) {
                 continue;
             }
-            $suggestions[] = [
-                'value' => sprintf('%s (%s)', $value, $totals[$value] ?? 0),
-                'data' => $metadata,
-            ];
+
+            $uri = 'https://www.idref.fr/' . $result['ppn_z'];
+            $uriLabels[$uri] = $value;
+            $uriData[$uri] = $metadata;
+
             if (++$total >= $maxResult) {
                 break;
             }
         }
 
-        return $suggestions;
+        $dataType = 'valuesuggest:' . $service;
+        return $this->finalizeSuggestions($uriLabels, $uriData, $dataType);
     }
 }

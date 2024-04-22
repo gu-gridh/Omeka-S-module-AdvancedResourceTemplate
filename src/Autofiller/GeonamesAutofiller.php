@@ -45,8 +45,6 @@ class GeonamesAutofiller extends AbstractAutofiller
             return null;
         }
 
-        $suggestions = [];
-
         // Parse the JSON response.
         $results = json_decode($response->getBody(), true);
         if (empty($results['geonames'])) {
@@ -56,28 +54,20 @@ class GeonamesAutofiller extends AbstractAutofiller
         // Prepare mapper one time.
         $this->mapper->setMapping($this->mapping);
 
-        // Get all the totals for the data type one time.
-        $sql = <<<'SQL'
-SELECT `value`.`uri`, COUNT(`value`.`uri`)
-FROM `value`
-WHERE `value`.`type` = "valuesuggest:geonames:geonames"
-GROUP BY `value`.`uri`
-;
-SQL;
-        $totals = $this->connection->executeQuery($sql)->fetchAllKeyValue();
-
+        // Get all uris and prepare all data one time.
+        $uriLabels = [];
+        $uriData = [];
         foreach ($results['geonames'] as $result) {
             $metadata = $this->mapper->array($result);
             if (!$metadata) {
                 continue;
             }
-            $suggestions[] = [
-                'value' => $result['name'],
-                'value' => sprintf('%s (%s)', $result['name'], $totals[$result['name']] ?? 0),
-                'data' => $metadata,
-            ];
+            $uri = sprintf('http://www.geonames.org/%s', $result['geonameId']);
+            $uriLabels[$uri] = $result['name'];
+            $uriData[$uri] = $metadata;
         }
 
-        return $suggestions;
+        $dataType = 'valuesuggest:geonames:geonames';
+        return $this->finalizeSuggestions($uriLabels, $uriData, $dataType);
     }
 }

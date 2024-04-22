@@ -17,14 +17,14 @@ abstract class AbstractAutofiller implements AutofillerInterface
     protected $mapping;
 
     /**
-     * @var ServiceLocatorInterface
-     */
-    protected $services;
-
-    /**
      * @var array
      */
     protected $options;
+
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
+    protected $connection;
 
     /**
      * @var \Laminas\Http\Client
@@ -36,12 +36,18 @@ abstract class AbstractAutofiller implements AutofillerInterface
      */
     protected $mapper;
 
-    public function __construct(ServiceLocatorInterface $services, array $options = null)
+    /**
+     * @var \Laminas\ServiceManager\ServiceLocatorInterface
+     */
+    protected $services;
+
+    public function __construct(ServiceLocatorInterface $services, array $options = [])
     {
-        $this->services = $services;
-        $this->options = $options ?: [];
-        $this->httpClient = $services->get('Omeka\HttpClient');
         $pluginManager = $services->get('ControllerPluginManager');
+        $this->services = $services;
+        $this->options = $options;
+        $this->connection = $services->get('Omeka\Connection');
+        $this->httpClient = $services->get('Omeka\HttpClient');
         $this->mapper = $pluginManager->get('artMapper');
     }
 
@@ -69,4 +75,68 @@ abstract class AbstractAutofiller implements AutofillerInterface
     }
 
     abstract public function getResults($query, $lang = null): ?array;
+
+    protected function finalizeSuggestions(array $uriLabels, array $uriMetadata, ?string $dataType = null): array
+    {
+        if (!$uriLabels) {
+            return [];
+        }
+
+        // Keep sort by most used uris first.
+        $hasUris = !is_numeric(key($uriLabels));
+        $uris = array_fill_keys(array_keys($uriLabels), 0);
+        if ($hasUris) {
+            $totals = $this->totalsByUri(array_keys($uris), $dataType);
+            $uris = $totals + $uris;
+        }
+
+        $suggestions = [];
+        foreach ($uris as $uri => $count) {
+            $suggestions[] = [
+                'value' => $hasUris ? sprintf('%s (%s)', $uriLabels[$uri], $count) : $uriLabels[$uri],
+                'data' => $uriMetadata[$uri],
+                'info' => [
+                    'uri' => $uri,
+                    'label' => $uriLabels[$uri],
+                    'count' => $count,
+                ],
+            ];
+        }
+
+        return $suggestions;
+    }
+
+    protected function totalsByUri(array $uris, ?string $dataType = null): array
+    {
+        if (!count($uris)) {
+            return [];
+        }
+
+        // TODO Use doctrine query builder.
+        $bind = [
+            'uris' => $uris
+        ];
+        $types = [
+            'uris' => \Doctrine\DBAL\Connection::PARAM_STR_ARRAY,
+        ];
+        if ($dataType) {
+            $andWhere = "\n    AND `value`.`type` = :data_type\n";
+            $bind['data_type'] = $dataType;
+            $types['data_type'] = \Doctrine\DBAL\ParameterType::STRING;
+        } else {
+            $andWhere = '';
+        }
+
+        // Get all the totals for the data type one time.
+        $sql = <<<SQL
+SELECT `value`.`uri`, COUNT(`value`.`uri`)
+FROM `value`
+WHERE `value`.`uri` IN (:uris)$andWhere
+GROUP BY `value`.`uri`
+ORDER BY COUNT(`value`.`uri`) DESC
+;
+SQL;
+        $totals = $this->connection->executeQuery($sql, $bind, $types)->fetchAllKeyValue();
+        return $totals ? array_map('intval', $totals) : [];
+    }
 }
