@@ -108,7 +108,7 @@ class IndexController extends AbstractRestfulController
         if (is_null($results)) {
             return $this->returnError(new PsrMessage(
                 'The remote service "{service}" seems unavailable.', // @translate
-                $autofiller->getLabel()
+                ['service' => $autofiller->getLabel()]
             ), HttpResponse::STATUS_CODE_502);
         }
 

@@ -818,9 +818,9 @@
 
             templateData.autofillers.forEach(function(autofillerName) {
                 $.get(baseUrl + 'admin/autofiller/settings', {
-                    service: autofillerName,
-                    template: $('#resource-template-select').val(),
-                })
+                        service: autofillerName,
+                        template: $('#resource-template-select').val(),
+                    })
                     .done(function(data) {
                         const autofiller = data.data.autofiller;
                         const autofillerId = 'autofiller-' + autofillerName.replace(/[\W_]+/g, '-');
@@ -887,6 +887,13 @@
                                 autofill(suggestion.data);
                             },
                         });
+                    })
+                    .fail(function(jqXHR, textStatus) {
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                            alert(jqXHR.responseJSON.message);
+                        } else {
+                            alert(Omeka.jsTranslate('Something went wrong'));
+                        }
                     });
             });
         }
