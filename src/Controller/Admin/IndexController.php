@@ -10,6 +10,7 @@ use Laminas\Mvc\Controller\AbstractRestfulController;
 use Laminas\View\Model\JsonModel;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
+use Omeka\Stdlib\ErrorStore;
 use Omeka\View\Model\ApiJsonModel;
 
 class IndexController extends AbstractRestfulController
@@ -232,9 +233,9 @@ class IndexController extends AbstractRestfulController
      * @param \Omeka\Stdlib\ErrorStore|array $messages
      * @return \Laminas\View\Model\JsonModel
      */
-    protected function returnError($message, int $statusCode = Response::STATUS_CODE_400, $messages = null): JsonModel
+    protected function returnError($message, int $statusCode = HttpResponse::STATUS_CODE_400, $messages = null): JsonModel
     {
-        $statusCode ??= Response::STATUS_CODE_400;
+        $statusCode ??= HttpResponse::STATUS_CODE_400;
 
         $response = $this->getResponse();
         $response->setStatusCode($statusCode);
