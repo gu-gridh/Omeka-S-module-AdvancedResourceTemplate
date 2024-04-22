@@ -6,7 +6,7 @@ class GenericAutofiller extends AbstractAutofiller
 {
     protected $label = 'Generic'; // @translate
 
-    public function getResults($query, $lang = null)
+    public function getResults($query, $lang = null): ?array
     {
         if (empty($this->options['sub']) || !in_array($this->options['sub'], ['json', 'xml'])
             || empty($this->options['url']) || !filter_var($this->options['url'], FILTER_VALIDATE_URL)

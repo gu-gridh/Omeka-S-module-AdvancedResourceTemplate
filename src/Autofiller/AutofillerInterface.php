@@ -9,7 +9,7 @@ interface AutofillerInterface
      *
      * @return string
      */
-    public function getLabel();
+    public function getLabel(): string;
 
     /**
      * The mapping is an array of xpath or object to a property.
@@ -57,5 +57,5 @@ interface AutofillerInterface
      * @param string $lang The language code
      * @return array|null Return null when an error occurs.
      */
-    public function getResults($query, $lang = null);
+    public function getResults($query, $lang = null): ?array;
 }

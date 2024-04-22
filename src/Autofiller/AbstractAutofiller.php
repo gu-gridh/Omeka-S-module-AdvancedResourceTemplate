@@ -45,7 +45,7 @@ abstract class AbstractAutofiller implements AutofillerInterface
         $this->mapper = $pluginManager->get('artMapper');
     }
 
-    public function getLabel()
+    public function getLabel(): string
     {
         if (!empty($this->options['label'])) {
             return $this->options['label'];
@@ -68,5 +68,5 @@ abstract class AbstractAutofiller implements AutofillerInterface
         return $this;
     }
 
-    abstract public function getResults($query, $lang = null);
+    abstract public function getResults($query, $lang = null): ?array;
 }

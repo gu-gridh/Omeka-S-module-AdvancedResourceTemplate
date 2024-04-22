@@ -73,7 +73,7 @@ class IdRefAutofiller extends AbstractAutofiller
         ],
     ];
 
-    public function getResults($query, $lang = null)
+    public function getResults($query, $lang = null): ?array
     {
         $maxResult = 12;
 

@@ -13,7 +13,7 @@ class GeonamesAutofiller extends AbstractAutofiller
      * @link https://www.geonames.org/export/geonames-search.html
      * @see \ValueSuggest\Suggester\Geonames\GeonamesSuggest::getSuggestions()
      */
-    public function getResults($query, $lang = null)
+    public function getResults($query, $lang = null): ?array
     {
         $params = [];
         if (!empty($this->options['query'])) {
