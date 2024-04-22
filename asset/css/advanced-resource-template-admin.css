@@ -13,6 +13,17 @@
         padding-left: 6px;
     }
 
+    .autofiller .spinner {
+        position: absolute;
+        right: 0;
+        margin-top: 12px;
+        margin-right: 6px;
+        opacity: 0;
+    }
+    .autofiller .spinner.processing {
+        opacity: 0.75;
+    }
+
     /* // Old fix for custom vocab.
     .resource-form .value:not(:only-of-type) .input-body {
         max-width: inherit;

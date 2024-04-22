@@ -828,6 +828,7 @@
     <div class="field autofiller">
         <div class="field-meta">
             <label for="autofiller-input">${autofiller.label}</label>
+            <span class="spinner"></span>
         </div>
         <div class="inputs">
             <input type="text" class="autofiller" id="${autofillerId}">
@@ -854,9 +855,11 @@
                                 return response.data;
                             },
                             onSearchStart: function(/*params*/) {
+                                $(this).closest('.field.autofiller').find('.spinner').addClass('processing fas fa-sync fa-spin');
                                 $(this).css('cursor', 'progress');
                             },
                             onSearchComplete: function(/*query, suggestions*/) {
+                                $(this).closest('.field.autofiller').find('.spinner').removeClass('processing fas fa-sync fa-spin');
                                 $(this).css('cursor', 'default');
                             },
                             onSearchError: function(query, jqXHR, textStatus, errorThrown) {
@@ -896,6 +899,10 @@
                         } else {
                             alert(Omeka.jsTranslate('Something went wrong'));
                         }
+                    })
+                    .always(function() {
+                        $(this).closest('.field.autofiller').find('.spinner').removeClass('processing fas fa-sync fa-spin');
+                        $(this).css('cursor', 'default');
                     });
             });
         }
