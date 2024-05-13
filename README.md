@@ -142,6 +142,15 @@ resources. If you do not see images, go to the [original repository]:
 
   ![Example of display of grouped properties](data/images/groups_properties.png)
 
+- Display of links on values of properties
+
+  ![Example of display of property values with search link and direct link](data/images/property_values_links.png)
+
+  In the record, the value of the properties can be displayed as a search link,
+  that is useful in particular to bounce on the subjects. The links to the
+  linked resource or to the external uri can be added too. The properties can be
+  selected via a whitelist and a blacklist.
+
 - Language selection and default by template and by property, or no language:
 
   ![Example of language by template and property](data/images/advanced_language_settings.png)
@@ -463,6 +472,7 @@ TODO
 - [ ] Allow to group properties differently between sites?
 - [ ] Create a form element for the autofiller or simple mapping.
 - [ ] Move the autofiller into a new module?
+- [ ] Simplify all structures and processes for the feature "multiple times the same property with different data types and options" via only some js in form?
 
 
 Warning
