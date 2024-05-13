@@ -83,6 +83,24 @@ Warning: you may have to set each resource template as open/close to addition ac
             ])
 
             ->add([
+                'name' => 'advancedresourcetemplate_properties_display',
+                'type' => CommonElement\OptionalRadio::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Display of property values', // @translate
+                    'value_options' => [
+                        '' => 'Default', // @translate
+                        'search_value' => 'Value as search', // @ŧranslate
+                        'search_icon_prepend' => 'Prepend a search icon', // @translate
+                        'search_icon_append' => 'Append a search icon', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_properties_display',
+                ],
+            ])
+
+            ->add([
                 'name' => 'advancedresourcetemplate_properties_as_search_whitelist',
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [

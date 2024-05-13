@@ -811,6 +811,16 @@ class Module extends AbstractModule
      */
     public function handleRepresentationValueHtml(Event $event): void
     {
+        static $display;
+        static $whitelist;
+        static $blacklist;
+        static $whitelistAll;
+        static $url;
+        static $hyperlink;
+        static $escapeAttr;
+        static $siteSlug;
+        static $searchText;
+
         /**
          * @var \Omeka\Api\Representation\ValueRepresentation $value
          * @var \Omeka\Settings\Settings $settings
@@ -825,34 +835,47 @@ class Module extends AbstractModule
             return;
         }
 
-        $value = $event->getTarget();
-        $settings = $services->get('Omeka\Settings');
-
-        $property = $value->property()->term();
-        $propertiesAsSearch = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
-        $hasAll = in_array('all', $propertiesAsSearch);
-        if ($hasAll) {
+        if ($display === null) {
+            $settings = $services->get('Omeka\Settings');
+            $display = (string) $settings->get('advancedresourcetemplate_properties_display', '');
+            if (!in_array($display, ['search_value', 'search_icon_prepend', 'search_icon_append'])) {
+                $display = false;
+                return;
+            }
+            $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
             $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
+            $whitelistAll = in_array('all', $whitelist);
+            $plugins = $services->get('ControllerPluginManager');
+            $helpers = $services->get('ViewHelperManager');
+            $url = $plugins->get('url');
+            $hyperlink = $helpers->get('hyperlink');
+            $escape = $helpers->get('escapeHtml');
+            $escapeAttr = $helpers->get('escapeHtmlAttr');
+            $siteSlug = $status->getRouteParam('site-slug');
+            $translate = $helpers->get('translate');
+            $searchText = $escape($translate('Search this value')); // @translate
+        }
+
+        if (!$display) {
+            return;
+        }
+
+        $value = $event->getTarget();
+        $property = $value->property()->term();
+        if ($whitelistAll) {
             if (in_array($property, $blacklist)) {
                 return;
             }
-        } elseif (!in_array($property, $propertiesAsSearch)) {
+        } elseif (!in_array($property, $whitelist)) {
             return;
         }
 
         $resource = $value->resource();
-
-        $plugins = $services->get('ControllerPluginManager');
-        $helpers = $services->get('ViewHelperManager');
-        $url = $plugins->get('url');
-        $hyperlink = $helpers->get('hyperlink');
-
-        $siteSlug = $status->getRouteParam('site-slug');
         $controllerName = $resource->getControllerName();
+        $html = $event->getParam('html');
 
         $vr = $value->valueResource();
         if ($vr) {
-            $html = $event->getParam('html');
             $searchUrl = $url->fromRoute(
                 'site/resource',
                 ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
@@ -862,7 +885,6 @@ class Module extends AbstractModule
                     'property[0][text]' => $vr->id(),
                 ]]
             );
-            $link = $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link']);
         } else {
             $uri = $value->uri();
             $val = (string) $value->value();
@@ -875,10 +897,19 @@ class Module extends AbstractModule
                     'property[0][text]' => $uri ?: $val,
                 ]]
             );
-            $link = $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
         }
 
-        $event->setParam('html', $link);
+        if ($display === 'search_value') {
+            $html = $vr
+                ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
+                : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+        } elseif ($display === 'search_icon_prepend') {
+            $html = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a> ', $escapeAttr($searchUrl), $searchText) . $html;
+        } elseif ($display === 'search_icon_append') {
+            $html .= sprintf(' <a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $searchText);
+        }
+
+        $event->setParam('html', $html);
     }
 
     public function preBatchUpdateItems(Event $event): void
