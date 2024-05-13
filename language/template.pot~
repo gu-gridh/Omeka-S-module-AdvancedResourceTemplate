@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 00:00+0000\n"
+"POT-Creation-Date: 2024-05-18 12:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -602,22 +602,6 @@ msgstr ""
 
 #: src/Form/TraitPropertyValuesDisplay.php:17
 msgid "Display of property values"
-msgstr ""
-
-#: src/Form/TraitPropertyValuesDisplay.php:21
-msgid "Value as search"
-msgstr ""
-
-#: src/Form/TraitPropertyValuesDisplay.php:28
-msgid "Value as advanced search (module or fallback)"
-msgstr ""
-
-#: src/Form/TraitPropertyValuesDisplay.php:35
-msgid "Display linked resource as simple text"
-msgstr ""
-
-#: src/Form/TraitPropertyValuesDisplay.php:42
-msgid "Display uri as simple text"
 msgstr ""
 
 #: src/Form/TraitPropertyValuesDisplay.php:49
