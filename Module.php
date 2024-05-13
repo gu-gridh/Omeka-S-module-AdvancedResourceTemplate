@@ -829,8 +829,14 @@ class Module extends AbstractModule
         $settings = $services->get('Omeka\Settings');
 
         $property = $value->property()->term();
-        $propertiesAsSearch = $settings->get('advancedresourcetemplate_properties_as_search', []);
-        if (!in_array($property, $propertiesAsSearch)) {
+        $propertiesAsSearch = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
+        $hasAll = in_array('all', $propertiesAsSearch);
+        if ($hasAll) {
+            $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
+            if (in_array($property, $blacklist)) {
+                return;
+            }
+        } elseif (!in_array($property, $propertiesAsSearch)) {
             return;
         }
 

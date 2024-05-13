@@ -83,15 +83,34 @@ Warning: you may have to set each resource template as open/close to addition ac
             ])
 
             ->add([
-                'name' => 'advancedresourcetemplate_properties_as_search',
+                'name' => 'advancedresourcetemplate_properties_as_search_whitelist',
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'element_group' => 'resources',
-                    'label' => 'Properties to display as search link', // @translate
+                    'label' => 'Properties to display as search link (whitelist)', // @translate
+                    'term_as_value' => true,
+                    'prepend_value_options' => [
+                        'all' => 'All properties', // @translate',
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_properties_as_search_whitelist',
+                    'multiple' => true,
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select properties…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'advancedresourcetemplate_properties_as_search_blacklist',
+                'type' => CommonElement\OptionalPropertySelect::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Properties to display as search link (blacklist)', // @translate
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'advancedresourcetemplate_properties_as_search',
+                    'id' => 'advancedresourcetemplate_properties_as_search_blacklist',
                     'multiple' => true,
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select properties…', // @translate
