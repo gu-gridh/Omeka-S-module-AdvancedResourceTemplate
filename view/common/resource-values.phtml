@@ -50,7 +50,7 @@ if ($this->status()->isSiteRequest()) {
 }
 */
 
-// For compatibility with value annotations, waiting fix omeka/omeka-s#1997.
+// For compatibility with value annotations, waiting fix omeka/omeka-s#1999.
 if (empty($resource)) {
     /** @var \Omeka\Api\Representation\ValueRepresentation $firstValueValue */
     $firstValue = is_array($values) ? reset($values) : $values->current();

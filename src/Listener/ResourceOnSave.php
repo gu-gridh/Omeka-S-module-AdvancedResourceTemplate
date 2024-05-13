@@ -21,7 +21,7 @@ class ResourceOnSave
     protected $api;
 
     /**
-     * @var \Commont\Stdlib\EasyMeta
+     * @var \Common\Stdlib\EasyMeta
      */
     protected $easyMeta;
 
