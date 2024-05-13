@@ -876,6 +876,8 @@ class Module extends AbstractModule
                 'prepend_icon_uri',
                 'value_search',
                 'value_advanced_search',
+                'value_text_resource',
+                'value_text_uri',
                 'append_icon_search',
                 'append_icon_advanced_search',
                 'append_icon_resource',
@@ -988,7 +990,7 @@ class Module extends AbstractModule
             'prepend_icon_advanced_search' => '',
             'prepend_icon_resource' => '',
             'prepend_icon_uri' => '',
-            'value_default' => $display['default'] ? $html : '',
+            'value_default' => '',
             'value_search' => '',
             'value_advanced_search' => '',
             'append_icon_search' => '',
@@ -996,6 +998,16 @@ class Module extends AbstractModule
             'append_icon_resource' => '',
             'append_icon_uri' => '',
         ];
+
+        if ($display['default']) {
+            if ($vr && $display['value_text_resource']) {
+                $result['value_default'] = strip_tags($html);
+            } elseif ($uri && $display['value_text_uri']) {
+                $result['value_default'] = strip_tags($html);
+            } else {
+                $result['value_default'] = $html;
+            }
+        }
 
         if ($display['search']) {
             if ($vr) {

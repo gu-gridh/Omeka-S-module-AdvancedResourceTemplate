@@ -31,6 +31,20 @@ trait TraitPropertyValuesDisplay
                             ],
                         ],
                         [
+                            'value' => 'value_text_resource',
+                            'label' => 'Display linked resource as simple text', // @translate
+                            'label_attributes' => [
+                                'class' => 'art_pd_value',
+                            ],
+                        ],
+                        [
+                            'value' => 'value_text_uri',
+                            'label' => 'Display uri as simple text', // @translate
+                            'label_attributes' => [
+                                'class' => 'art_pd_value',
+                            ],
+                        ],
+                        [
                             'value' => 'prepend_icon_search',
                             'label' => 'Prepend an icon for search link', // @translate
                             'label_attributes' => [
