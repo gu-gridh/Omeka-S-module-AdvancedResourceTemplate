@@ -198,6 +198,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                         'yes' => 'Yes', // @translate
                         'no' => 'No', // @translate
                     ],
+                    // Fix the formatting issue of the radio label in Omeka.
+                    'label_attributes' => [
+                        'class' => 'radio',
+                    ],
                 ],
                 'attributes' => [
                     // 'id' => 'quick_new_resource',
@@ -216,6 +220,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                         'no' => 'No', // @translate
                         'sw' => 'Starts with', // @translate
                         'in' => 'Contains', // @translate
+                    ],
+                    // Fix the formatting issue of the radio label in Omeka.
+                    'label_attributes' => [
+                        'class' => 'radio',
                     ],
                 ],
                 'attributes' => [
@@ -248,6 +256,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                         'yes' => 'Yes', // @translate
                         'no' => 'No', // @translate
                     ],
+                    // Fix the formatting issue of the radio label in Omeka.
+                    'label_attributes' => [
+                        'class' => 'radio',
+                    ],
                 ],
                 'attributes' => [
                     // 'id' => 'use_language',
@@ -279,6 +291,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                         'no' => 'No', // @translate
                         'yes' => 'Yes', // @translate
                     ],
+                    // Fix the formatting issue of the radio label in Omeka.
+                    'label_attributes' => [
+                        'class' => 'radio',
+                    ],
                 ],
                 'attributes' => [
                     // 'id' => 'value_suggest_keep_original_label',
@@ -296,6 +312,10 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                         '' => 'Use template setting', // @translate
                         'no' => 'No', // @translate
                         'yes' => 'Yes', // @translate
+                    ],
+                    // Fix the formatting issue of the radio label in Omeka.
+                    'label_attributes' => [
+                        'class' => 'radio',
                     ],
                 ],
                 'attributes' => [

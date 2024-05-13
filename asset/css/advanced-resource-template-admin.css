@@ -219,6 +219,10 @@
       margin-left: 0;
     }
 
+    .resource-templates #edit-sidebar .option label.radio {
+        display: inline-block;
+    }
+
     form > .settings > a::after {
         margin-left: 12px;
     }
