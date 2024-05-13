@@ -47,6 +47,15 @@ class Module extends AbstractModule
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
+
+        if ($this->isModuleActive('AdvancedSearch') && !$this->isModuleVersionAtLeast('AdvancedSearch', '3.4.22')) {
+            $message = new \Common\Stdlib\PsrMessage(
+                $translate('Some features require the module {module} to be upgraded to version {version} or later.'), // @translate
+                ['module' => 'AdvancedSearch', 'version' => '3.4.22']
+            );
+            $messenger = $services->get('ControllerPluginManager')->get('messenger');
+            $messenger->addWarning($message);
+        }
     }
 
     protected function postInstall(): void
