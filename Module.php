@@ -810,10 +810,6 @@ class Module extends AbstractModule
 
     /**
      * Convert selected property values to links.
-     *
-     * Since this feature is similar to the one of the module Metadata Browse,
-     * the same class name is used (metadata-browse-direct-link) to simplify
-     * theme building.
      */
     public function handleRepresentationValueHtml(Event $event): void
     {
@@ -874,16 +870,16 @@ class Module extends AbstractModule
             }
 
             $allowed = [
-                'search_value',
-                'search_icon_prepend',
-                'search_icon_append',
-                'advanced_search_value',
-                'advanced_search_icon_prepend',
-                'advanced_search_icon_append',
-                'resource_icon_prepend',
-                'resource_icon_append',
-                'uri_icon_prepend',
-                'uri_icon_append',
+                'prepend_icon_search',
+                'prepend_icon_advanced_search',
+                'prepend_icon_resource',
+                'prepend_icon_uri',
+                'value_search',
+                'value_advanced_search',
+                'append_icon_search',
+                'append_icon_advanced_search',
+                'append_icon_resource',
+                'append_icon_uri',
             ];
 
             $display = (array) $sSettings->get('advancedresourcetemplate_properties_display', []);
@@ -914,31 +910,31 @@ class Module extends AbstractModule
 
             $display = array_replace(array_fill_keys($allowed, false), array_fill_keys($display, true));
 
-            $display['search_icon'] = $display['search_icon_prepend'] || $display['search_icon_append'];
-            $display['resource_icon'] = $display['resource_icon_prepend'] || $display['resource_icon_append'];
-            $display['uri_icon'] = $display['uri_icon_prepend'] || $display['uri_icon_append'];
-            $display['search'] = $display['search_value'] || $display['search_icon'];
-            $display['default'] = !$display['search_value'] && !$display['advanced_search_value'];
+            $display['icon_search'] = $display['prepend_icon_search'] || $display['append_icon_search'];
+            $display['icon_resource'] = $display['prepend_icon_resource'] || $display['append_icon_resource'];
+            $display['icon_uri'] = $display['prepend_icon_uri'] || $display['append_icon_uri'];
+            $display['search'] = $display['value_search'] || $display['icon_search'];
+            $display['default'] = !$display['value_search'] && !$display['value_advanced_search'];
 
             if ($advancedSearchConfig) {
-                $display['advanced_search_icon'] = $display['advanced_search_icon_prepend'] || $display['advanced_search_icon_append'];
-                $display['advanced_search'] = $display['advanced_search_value'] || $display['advanced_search_icon'];
+                $display['icon_advanced_search'] = $display['prepend_icon_advanced_search'] || $display['append_icon_advanced_search'];
+                $display['advanced_search'] = $display['value_advanced_search'] || $display['icon_advanced_search'];
                 $advancedSearchConfig = $display['advanced_search'] ? $advancedSearchConfig() : null;
                 $engine = $advancedSearchConfig ? $advancedSearchConfig->engine() : null;
                 $querier = $engine ? $engine->querier() : null;
                 $isInternalSearch = $querier instanceof \AdvancedSearch\Querier\InternalQuerier;
                 // Fallback to standard search for module Advanced search.
                 if ($display['advanced_search'] && (!$querier || $querier instanceof \AdvancedSearch\Querier\NoopQuerier)) {
-                    $display['search_value'] = $display['search_value'] || $display['advanced_search_value'];
-                    $display['search_icon_prepend'] = $display['search_icon_prepend'] || $display['advanced_search_icon_prepend'];
-                    $display['search_icon_append'] = $display['search_icon_append'] || $display['advanced_search_icon_append'];
-                    $display['search_icon'] = $display['search_icon_prepend'] || $display['search_icon_append'];
-                    $display['search'] = $display['search_value'] || $display['search_icon'];
-                    $display['default'] = !$display['search_value'];
-                    $display['advanced_search_value'] = false;
-                    $display['advanced_search_icon_prepend'] = false;
-                    $display['advanced_search_icon_append'] = false;
-                    $display['advanced_search_icon'] = false;
+                    $display['value_search'] = $display['value_search'] || $display['value_advanced_search'];
+                    $display['prepend_icon_search'] = $display['prepend_icon_search'] || $display['prepend_icon_advanced_search'];
+                    $display['append_icon_search'] = $display['append_icon_search'] || $display['append_icon_advanced_search'];
+                    $display['icon_search'] = $display['prepend_icon_search'] || $display['append_icon_search'];
+                    $display['search'] = $display['value_search'] || $display['icon_search'];
+                    $display['default'] = !$display['value_search'];
+                    $display['value_advanced_search'] = false;
+                    $display['prepend_icon_advanced_search'] = false;
+                    $display['append_icon_advanced_search'] = false;
+                    $display['icon_advanced_search'] = false;
                     $display['advanced_search'] = false;
                 }
             }
@@ -947,13 +943,13 @@ class Module extends AbstractModule
             // default, so don't append them twice.
             // Furthermore, there may be an issue with the icon used in site.
             if ($isAdmin && $display['default']) {
-                if ($display['resource_icon_append']) {
-                    $display['resource_icon_append'] = false;
-                    $display['resource_icon'] = $display['resource_icon_prepend'];
+                if ($display['append_icon_resource']) {
+                    $display['append_icon_resource'] = false;
+                    $display['icon_resource'] = $display['prepend_icon_resource'];
                 }
-                if ($display['uri_icon_append']) {
-                    $display['uri_icon_append'] = false;
-                    $display['uri_icon'] = $display['uri_icon_prepend'];
+                if ($display['append_icon_uri']) {
+                    $display['append_icon_uri'] = false;
+                    $display['icon_uri'] = $display['prepend_icon_uri'];
                 }
             }
 
@@ -988,17 +984,17 @@ class Module extends AbstractModule
         $val = (string) $value->value();
 
         $result = [
-            'search_icon_prepend' => '',
-            'advanced_search_icon_prepend' => '',
-            'resource_icon_prepend' => '',
-            'uri_icon_prepend' => '',
-            'default_value' => $display['default'] ? $html : '',
-            'search_value' => '',
-            'advanced_search_value' => '',
-            'search_icon_append' => '',
-            'advanced_search_icon_append' => '',
-            'resource_icon_append' => '',
-            'uri_icon_append' => '',
+            'prepend_icon_search' => '',
+            'prepend_icon_advanced_search' => '',
+            'prepend_icon_resource' => '',
+            'prepend_icon_uri' => '',
+            'value_default' => $display['default'] ? $html : '',
+            'value_search' => '',
+            'value_advanced_search' => '',
+            'append_icon_search' => '',
+            'append_icon_advanced_search' => '',
+            'append_icon_resource' => '',
+            'append_icon_uri' => '',
         ];
 
         if ($display['search']) {
@@ -1023,15 +1019,15 @@ class Module extends AbstractModule
                     ]]
                 );
             }
-            if ($display['search_value']) {
-                $result['search_value'] = $vr
-                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
-                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+            if ($display['value_search']) {
+                $result['value_search'] = $vr
+                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-search-link'])
+                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-search-link']);
             }
-            if ($display['search_icon']) {
-                $htmlSearchIcon = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
-                $result['search_icon_prepend'] = $display['search_icon_prepend'] ? $htmlSearchIcon : '';
-                $result['search_icon_append'] = $display['search_icon_append'] ? $htmlSearchIcon : '';
+            if ($display['icon_search']) {
+                $htmlIconSearch = sprintf('<a href="%1$s" class="metadata-search-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['prepend_icon_search'] = $display['prepend_icon_search'] ? $htmlIconSearch : '';
+                $result['append_icon_search'] = $display['append_icon_search'] ? $htmlIconSearch : '';
             }
         }
 
@@ -1092,38 +1088,38 @@ class Module extends AbstractModule
             $searchUrl = $isAdmin
                 ? $advancedSearchConfig->adminSearchUrl(false, $urlQuery)
                 : $advancedSearchConfig->siteUrl($siteSlug, false, $urlQuery);
-            if ($display['advanced_search_value']) {
-                $result['advanced_search_value'] = $vr
-                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
-                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+            if ($display['value_advanced_search']) {
+                $result['value_advanced_search'] = $vr
+                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-search-link'])
+                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-search-link']);
             }
-            if ($display['advanced_search_icon']) {
-                $htmlSearchIcon = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
-                $result['advanced_search_icon_prepend'] = $display['advanced_search_icon_prepend'] ? $htmlSearchIcon : '';
-                $result['advanced_search_icon_append'] = $display['advanced_search_icon_append'] ? $htmlSearchIcon : '';
+            if ($display['icon_advanced_search']) {
+                $htmlIconSearch = sprintf('<a href="%1$s" class="metadata-search-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['prepend_icon_advanced_search'] = $display['prepend_icon_advanced_search'] ? $htmlIconSearch : '';
+                $result['append_icon_advanced_search'] = $display['append_icon_advanced_search'] ? $htmlIconSearch : '';
             }
         }
 
-        if ($display['resource_icon'] && $vr) {
+        if ($display['icon_resource'] && $vr) {
             $vrType = $vr->getControllerName() ?? 'resource';
             $vrName = $vr->resourceName() ?? 'resources';
             $vrUrl = $isAdmin ? $vr->adminUrl() : $vr->siteUrl($siteSlug);
-            $htmlResourceIcon = $isAdmin
+            $htmlIconResource = $isAdmin
                 ? sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="resource-name"></a>', $escapeAttr($vrUrl), $text[$vrType])
                 : sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="o-icon-%3$s resource-name"></span></a>', $escapeAttr($vrUrl), $text[$vrType], $vrName);
-            $result['resource_icon_prepend'] = $display['resource_icon_prepend'] ? $htmlResourceIcon : '';
-            $result['resource_icon_append'] = $display['resource_icon_append'] ? $htmlResourceIcon : '';
+            $result['prepend_icon_resource'] = $display['prepend_icon_resource'] ? $htmlIconResource : '';
+            $result['append_icon_resource'] = $display['append_icon_resource'] ? $htmlIconResource : '';
         }
 
-        if ($display['uri_icon'] && $uri) {
-            $htmlUriIcon = sprintf($isAdmin
+        if ($display['icon_uri'] && $uri) {
+            $htmlIconUri = sprintf($isAdmin
                 ? '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener" title="%2$s"></a>'
                 : '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener"><span title="%2$s" class="o-icon-external"></span></a>',
                 $escapeAttr($uri),
                 $text['uri']
             );
-            $result['uri_icon_prepend'] = $display['uri_icon_prepend'] ? $htmlUriIcon : '';
-            $result['uri_icon_append'] = $display['uri_icon_append'] ? $htmlUriIcon : '';
+            $result['prepend_icon_uri'] = $display['prepend_icon_uri'] ? $htmlIconUri : '';
+            $result['append_icon_uri'] = $display['append_icon_uri'] ? $htmlIconUri : '';
         }
 
         $event->setParam('html', implode(' ', array_filter($result, 'strlen')));

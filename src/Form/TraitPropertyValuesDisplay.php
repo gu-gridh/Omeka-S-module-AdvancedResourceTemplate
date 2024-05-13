@@ -17,70 +17,70 @@ trait TraitPropertyValuesDisplay
                     'label' => 'Display of property values', // @translate
                     'value_options' => [
                         [
-                            'value' => 'search_value',
+                            'value' => 'value_search',
                             'label' => 'Value as search', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_value',
                             ],
                         ],
                         [
-                            'value' => 'advanced_search_value',
-                            'label' => 'Value as advanced search (module or fallback)', // @Translate
+                            'value' => 'value_advanced_search',
+                            'label' => 'Value as advanced search (module or fallback)', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_value',
                             ],
                         ],
                         [
-                            'value' => 'search_icon_prepend',
+                            'value' => 'prepend_icon_search',
                             'label' => 'Prepend an icon for search link', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_prepend group-br',
                             ],
                         ],
                         [
-                            'value' => 'advanced_search_icon_prepend',
+                            'value' => 'prepend_icon_advanced_search',
                             'label' => 'Prepend an icon for advanced search link (module or fallback)', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_prepend',
                             ],
                         ],
                         [
-                            'value' => 'resource_icon_prepend',
+                            'value' => 'prepend_icon_resource',
                             'label' => 'Prepend an icon for linked resource', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_prepend',
                             ],
                         ],
                         [
-                            'value' => 'uri_icon_prepend',
+                            'value' => 'prepend_icon_uri',
                             'label' => 'Prepend an icon for external uri', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_prepend',
                             ],
                         ],
                         [
-                            'value' => 'search_icon_append',
+                            'value' => 'append_icon_search',
                             'label' => 'Append an icon for search link', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_append group-br',
                             ],
                         ],
                         [
-                            'value' => 'advanced_search_icon_append',
+                            'value' => 'append_icon_advanced_search',
                             'label' => 'Append an icon for advanced search link (module or fallback)', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_append',
                             ],
                         ],
                         [
-                            'value' => 'resource_icon_append',
+                            'value' => 'append_icon_resource',
                             'label' => 'Append an icon for linked resource', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_append',
                             ],
                         ],
                         [
-                            'value' => 'uri_icon_append',
+                            'value' => 'append_icon_uri',
                             'label' => 'Append an icon for external uri', // @translate
                             'label_attributes' => [
                                 'class' => 'art_pd_append',
