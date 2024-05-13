@@ -150,6 +150,15 @@ l’édition des ressources. Si vous ne voyez pas les images, allez au [dépôt 
 
   ![Exemple d’affichage de groupes de propriétés](data/images/groups_properties.png)
 
+- Affichage des liens sur les valeurs de propriétés
+
+  ![Exemple d’affichage de valeurs de propriétés avec lien de recherche et lien direct](data/images/property_values_links.png)
+
+  Dans la notice, la valeur des propriétés peut être affichée comme un lien de
+  recherche, ce qui est utile notamment pour rebondir sur les sujets. Les liens
+  vers la ressource liée ou vers l’uri externe peuvent également être ajoutés.
+  Les propriétés peuvent être choisies par liste blanche et par liste noire.
+
 - Sélection de la langue et langue par défaut par modèle et par propriété, ou
   aucune langue :
 
@@ -487,6 +496,7 @@ TODO
 - [ ] Permettre de grouper les propriétés différemment selon les sites ?
 - [ ] Créer un élément pour le remplisseur ou un alignement simple.
 - [ ] Déplacer le remplisseur dans un nouveau module ?
+- [ ] Simplifier toutes les structures et process pour la fonctionnalité "plusieurs propriétés avec des types de données et des options différentes" via un simple js dans le formulaire de ressource ?
 
 
 Avertissement
