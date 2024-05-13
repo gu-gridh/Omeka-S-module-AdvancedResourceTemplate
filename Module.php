@@ -389,6 +389,13 @@ class Module extends AbstractModule
             -100
         );
 
+        // Display some property values with a search link.
+        $sharedEventManager->attach(
+            \Omeka\Api\Representation\ValueRepresentation::class,
+            'rep.value.html',
+            [$this, 'handleRepresentationValueHtml']
+        );
+
         // Add css/js to some admin pages.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Item',
@@ -793,6 +800,79 @@ class Module extends AbstractModule
         }
 
         return $newValues;
+    }
+
+    /**
+     * Convert selected property values to links.
+     *
+     * Since this feature is similar to the one of the module Metadata Browse,
+     * the same class name is used (metadata-browse-direct-link) to simplify
+     * theme building.
+     */
+    public function handleRepresentationValueHtml(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Representation\ValueRepresentation $value
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Mvc\Status $status
+         * @var \Laminas\Mvc\Controller\Plugin\Url $url
+         * @var \Omeka\View\Helper\Hyperlink $hyperlink
+         */
+        $services = $this->getServiceLocator();
+
+        $status = $services->get('Omeka\Status');
+        if (!$status->isSiteRequest()) {
+            return;
+        }
+
+        $value = $event->getTarget();
+        $settings = $services->get('Omeka\Settings');
+
+        $property = $value->property()->term();
+        $propertiesAsSearch = $settings->get('advancedresourcetemplate_properties_as_search', []);
+        if (!in_array($property, $propertiesAsSearch)) {
+            return;
+        }
+
+        $resource = $value->resource();
+
+        $plugins = $services->get('ControllerPluginManager');
+        $helpers = $services->get('ViewHelperManager');
+        $url = $plugins->get('url');
+        $hyperlink = $helpers->get('hyperlink');
+
+        $siteSlug = $status->getRouteParam('site-slug');
+        $controllerName = $resource->getControllerName();
+
+        $vr = $value->valueResource();
+        if ($vr) {
+            $html = $event->getParam('html');
+            $searchUrl = $url->fromRoute(
+                'site/resource',
+                ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                ['query' => [
+                    'property[0][property]' => $property,
+                    'property[0][type]' => 'res',
+                    'property[0][text]' => $vr->id(),
+                ]]
+            );
+            $link = $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link']);
+        } else {
+            $uri = $value->uri();
+            $val = (string) $value->value();
+            $searchUrl = $url->fromRoute(
+                'site/resource',
+                ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                ['query' => [
+                    'property[0][property]' => $property,
+                    'property[0][type]' => 'eq',
+                    'property[0][text]' => $uri ?: $val,
+                ]]
+            );
+            $link = $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+        }
+
+        $event->setParam('html', $link);
     }
 
     public function preBatchUpdateItems(Event $event): void

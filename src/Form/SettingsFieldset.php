@@ -45,7 +45,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'element_group' => 'resources',
                     'label' => 'Skip checking advanced template settings to allow to save an invalid record', // @translate
-                    'info' => 'Disable the checking of the template settings. For example if a value is longer than the specified length, it will be saved anyway.
+                    'info' => 'For example if a value is longer than the specified length, it will be saved anyway.
 This option should be used only during a migration process or to simplify a complex batch edition or import.
 It does not skip core checks, in particular required properties.', // @translate
                 ],
@@ -81,6 +81,23 @@ Warning: you may have to set each resource template as open/close to addition ac
                     'id' => 'advancedresourcetemplate_skip_private_values',
                 ],
             ])
+
+            ->add([
+                'name' => 'advancedresourcetemplate_properties_as_search',
+                'type' => CommonElement\OptionalPropertySelect::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Properties to display as search link', // @translate
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_properties_as_search',
+                    'multiple' => true,
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select properties…', // @translate
+                ],
+            ])
+
             ->add([
                 'name' => 'advancedresourcetemplate_autofillers',
                 'type' => Element\Textarea::class,
