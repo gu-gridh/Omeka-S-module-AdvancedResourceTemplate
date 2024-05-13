@@ -20,11 +20,13 @@ use Omeka\Module\Exception\ModuleCannotInstallException;
 $plugins = $services->get('ControllerPluginManager');
 $url = $plugins->get('url');
 $api = $plugins->get('api');
-$config = require dirname(__DIR__, 2) . '/config/module.config.php';
 $settings = $services->get('Omeka\Settings');
+$translator = $services->get('MvcTranslator');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 // $entityManager = $services->get('Omeka\EntityManager');
+
+$localConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 
 if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.57')) {
     $message = new \Omeka\Stdlib\Message(
@@ -169,7 +171,7 @@ SQL;
     }
 
     $settings->set('advancedresourcetemplate_resource_form_elements',
-        $config['advancedresourcetemplate']['settings']['advancedresourcetemplate_resource_form_elements']);
+        $localConfig['advancedresourcetemplate']['settings']['advancedresourcetemplate_resource_form_elements']);
 
     $message = new PsrMessage(
         'New settings were added to the template.' // @translate
@@ -538,6 +540,22 @@ if (version_compare((string) $oldVersion, '3.4.29', '<')) {
         'The feature to display the property select with all alternative labels of templates was moved to a new module {link}Alternative Label Select{link_end}. You should install it if you need it.', // @translate
         [
             'link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AlternativeLabelSelect" _target="blank" rel="noopener">',
+            'link_end' => '</a>',
+        ]
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addWarning($message);
+}
+
+if (version_compare((string) $oldVersion, '3.4.31', '<')) {
+    $settings->set('advancedresourcetemplate_properties_as_search_blacklist',
+        $localConfig['advancedresourcetemplate']['settings']['advancedresourcetemplate_properties_as_search_blacklist']);
+    $settings->delete('advancedresourcetemplate_properties_as_search');
+
+    $message = new PsrMessage(
+        'A new option allows to display property values as search links, or to add a search icon to values, compatible with module {link}Advanced search{link_end}.', // @translate
+        [
+            'link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedSearch" _target="blank" rel="noopener">',
             'link_end' => '</a>',
         ]
     );
