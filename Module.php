@@ -1531,6 +1531,8 @@ class Module extends AbstractModule
         $fieldset
             ->get('advancedresourcetemplate_autofillers')
             ->setValue($value);
+
+        $this->appendCssGroupMultiCheckbox();
     }
 
     public function handleMainSettingsFilters(Event $event): void
@@ -1551,6 +1553,19 @@ class Module extends AbstractModule
                     ],
                 ],
             ]);
+    }
+
+    public function handleSiteSettings(Event $event): void
+    {
+        $this->handleAnySettings($event, 'site_settings');
+        $this->appendCssGroupMultiCheckbox();
+    }
+
+    protected function appendCssGroupMultiCheckbox()
+    {
+        /** @var \Laminas\View\Helper\HeadStyle headStyle */
+        $headStyle = $this->getServiceLocator()->get('ViewHelperManager')->get('headStyle');
+        $headStyle->appendStyle('.group-br::before { display: block; content: ""; }');
     }
 
     public function addResourceTemplateFormElements(Event $event): void
