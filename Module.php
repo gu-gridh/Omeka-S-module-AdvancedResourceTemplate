@@ -819,6 +819,7 @@ class Module extends AbstractModule
          * @var \Omeka\View\Helper\Hyperlink $hyperlink
          * @var \Laminas\View\Helper\EscapeHtml $escape
          * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
+         * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $advancedSearchConfig
          */
         static $display;
         static $whitelist;
@@ -829,12 +830,12 @@ class Module extends AbstractModule
         static $escapeAttr;
         static $siteSlug;
         static $text;
+        static $advancedSearchConfig;
+        static $isInternalSearch;
 
         if ($display === false) {
             return;
-        }
-
-        if ($display === null) {
+        } elseif ($display === null) {
             $services = $this->getServiceLocator();
             $status = $services->get('Omeka\Status');
             if (!$status->isSiteRequest()) {
@@ -846,6 +847,9 @@ class Module extends AbstractModule
                 'search_value',
                 'search_icon_prepend',
                 'search_icon_append',
+                'advanced_search_value',
+                'advanced_search_icon_prepend',
+                'advanced_search_icon_append',
                 'resource_icon_prepend',
                 'resource_icon_append',
                 'uri_icon_prepend',
@@ -868,6 +872,7 @@ class Module extends AbstractModule
             $translate = $helpers->get('translate');
             $hyperlink = $helpers->get('hyperlink');
             $escapeAttr = $helpers->get('escapeHtmlAttr');
+            $advancedSearchConfig = $helpers->has('searchConfigCurrent') ? $helpers->get('searchConfigCurrent') : null;
             $siteSlug = $status->getRouteParam('site-slug');
 
             $display = array_replace(array_fill_keys($allowed, false), array_fill_keys($display, true));
@@ -876,6 +881,30 @@ class Module extends AbstractModule
             $display['resource_icon'] = $display['resource_icon_prepend'] || $display['resource_icon_append'];
             $display['uri_icon'] = $display['uri_icon_prepend'] || $display['uri_icon_append'];
             $display['search'] = $display['search_value'] || $display['search_icon'];
+            $display['default'] = !$display['search_value'] && !$display['advanced_search_value'];
+
+            if ($advancedSearchConfig) {
+                $display['advanced_search_icon'] = $display['advanced_search_icon_prepend'] || $display['advanced_search_icon_append'];
+                $display['advanced_search'] = $display['advanced_search_value'] || $display['advanced_search_icon'];
+                $advancedSearchConfig = $display['advanced_search'] ? $advancedSearchConfig() : null;
+                $engine = $advancedSearchConfig ? $advancedSearchConfig->engine() : null;
+                $querier = $engine ? $engine->querier() : null;
+                $isInternalSearch = $querier instanceof \AdvancedSearch\Querier\InternalQuerier;
+                // Fallback to standard search for module Advanced search.
+                if ($display['advanced_search'] && (!$querier || $querier instanceof \AdvancedSearch\Querier\NoopQuerier)) {
+                    $display['search_value'] = $display['search_value'] || $display['advanced_search_value'];
+                    $display['search_icon_prepend'] = $display['search_icon_prepend'] || $display['advanced_search_icon_prepend'];
+                    $display['search_icon_append'] = $display['search_icon_append'] || $display['advanced_search_icon_append'];
+                    $display['search_icon'] = $display['search_icon_prepend'] || $display['search_icon_append'];
+                    $display['search'] = $display['search_value'] || $display['search_icon'];
+                    $display['default'] = !$display['search_value'];
+                    $display['advanced_search_value'] = false;
+                    $display['advanced_search_icon_prepend'] = false;
+                    $display['advanced_search_icon_append'] = false;
+                    $display['advanced_search_icon'] = false;
+                    $display['advanced_search'] = false;
+                }
+            }
 
             $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
             $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
@@ -902,16 +931,25 @@ class Module extends AbstractModule
         $html = $event->getParam('html');
         $resource = $value->resource();
         $controllerName = $resource->getControllerName();
+        if (!$controllerName) {
+            $display = false;
+            return;
+        }
+
         $vr = $value->valueResource();
         $uri = $value->uri();
+        $val = (string) $value->value();
 
         $result = [
             'search_icon_prepend' => '',
+            'advanced_search_icon_prepend' => '',
             'resource_icon_prepend' => '',
             'uri_icon_prepend' => '',
-            'default_value' => $display['search_value'] ? '' : $html,
+            'default_value' => $display['default'] ? $html : '',
             'search_value' => '',
+            'advanced_search_value' => '',
             'search_icon_append' => '',
+            'advanced_search_icon_append' => '',
             'resource_icon_append' => '',
             'uri_icon_append' => '',
         ];
@@ -928,7 +966,6 @@ class Module extends AbstractModule
                     ]]
                 );
             } else {
-                $val = (string) $value->value();
                 $searchUrl = $url->fromRoute(
                     'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
@@ -948,6 +985,74 @@ class Module extends AbstractModule
                 $htmlSearchIcon = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
                 $result['search_icon_prepend'] = $display['search_icon_prepend'] ? $htmlSearchIcon : '';
                 $result['search_icon_append'] = $display['search_icon_append'] ? $htmlSearchIcon : '';
+            }
+        }
+
+        if ($display['advanced_search']) {
+            $uriOrVal = $uri ?: $val;
+
+            // For solr, at the choice of the administrator, the index may use
+            // the real title for the value resource and no id.
+
+            // There is currently no way to convert a query to a request, so do
+            // it manually, because terms are managed in all queriers anyway.
+            /*
+            $query = new \AdvancedSearch\Query();
+            if ($vr) {
+                $query->addFilterQuery($property, $vr->id(), 'res');
+            } else {
+                $val = (string) $value->value();
+                $query->addFilter($property, $uriOrVal);
+            }
+            $request = $advancedSearchConfig->toRequest($query);
+            $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, $request);
+            */
+
+            if ($isInternalSearch) {
+                $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, [
+                    'filter' => [[
+                        'field' => $property,
+                        'type' => $vr ? 'res' : 'eq',
+                        'value' => $vr ? $vr->id() : $uriOrVal,
+                    ]],
+                ]);
+            } else {
+                // For resource, the id may or may not be indexed in Solr, so
+                // use title. And the property may not be indexed too, anyway.
+                if ($vr) {
+                    $urlQuery = ['filter' => [
+                        [
+                            'field' => $property,
+                            'type' => 'res',
+                            'value' => $vr->id(),
+                        ],
+                        [
+                            'join' => 'or',
+                            'field' => $property,
+                            'type' => 'eq',
+                            'value' => $vr->displayTitle(),
+                        ],
+                    ]];
+                } else {
+                    $urlQuery = [
+                        'filter' => [[
+                            'field' => $property,
+                            'type' => 'eq',
+                            'value' => $uriOrVal,
+                        ]],
+                    ];
+                }
+                $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, $urlQuery);
+            }
+            if ($display['advanced_search_value']) {
+                $result['advanced_search_value'] = $vr
+                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
+                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+            }
+            if ($display['advanced_search_icon']) {
+                $htmlSearchIcon = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['advanced_search_icon_prepend'] = $display['advanced_search_icon_prepend'] ? $htmlSearchIcon : '';
+                $result['advanced_search_icon_append'] = $display['advanced_search_icon_append'] ? $htmlSearchIcon : '';
             }
         }
 

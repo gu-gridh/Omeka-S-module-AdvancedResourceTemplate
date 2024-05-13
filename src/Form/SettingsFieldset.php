@@ -90,12 +90,15 @@ Warning: you may have to set each resource template as open/close to addition ac
                     'label' => 'Display of property values', // @translate
                     'value_options' => [
                         'search_value' => 'Value as search', // @ŧranslate
-                        'search_icon_prepend' => 'Prepend a search icon', // @translate
-                        'resource_icon_prepend' => 'Prepend an icon to the linked resource', // @translate
-                        'uri_icon_prepend' => 'Prepend an external link icon for uris', // @translate
-                        'search_icon_append' => 'Append a search icon', // @translate
-                        'resource_icon_append' => 'Append an icon to the linked resource', // @translate
-                        'uri_icon_append' => 'Append an external link icon for uris', // @translate
+                        'advanced_search_value' => 'Value as advanced search (module or fallback)', // @ŧranslate
+                        'search_icon_prepend' => 'Prepend an icon for search link', // @translate
+                        'advanced_search_icon_prepend' => 'Prepend an icon for advanced search link (module or fallback)', // @translate
+                        'resource_icon_prepend' => 'Prepend an icon for linked resource', // @translate
+                        'uri_icon_prepend' => 'Prepend an icon for external uri', // @translate
+                        'search_icon_append' => 'Append an icon for search link', // @translate
+                        'advanced_search_icon_append' => 'Append an icon for advanced search link (module or fallback)', // @translate
+                        'resource_icon_append' => 'Append an icon for linked resource', // @translate
+                        'uri_icon_append' => 'Append an icon for external uri', // @translate
                     ],
                 ],
                 'attributes' => [
