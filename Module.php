@@ -449,6 +449,12 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_elements',
+            [$this, 'handleSiteSettings']
+        );
+
+        $sharedEventManager->attach(
             // \Omeka\Form\ResourceTemplateForm::class,
             \AdvancedResourceTemplate\Form\ResourceTemplateForm::class,
             'form.add_elements',
@@ -814,6 +820,7 @@ class Module extends AbstractModule
         /**
          * @var \Omeka\Api\Representation\ValueRepresentation $value
          * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Settings\SiteSettings $siteSettings
          * @var \Omeka\Mvc\Status $status
          * @var \Laminas\Mvc\Controller\Plugin\Url $url
          * @var \Omeka\View\Helper\Hyperlink $hyperlink
@@ -847,9 +854,23 @@ class Module extends AbstractModule
             if (!$isSite && !$isAdmin) {
                 $display = false;
                 return;
-            } elseif ($isAdmin && !$settings->get('advancedresourcetemplate_properties_display_admin')) {
+            } elseif ($isSite) {
+                $siteSettings = $services->get('Omeka\Settings\Site');
+                $displaySite = $siteSettings->get('advancedresourcetemplate_properties_display_site');
+                if ($displaySite === 'site') {
+                    $sSettings = $siteSettings;
+                } elseif ($displaySite === 'main') {
+                    $sSettings = $settings;
+                } else {
+                    $display = false;
+                    return;
+                }
+            } elseif (!$settings->get('advancedresourcetemplate_properties_display_admin')) {
                 $display = false;
                 return;
+            } else {
+                // Admin.
+                $sSettings = $settings;
             }
 
             $allowed = [
@@ -865,15 +886,15 @@ class Module extends AbstractModule
                 'uri_icon_append',
             ];
 
-            $display = (array) $settings->get('advancedresourcetemplate_properties_display', []);
+            $display = (array) $sSettings->get('advancedresourcetemplate_properties_display', []);
             $display = array_values(array_intersect($allowed, $display));
             if (!$display) {
                 $display = false;
                 return;
             }
 
-            $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
-            $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
+            $whitelist = $sSettings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
+            $blacklist = $sSettings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
             $whitelistAll = in_array('all', $whitelist);
             if (!$whitelist) {
                 $display = false;
