@@ -811,6 +811,15 @@ class Module extends AbstractModule
      */
     public function handleRepresentationValueHtml(Event $event): void
     {
+        /**
+         * @var \Omeka\Api\Representation\ValueRepresentation $value
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Mvc\Status $status
+         * @var \Laminas\Mvc\Controller\Plugin\Url $url
+         * @var \Omeka\View\Helper\Hyperlink $hyperlink
+         * @var \Laminas\View\Helper\EscapeHtml $escape
+         * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
+         */
         static $display;
         static $whitelist;
         static $blacklist;
@@ -819,45 +828,65 @@ class Module extends AbstractModule
         static $hyperlink;
         static $escapeAttr;
         static $siteSlug;
-        static $searchText;
+        static $text;
 
-        /**
-         * @var \Omeka\Api\Representation\ValueRepresentation $value
-         * @var \Omeka\Settings\Settings $settings
-         * @var \Omeka\Mvc\Status $status
-         * @var \Laminas\Mvc\Controller\Plugin\Url $url
-         * @var \Omeka\View\Helper\Hyperlink $hyperlink
-         */
-        $services = $this->getServiceLocator();
-
-        $status = $services->get('Omeka\Status');
-        if (!$status->isSiteRequest()) {
+        if ($display === false) {
             return;
         }
 
         if ($display === null) {
-            $settings = $services->get('Omeka\Settings');
-            $display = (string) $settings->get('advancedresourcetemplate_properties_display', '');
-            if (!in_array($display, ['search_value', 'search_icon_prepend', 'search_icon_append'])) {
+            $services = $this->getServiceLocator();
+            $status = $services->get('Omeka\Status');
+            if (!$status->isSiteRequest()) {
                 $display = false;
                 return;
             }
+
+            $allowed = [
+                'search_value',
+                'search_icon_prepend',
+                'search_icon_append',
+                'resource_icon_prepend',
+                'resource_icon_append',
+                'uri_icon_prepend',
+                'uri_icon_append',
+            ];
+
+            $settings = $services->get('Omeka\Settings');
+            $display = (array) $settings->get('advancedresourcetemplate_properties_display', []);
+            $display = array_values(array_intersect($allowed, $display));
+            if (!$display) {
+                $display = false;
+                return;
+            }
+
+            $plugins = $services->get('ControllerPluginManager');
+            $helpers = $services->get('ViewHelperManager');
+
+            $url = $plugins->get('url');
+            $escape = $helpers->get('escapeHtml');
+            $translate = $helpers->get('translate');
+            $hyperlink = $helpers->get('hyperlink');
+            $escapeAttr = $helpers->get('escapeHtmlAttr');
+            $siteSlug = $status->getRouteParam('site-slug');
+
+            $display = array_replace(array_fill_keys($allowed, false), array_fill_keys($display, true));
+
+            $display['search_icon'] = $display['search_icon_prepend'] || $display['search_icon_append'];
+            $display['resource_icon'] = $display['resource_icon_prepend'] || $display['resource_icon_append'];
+            $display['uri_icon'] = $display['uri_icon_prepend'] || $display['uri_icon_append'];
+            $display['search'] = $display['search_value'] || $display['search_icon'];
+
             $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
             $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
             $whitelistAll = in_array('all', $whitelist);
-            $plugins = $services->get('ControllerPluginManager');
-            $helpers = $services->get('ViewHelperManager');
-            $url = $plugins->get('url');
-            $hyperlink = $helpers->get('hyperlink');
-            $escape = $helpers->get('escapeHtml');
-            $escapeAttr = $helpers->get('escapeHtmlAttr');
-            $siteSlug = $status->getRouteParam('site-slug');
-            $translate = $helpers->get('translate');
-            $searchText = $escape($translate('Search this value')); // @translate
-        }
 
-        if (!$display) {
-            return;
+            $text['search'] = $escape($translate('Search this value')); // @translate
+            $text['item'] = $escape($translate('Show this item')); // @translate
+            $text['media'] = $escape($translate('Show this media')); // @translate
+            $text['item-set'] = $escape($translate('Show this item set')); // @translate
+            $text['resource'] = $escape($translate('Show this resource')); // @translate
+            $text['uri'] = $escape($translate('Open this external uri in a new tab')); // @translate
         }
 
         $value = $event->getTarget();
@@ -870,46 +899,82 @@ class Module extends AbstractModule
             return;
         }
 
+        $html = $event->getParam('html');
         $resource = $value->resource();
         $controllerName = $resource->getControllerName();
-        $html = $event->getParam('html');
-
         $vr = $value->valueResource();
-        if ($vr) {
-            $searchUrl = $url->fromRoute(
-                'site/resource',
-                ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
-                ['query' => [
-                    'property[0][property]' => $property,
-                    'property[0][type]' => 'res',
-                    'property[0][text]' => $vr->id(),
-                ]]
-            );
-        } else {
-            $uri = $value->uri();
-            $val = (string) $value->value();
-            $searchUrl = $url->fromRoute(
-                'site/resource',
-                ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
-                ['query' => [
-                    'property[0][property]' => $property,
-                    'property[0][type]' => 'eq',
-                    'property[0][text]' => $uri ?: $val,
-                ]]
-            );
+        $uri = $value->uri();
+
+        $result = [
+            'search_icon_prepend' => '',
+            'resource_icon_prepend' => '',
+            'uri_icon_prepend' => '',
+            'default_value' => $display['search_value'] ? '' : $html,
+            'search_value' => '',
+            'search_icon_append' => '',
+            'resource_icon_append' => '',
+            'uri_icon_append' => '',
+        ];
+
+        if ($display['search']) {
+            if ($vr) {
+                $searchUrl = $url->fromRoute(
+                    'site/resource',
+                    ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                    ['query' => [
+                        'property[0][property]' => $property,
+                        'property[0][type]' => 'res',
+                        'property[0][text]' => $vr->id(),
+                    ]]
+                );
+            } else {
+                $val = (string) $value->value();
+                $searchUrl = $url->fromRoute(
+                    'site/resource',
+                    ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                    ['query' => [
+                        'property[0][property]' => $property,
+                        'property[0][type]' => 'eq',
+                        'property[0][text]' => $uri ?: $val,
+                    ]]
+                );
+            }
+            if ($display['search_value']) {
+                $result['search_value'] = $vr
+                    ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
+                    : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
+            }
+            if ($display['search_icon']) {
+                $htmlSearchIcon = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['search_icon_prepend'] = $display['search_icon_prepend'] ? $htmlSearchIcon : '';
+                $result['search_icon_append'] = $display['search_icon_append'] ? $htmlSearchIcon : '';
+            }
         }
 
-        if ($display === 'search_value') {
-            $html = $vr
-                ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
-                : $hyperlink->raw(strlen($val) ? strip_tags($val) : $uri, $searchUrl, ['class' => 'metadata-browse-direct-link']);
-        } elseif ($display === 'search_icon_prepend') {
-            $html = sprintf('<a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a> ', $escapeAttr($searchUrl), $searchText) . $html;
-        } elseif ($display === 'search_icon_append') {
-            $html .= sprintf(' <a href="%1$s" class="metadata-browse-direct-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $searchText);
+        if ($display['resource_icon'] && $vr) {
+            $vrType = $vr->getControllerName() ?? 'resource';
+            $vrName = $vr->resourceName() ?? 'resources';
+            $htmlResourceIcon = sprintf(
+                '<a href="%1$s" class="resource-link"><span title="%2$s" class="o-icon-%3$s resource-name"></span></a>',
+                $escapeAttr($vr->siteUrl($siteSlug)),
+                $text[$vrType],
+                $vrName
+            );
+            $result['resource_icon_prepend'] = $display['resource_icon_prepend'] ? $htmlResourceIcon : '';
+            $result['resource_icon_append'] = $display['resource_icon_append'] ? $htmlResourceIcon : '';
         }
 
-        $event->setParam('html', $html);
+        if ($display['uri_icon'] && $uri) {
+            $htmlUriIcon = sprintf(
+                '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener"><span title="%2$s" class="o-icon-external"></span></a>',
+                $escapeAttr($uri),
+                $text['uri']
+            );
+            $result['uri_icon_prepend'] = $display['uri_icon_prepend'] ? $htmlUriIcon : '';
+            $result['uri_icon_append'] = $display['uri_icon_append'] ? $htmlUriIcon : '';
+        }
+
+        $event->setParam('html', implode(' ', array_filter($result, 'strlen')));
     }
 
     public function preBatchUpdateItems(Event $event): void

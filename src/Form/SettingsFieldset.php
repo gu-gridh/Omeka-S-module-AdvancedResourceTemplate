@@ -84,15 +84,18 @@ Warning: you may have to set each resource template as open/close to addition ac
 
             ->add([
                 'name' => 'advancedresourcetemplate_properties_display',
-                'type' => CommonElement\OptionalRadio::class,
+                'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'element_group' => 'resources',
                     'label' => 'Display of property values', // @translate
                     'value_options' => [
-                        '' => 'Default', // @translate
                         'search_value' => 'Value as search', // @ŧranslate
                         'search_icon_prepend' => 'Prepend a search icon', // @translate
+                        'resource_icon_prepend' => 'Prepend an icon to the linked resource', // @translate
+                        'uri_icon_prepend' => 'Prepend an external link icon for uris', // @translate
                         'search_icon_append' => 'Append a search icon', // @translate
+                        'resource_icon_append' => 'Append an icon to the linked resource', // @translate
+                        'uri_icon_append' => 'Append an external link icon for uris', // @translate
                     ],
                 ],
                 'attributes' => [
