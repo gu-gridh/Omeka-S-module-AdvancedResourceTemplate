@@ -83,6 +83,17 @@ Warning: you may have to set each resource template as open/close to addition ac
             ])
 
             ->add([
+                'name' => 'advancedresourcetemplate_properties_display_admin',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Use property display settings in admin board', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_properties_display_admin',
+                ],
+            ])
+            ->add([
                 'name' => 'advancedresourcetemplate_properties_display',
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
@@ -105,7 +116,6 @@ Warning: you may have to set each resource template as open/close to addition ac
                     'id' => 'advancedresourcetemplate_properties_display',
                 ],
             ])
-
             ->add([
                 'name' => 'advancedresourcetemplate_properties_as_search_whitelist',
                 'type' => CommonElement\OptionalPropertySelect::class,
@@ -124,7 +134,6 @@ Warning: you may have to set each resource template as open/close to addition ac
                     'data-placeholder' => 'Select properties…', // @translate
                 ],
             ])
-
             ->add([
                 'name' => 'advancedresourcetemplate_properties_as_search_blacklist',
                 'type' => CommonElement\OptionalPropertySelect::class,

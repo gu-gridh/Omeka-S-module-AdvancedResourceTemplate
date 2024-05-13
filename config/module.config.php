@@ -157,6 +157,7 @@ return [
             'advancedresourcetemplate_skip_checks' => false,
             'advancedresourcetemplate_closed_property_list' => '0',
             'advancedresourcetemplate_skip_private_values' => false,
+            'advancedresourcetemplate_properties_display_admin' => false,
             'advancedresourcetemplate_properties_display' => [],
             'advancedresourcetemplate_properties_as_search_whitelist' => [],
             'advancedresourcetemplate_properties_as_search_blacklist' => [

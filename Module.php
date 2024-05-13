@@ -821,6 +821,8 @@ class Module extends AbstractModule
          * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
          * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $advancedSearchConfig
          */
+        static $isAdmin;
+        static $isSite;
         static $display;
         static $whitelist;
         static $blacklist;
@@ -838,7 +840,14 @@ class Module extends AbstractModule
         } elseif ($display === null) {
             $services = $this->getServiceLocator();
             $status = $services->get('Omeka\Status');
-            if (!$status->isSiteRequest()) {
+            $isSite = $status->isSiteRequest();
+            $isAdmin = $status->isAdminRequest();
+            $settings = $services->get('Omeka\Settings');
+            // Warning: some background jobs may need to get full html.
+            if (!$isSite && !$isAdmin) {
+                $display = false;
+                return;
+            } elseif ($isAdmin && !$settings->get('advancedresourcetemplate_properties_display_admin')) {
                 $display = false;
                 return;
             }
@@ -856,10 +865,17 @@ class Module extends AbstractModule
                 'uri_icon_append',
             ];
 
-            $settings = $services->get('Omeka\Settings');
             $display = (array) $settings->get('advancedresourcetemplate_properties_display', []);
             $display = array_values(array_intersect($allowed, $display));
             if (!$display) {
+                $display = false;
+                return;
+            }
+
+            $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
+            $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
+            $whitelistAll = in_array('all', $whitelist);
+            if (!$whitelist) {
                 $display = false;
                 return;
             }
@@ -873,7 +889,7 @@ class Module extends AbstractModule
             $hyperlink = $helpers->get('hyperlink');
             $escapeAttr = $helpers->get('escapeHtmlAttr');
             $advancedSearchConfig = $helpers->has('searchConfigCurrent') ? $helpers->get('searchConfigCurrent') : null;
-            $siteSlug = $status->getRouteParam('site-slug');
+            $siteSlug = $isSite ? $status->getRouteParam('site-slug') : null;
 
             $display = array_replace(array_fill_keys($allowed, false), array_fill_keys($display, true));
 
@@ -906,9 +922,19 @@ class Module extends AbstractModule
                 }
             }
 
-            $whitelist = $settings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
-            $blacklist = $settings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
-            $whitelistAll = in_array('all', $whitelist);
+            // In admin, the links for linked resource and uri are appended by
+            // default, so don't append them twice.
+            // Furthermore, there may be an issue with the icon used in site.
+            if ($isAdmin && $display['default']) {
+                if ($display['resource_icon_append']) {
+                    $display['resource_icon_append'] = false;
+                    $display['resource_icon'] = $display['resource_icon_prepend'];
+                }
+                if ($display['uri_icon_append']) {
+                    $display['uri_icon_append'] = false;
+                    $display['uri_icon'] = $display['uri_icon_prepend'];
+                }
+            }
 
             $text['search'] = $escape($translate('Search this value')); // @translate
             $text['item'] = $escape($translate('Show this item')); // @translate
@@ -957,7 +983,7 @@ class Module extends AbstractModule
         if ($display['search']) {
             if ($vr) {
                 $searchUrl = $url->fromRoute(
-                    'site/resource',
+                    $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
                         'property[0][property]' => $property,
@@ -967,7 +993,7 @@ class Module extends AbstractModule
                 );
             } else {
                 $searchUrl = $url->fromRoute(
-                    'site/resource',
+                    $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
                         'property[0][property]' => $property,
@@ -1004,18 +1030,17 @@ class Module extends AbstractModule
                 $val = (string) $value->value();
                 $query->addFilter($property, $uriOrVal);
             }
-            $request = $advancedSearchConfig->toRequest($query);
-            $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, $request);
+            $urlQuery = $advancedSearchConfig->toRequest($query);
             */
 
             if ($isInternalSearch) {
-                $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, [
+                $urlQuery = [
                     'filter' => [[
                         'field' => $property,
                         'type' => $vr ? 'res' : 'eq',
                         'value' => $vr ? $vr->id() : $uriOrVal,
                     ]],
-                ]);
+                ];
             } else {
                 // For resource, the id may or may not be indexed in Solr, so
                 // use title. And the property may not be indexed too, anyway.
@@ -1042,8 +1067,10 @@ class Module extends AbstractModule
                         ]],
                     ];
                 }
-                $searchUrl = $advancedSearchConfig->siteUrl($siteSlug, false, $urlQuery);
             }
+            $searchUrl = $isAdmin
+                ? $advancedSearchConfig->adminSearchUrl(false, $urlQuery)
+                : $advancedSearchConfig->siteUrl($siteSlug, false, $urlQuery);
             if ($display['advanced_search_value']) {
                 $result['advanced_search_value'] = $vr
                     ? $hyperlink->raw(strip_tags($html), $searchUrl, ['class' => 'metadata-browse-direct-link'])
@@ -1059,19 +1086,18 @@ class Module extends AbstractModule
         if ($display['resource_icon'] && $vr) {
             $vrType = $vr->getControllerName() ?? 'resource';
             $vrName = $vr->resourceName() ?? 'resources';
-            $htmlResourceIcon = sprintf(
-                '<a href="%1$s" class="resource-link"><span title="%2$s" class="o-icon-%3$s resource-name"></span></a>',
-                $escapeAttr($vr->siteUrl($siteSlug)),
-                $text[$vrType],
-                $vrName
-            );
+            $vrUrl = $isAdmin ? $vr->adminUrl() : $vr->siteUrl($siteSlug);
+            $htmlResourceIcon = $isAdmin
+                ? sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="resource-name"></a>', $escapeAttr($vrUrl), $text[$vrType])
+                : sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="o-icon-%3$s resource-name"></span></a>', $escapeAttr($vrUrl), $text[$vrType], $vrName);
             $result['resource_icon_prepend'] = $display['resource_icon_prepend'] ? $htmlResourceIcon : '';
             $result['resource_icon_append'] = $display['resource_icon_append'] ? $htmlResourceIcon : '';
         }
 
         if ($display['uri_icon'] && $uri) {
-            $htmlUriIcon = sprintf(
-                '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener"><span title="%2$s" class="o-icon-external"></span></a>',
+            $htmlUriIcon = sprintf($isAdmin
+                ? '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener" title="%2$s"></a>'
+                : '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener"><span title="%2$s" class="o-icon-external"></span></a>',
                 $escapeAttr($uri),
                 $text['uri']
             );
