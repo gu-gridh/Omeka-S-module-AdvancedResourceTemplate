@@ -576,3 +576,20 @@ if (version_compare((string) $oldVersion, '3.4.31', '<')) {
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
 }
+
+if (version_compare((string) $oldVersion, '3.4.32', '<')) {
+    $blockMetadataFields = $localConfig['advancedresourcetemplate']['site_settings']['advancedresourcetemplate_block_metadata_fields'] ?? [];
+    $blockMetadataComponents = $localConfig['advancedresourcetemplate']['site_settings']['advancedresourcetemplate_block_metadata_components'] ?? [];
+    $siteSettings = $services->get('Omeka\Settings\Site');
+    $siteIds = $api->search('sites', [], ['returnScalar' => 'id'])->getContent();
+    foreach ($siteIds as $siteId) {
+        $siteSettings->setTargetId($siteId);
+        $siteSettings->set('advancedresourcetemplate_block_metadata_fields', $blockMetadataFields);
+        $siteSettings->set('advancedresourcetemplate_block_metadata_components', $blockMetadataComponents);
+    }
+
+    $message = new PsrMessage(
+        'A new resource block was added to display selected metadata, for example for a short record.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
