@@ -82,6 +82,11 @@ return [
             Controller\Admin\ResourceTemplateControllerDelegator::class => 'omeka/admin/resource-template',
         ],
     ],
+    'resource_page_block_layouts' => [
+        'invokables' => [
+            'valuesSelectedProperties' => Site\ResourcePageBlockLayout\ValuesSelectedProperties::class,
+        ],
+    ],
     'form_elements' => [
         'invokables' => [
             Form\ResourceTemplatePropertyDataFieldset::class => Form\ResourceTemplatePropertyDataFieldset::class,
@@ -209,6 +214,7 @@ return [
         'site_settings' => [
             'advancedresourcetemplate_properties_display_site' => '',
             'advancedresourcetemplate_properties_display' => [],
+            'advancedresourcetemplate_selected_properties' => [],
             'advancedresourcetemplate_properties_as_search_whitelist' => [],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
         ],

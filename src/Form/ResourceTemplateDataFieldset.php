@@ -228,6 +228,7 @@ class ResourceTemplateDataFieldset extends Fieldset
                 'options' => [
                     'label' => 'Groups', // @translate
                     'info' => 'Allow to get properties by group for display. This is a list of group names and properties for each of them. May need a specific theme template.', // @translate
+                    'default_group_name' => 'Group %s',
                 ],
                 'attributes' => [
                     'id' => 'groups',

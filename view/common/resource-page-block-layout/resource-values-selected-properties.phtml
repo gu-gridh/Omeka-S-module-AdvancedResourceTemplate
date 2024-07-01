@@ -1,0 +1,103 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ * @var array $selectedPropertiesByGroup
+ */
+
+// Adaptation of omeka view/common/resource-values with a main class and some improvements.
+// There are no value annotation or trigger by default.
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+$siteSetting = $plugins->get('siteSetting');
+$escapeAttr = $plugins->get('escapeHtmlAttr');
+
+$labelInfo = $siteSetting('property_label_information', 'none');
+$showLocale = (bool) $siteSetting('show_locale_label', true);
+$filterLocale = (bool) $siteSetting('filter_locale_values');
+$lang = $this->lang();
+$langValue = $filterLocale ? [$lang, ''] : null;
+$langValueAsHtml = $langValue ? ['lang' => $langValue] : null;
+
+$filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation $value) use ($lang): bool {
+    $valueLang = $value->lang();
+    return !$valueLang || strcasecmp($valueLang, $lang) === 0;
+};
+?>
+
+<dl class="block-resource block-values-selected-properties">
+    <?php
+    $values = $resource->values();
+    foreach ($selectedPropertiesByGroup as $group => $properties):
+        // Get values ordered by the option.
+        $selectedValues = array_filter(array_replace(array_intersect_key($properties, $values), array_intersect_key($values, $properties)));
+        if (!count($selectedValues)) continue;
+        [$groupClass, $groupLabel] = strpos($group, '=') === false ? [$group, ''] : array_map('trim', explode('=', $group, 2));
+    ?>
+    <div class="values-group <?= $escapeAttr($groupClass) ?>">
+        <?php if ($groupLabel !== ''): ?>
+        <h4><?= $escape($groupLabel) ?></h4>
+        <?php endif; ?>
+        <?php
+        foreach ($selectedValues as $term => $propertyData):
+            /**
+             * @var \Omeka\Api\Representation\ValueRepresentation[] $propertyValues
+             * @var \Omeka\Api\Representation\PropertyRepresentation $property
+             */
+            $propertyValues = $propertyData['values'];
+            if ($filterLocale) {
+                $propertyValues = array_filter($propertyValues, $filterLocaleCallback);
+            }
+            if (!$propertyValues) {
+                continue;
+            }
+            $property = $propertyData['property'];
+            $propertyLabel = $properties[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
+            if ('term' === $labelInfo) {
+                $propertyTerm = $property->term();
+            } elseif ('vocab' === $labelInfo) {
+                $propertyTerm = $property->vocabulary()->label();
+            } else {
+                $propertyTerm = null;
+            }
+            ?>
+        <div class="property">
+            <dt>
+                <?= $escape($propertyLabel) ?>
+                <?php if ($propertyTerm): ?>
+                <span class="field-term">(<?= $escape($propertyTerm) ?>)</span>
+                <?php endif; ?>
+            </dt>
+            <?php foreach ($propertyValues as $value):
+                $class = ['value'];
+                $vr = $value->valueResource();
+                $uri = $value->uri();
+                if ($vr) {
+                    $class[] = 'resource';
+                    $class[] = $escape($vr->resourceName());
+                } elseif ($uri) {
+                    $class[] = 'uri';
+                }
+                $valueIsPublic = $value->isPublic();
+                if (!$valueIsPublic) {
+                    $class[] = 'private';
+                }
+                $valueLang = $value->lang();
+            ?>
+            <dd class="<?= implode(' ', $class) ?>"<?= $valueLang ? ' lang="' . $escapeAttr($valueLang) . '"' : '' ?>>
+                <?php if ($showLocale && $valueLang): ?>
+                <span class="language"><?= $valueLang ?></span>
+                <?php endif; ?>
+                <span class="value-content"><?= $value->asHtml($langValueAsHtml) ?></span>
+                <?php if (!$valueIsPublic): ?>
+                <span class="o-icon-private" role="img" title="<?= $escapeAttr($translate('Private')) ?>" aria-label="<?= $escapeAttr($translate('Private')) ?>"></span>
+                <?php endif; ?>
+            </dd>
+            <?php endforeach; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endforeach; ?>
+</dl>

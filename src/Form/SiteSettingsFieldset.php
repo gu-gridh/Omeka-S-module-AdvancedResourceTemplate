@@ -3,7 +3,6 @@
 namespace AdvancedResourceTemplate\Form;
 
 use Common\Form\Element as CommonElement;
-use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 
 class SiteSettingsFieldset extends Fieldset
@@ -39,6 +38,45 @@ class SiteSettingsFieldset extends Fieldset
                 ],
             ])
             ->addElementsPropertyDisplay()
+
+            ->add([
+                'name' => 'advancedresourcetemplate_selected_properties',
+                'type' => CommonElement\GroupTextarea::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Properties for resource block Selected values', // @translate
+                    'info' => 'This option may be used to display a short record. Each line is the term and the optional alternatif label. A specific label can be set on each line, separated with a "=". A division to group a list of properties may be added with "# div-class" and an optional label separated with a "=".', // @translate
+                    'as_key_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_selected_properties',
+                    'rows' => 5,
+                    'placeholder' => '# values-title
+dcterms:title
+
+# values-type
+dcterms:type
+
+# values-creator
+dcterms:creator
+
+# values-date
+dcterms:date
+dcterms:created
+dcterms:issued
+
+# values-rights
+dcterms:rights
+dcterms:license
+
+# values-subject = Keywords
+dcterms:subject
+dcterms:coverage
+dcterms:spatial
+dcterms:temporal
+',
+                ],
+            ])
         ;
     }
 }
