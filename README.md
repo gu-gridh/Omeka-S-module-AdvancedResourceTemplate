@@ -217,6 +217,36 @@ resources. If you do not see images, go to the [original repository]:
 
   ![Automatic attachment of items to item sets](data/images/auto-attach_items_to_item_sets.png)
 
+- Resource block with selected properties
+
+  This block allows to manage a short record in the page resource/show, for
+  example when a theme displays a tab with "Record" and "Advanced metadata".
+
+  The option is set in site settings. Each line is the term and the optional
+  alternatif label. A specific label can be set on each line, separated with a
+  "=". A division to group a list of properties may be added with "# div-class"
+  and an optional label separated with a "=". Example:
+
+```
+  # values-type
+  dcterms:type
+
+  # values-creator
+  dcterms:creator
+
+  # values-date
+  dcterms:date
+  dcterms:created
+  dcterms:issued
+
+  # values-subject
+  dcterms:subject
+
+  # values-rights = Terms of use
+  dcterms:rights
+  dcterms:license
+```
+
 
 Installation
 ------------
