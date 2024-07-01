@@ -217,6 +217,7 @@ return [
             'advancedresourcetemplate_properties_as_search_whitelist' => [],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
             'advancedresourcetemplate_block_metadata_fields' => [],
+            'advancedresourcetemplate_block_metadata_show_label' => false,
         ],
     ],
 ];

@@ -3,6 +3,7 @@
 namespace AdvancedResourceTemplate\Form;
 
 use Common\Form\Element as CommonElement;
+use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 
 class SiteSettingsFieldset extends Fieldset
@@ -39,6 +40,8 @@ class SiteSettingsFieldset extends Fieldset
             ])
             ->addElementsPropertyDisplay()
 
+            // Block Metadata.
+
             ->add([
                 'name' => 'advancedresourcetemplate_block_metadata_fields',
                 'type' => CommonElement\GroupTextarea::class,
@@ -51,10 +54,7 @@ class SiteSettingsFieldset extends Fieldset
                 'attributes' => [
                     'id' => 'advancedresourcetemplate_block_metadata_fields',
                     'rows' => 5,
-                    'placeholder' => '# values-title
-dcterms:title
-
-# values-type
+                    'placeholder' => '# values-type
 dcterms:type
 
 # values-creator
@@ -65,16 +65,24 @@ dcterms:date
 dcterms:created
 dcterms:issued
 
-# values-rights
+# values-subject
+dcterms:subject
+
+# values-rights = Terms of use
 dcterms:rights
 dcterms:license
-
-# values-subject = Keywords
-dcterms:subject
-dcterms:coverage
-dcterms:spatial
-dcterms:temporal
 ',
+                ],
+            ])
+            ->add([
+                'name' => 'advancedresourcetemplate_block_metadata_show_label',
+                'type' => CommonElement\OptionalCheckbox::class,
+                'options' => [
+                    'element_group' => 'resources',
+                    'label' => 'Show metadata label in block Metadata', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_block_metadata_show_label',
                 ],
             ])
         ;

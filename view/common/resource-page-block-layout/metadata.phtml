@@ -14,6 +14,8 @@ $translate = $plugins->get('translate');
 $siteSetting = $plugins->get('siteSetting');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
+$showLabel = (bool) $siteSetting('advancedresourcetemplate_block_metadata_show_label');
+
 $labelInfo = $siteSetting('property_label_information', 'none');
 $showLocale = (bool) $siteSetting('show_locale_label', true);
 $filterLocale = (bool) $siteSetting('filter_locale_values');
@@ -25,9 +27,21 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
     $valueLang = $value->lang();
     return !$valueLang || strcasecmp($valueLang, $lang) === 0;
 };
+
+// According to html 5 specifications (@see https://www.w3.org/wiki/HTML/Elements/dl),
+// <dl> requires at least one <dt>, so if labels are skipped (setting by default),
+// <ul> should be used, unlike the main template common/resource-values.
+// Warning: unlike dt/dd, the <li> are nested inside the <ul>.
+if ($showLabel) {
+    $tagMain = 'dl';
+    $tagVal = 'dd';
+} else {
+    $tagMain = 'div';
+    $tagVal = 'li';
+}
 ?>
 
-<dl class="block-resource block-metadata">
+<<?= $tagMain ?> class="block-resource block-metadata">
     <?php
     $values = $resource->values();
     foreach ($metadataByGroup as $group => $fields):
@@ -54,22 +68,31 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
                 continue;
             }
             $property = $propertyData['property'];
-            $propertyLabel = $fields[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
-            if ('term' === $labelInfo) {
-                $propertyTerm = $property->term();
-            } elseif ('vocab' === $labelInfo) {
-                $propertyTerm = $property->vocabulary()->label();
+            if ($showLabel) {
+                $propertyLabel = $fields[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
+                if ('term' === $labelInfo) {
+                    $propertyTerm = $property->term();
+                } elseif ('vocab' === $labelInfo) {
+                    $propertyTerm = $property->vocabulary()->label();
+                } else {
+                    $propertyTerm = null;
+                }
             } else {
+                $propertyLabel = null;
                 $propertyTerm = null;
             }
             ?>
         <div class="property">
+            <?php if ($showLabel): ?>
             <dt>
                 <?= $escape($propertyLabel) ?>
                 <?php if ($propertyTerm): ?>
                 <span class="field-term">(<?= $escape($propertyTerm) ?>)</span>
                 <?php endif; ?>
             </dt>
+            <?php else: ?>
+            <ul>
+            <?php endif; ?>
             <?php foreach ($propertyValues as $value):
                 $class = ['value'];
                 $vr = $value->valueResource();
@@ -86,7 +109,7 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
                 }
                 $valueLang = $value->lang();
             ?>
-            <dd class="<?= implode(' ', $class) ?>"<?= $valueLang ? ' lang="' . $escapeAttr($valueLang) . '"' : '' ?>>
+            <<?= $tagVal ?> class="<?= implode(' ', $class) ?>"<?= $valueLang ? ' lang="' . $escapeAttr($valueLang) . '"' : '' ?>>
                 <?php if ($showLocale && $valueLang): ?>
                 <span class="language"><?= $valueLang ?></span>
                 <?php endif; ?>
@@ -94,10 +117,13 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
                 <?php if (!$valueIsPublic): ?>
                 <span class="o-icon-private" role="img" title="<?= $escapeAttr($translate('Private')) ?>" aria-label="<?= $escapeAttr($translate('Private')) ?>"></span>
                 <?php endif; ?>
-            </dd>
+            </<?= $tagVal ?>>
             <?php endforeach; ?>
+            <?php if (!$showLabel): ?>
+            </ul>
+            <?php endif; ?>
         </div>
         <?php endforeach; ?>
     </div>
     <?php endforeach; ?>
-</dl>
+</<?= $tagMain ?>>
