@@ -31,6 +31,10 @@ class ValuesSelectedProperties implements ResourcePageBlockLayoutInterface
         $siteSetting = $plugins->get('siteSetting');
         $selectedProperties = $siteSetting('advancedresourcetemplate_selected_properties');
         if (!$selectedProperties) {
+            $view->logger()->warn(
+                'The block Selected properties is appended for {resource_type}, but no properties are configured.', // @translate
+                ['resource_type' => $resource->resourceName()]
+            );
             return '';
         }
 
