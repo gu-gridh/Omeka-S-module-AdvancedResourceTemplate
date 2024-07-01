@@ -180,32 +180,12 @@ class Module extends AbstractModule
             [$this, 'validateEntityHydratePost']
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Adapter\ItemAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\MediaAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.hydrate.post',
             [$this, 'validateEntityHydratePost']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\ItemSetAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Annotate\Api\Adapter\AnnotationAdapter::class,
             'api.hydrate.post',
             [$this, 'validateEntityHydratePost']
         );
