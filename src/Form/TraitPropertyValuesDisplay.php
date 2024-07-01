@@ -162,7 +162,7 @@ trait TraitPropertyValuesDisplay
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'element_group' => 'resources',
-                    'label' => 'Properties to display as search link (blacklist)', // @translate
+                    'label' => 'Properties not to display as search link (blacklist)', // @translate
                     'term_as_value' => true,
                 ],
                 'attributes' => [
