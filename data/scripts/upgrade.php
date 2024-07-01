@@ -317,6 +317,20 @@ SQL;
     if ($thesaurusTemplateConcept) {
         $thesaurusTemplates[] = $thesaurusTemplateConcept->id();
     }
+    $thesaurusTemplateSchemeId = $settings->get('thesaurus_skos_scheme_template_id');
+    if ($thesaurusTemplateSchemeId) {
+        $thesaurusTemplateScheme = $api->searchOne('resource_templates', ['id' => $thesaurusTemplateSchemeId])->getContent();
+        if ($thesaurusTemplateScheme) {
+            $thesaurusTemplates[] = $thesaurusTemplateScheme->id();
+        }
+    }
+    $thesaurusTemplateConceptId = $settings->get('thesaurus_skos_concept_template_id');
+    if ($thesaurusTemplateConceptId) {
+        $thesaurusTemplateConcept = $api->searchOne('resource_templates', ['id' => $thesaurusTemplateConceptId])->getContent();
+        if ($thesaurusTemplateConcept) {
+            $thesaurusTemplates[] = $thesaurusTemplateConcept->id();
+        }
+    }
     $thesaurusTemplates = array_unique(array_map('intval', $thesaurusTemplates));
 
     foreach ($templateDatas as $id => $templateRow) {
