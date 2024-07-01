@@ -980,6 +980,7 @@ class Module extends AbstractModule
             $display['icon_uri'] = $display['prepend_icon_uri'] || $display['append_icon_uri'];
             $display['search'] = $display['value_search'] || $display['icon_search'];
             $display['default'] = !$display['value_search'] && !$display['value_advanced_search'];
+            $display['advanced_search'] = false;
 
             if ($advancedSearchConfig) {
                 $display['icon_advanced_search'] = $display['prepend_icon_advanced_search'] || $display['append_icon_advanced_search'];
