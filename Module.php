@@ -881,7 +881,7 @@ class Module extends AbstractModule
          * @var \Omeka\Settings\Settings $settings
          * @var \Omeka\Settings\SiteSettings $siteSettings
          * @var \Omeka\Mvc\Status $status
-         * @var \Laminas\Mvc\Controller\Plugin\Url $url
+         * @var \Omeka\View\Helper\Url $url
          * @var \Omeka\View\Helper\Hyperlink $hyperlink
          * @var \Laminas\View\Helper\EscapeHtml $escape
          * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
@@ -962,10 +962,11 @@ class Module extends AbstractModule
                 return;
             }
 
-            $plugins = $services->get('ControllerPluginManager');
             $helpers = $services->get('ViewHelperManager');
 
-            $url = $plugins->get('url');
+            // Don't use plugin url because it requires a valid controller in
+            // background job.
+            $url = $helpers->get('url');
             $escape = $helpers->get('escapeHtml');
             $translate = $helpers->get('translate');
             $hyperlink = $helpers->get('hyperlink');
@@ -1078,7 +1079,7 @@ class Module extends AbstractModule
 
         if ($display['search']) {
             if ($vr) {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
@@ -1088,7 +1089,7 @@ class Module extends AbstractModule
                     ]]
                 );
             } else {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
@@ -1216,8 +1217,7 @@ class Module extends AbstractModule
          * @var \Omeka\Settings\Settings $settings
          * @var \Omeka\Settings\SiteSettings $siteSettings
          * @var \Omeka\Mvc\Status $status
-         * @var \Laminas\Mvc\Controller\Plugin\Url $url
-         * @var \Omeka\View\Helper\Hyperlink $hyperlink
+         * @var \Omeka\View\Helper\Url $url
          * @var \Laminas\View\Helper\EscapeHtml $escape
          * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
          * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $advancedSearchConfig
@@ -1229,7 +1229,6 @@ class Module extends AbstractModule
         static $blacklist;
         static $whitelistAll;
         static $url;
-        static $hyperlink;
         static $escapeAttr;
         static $siteSlug;
         static $text;
@@ -1289,13 +1288,13 @@ class Module extends AbstractModule
                 return;
             }
 
-            $plugins = $services->get('ControllerPluginManager');
             $helpers = $services->get('ViewHelperManager');
 
-            $url = $plugins->get('url');
+            // Don't use plugin url because it requires a valid controller in
+            // background job.
+            $url = $helpers->get('url');
             $escape = $helpers->get('escapeHtml');
             $translate = $helpers->get('translate');
-            $hyperlink = $helpers->get('hyperlink');
             $escapeAttr = $helpers->get('escapeHtmlAttr');
             $advancedSearchConfig = $helpers->has('searchConfigCurrent') ? $helpers->get('searchConfigCurrent') : null;
             $siteSlug = $isSite ? $status->getRouteParam('site-slug') : null;
@@ -1379,7 +1378,7 @@ class Module extends AbstractModule
 
         if ($display['search']) {
             if ($vr) {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
@@ -1389,7 +1388,7 @@ class Module extends AbstractModule
                     ]]
                 );
             } else {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
