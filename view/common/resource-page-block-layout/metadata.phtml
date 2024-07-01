@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var array $selectedPropertiesByGroup
+ * @var array $metadataByGroup
  */
 
 // Adaptation of omeka view/common/resource-values with a main class and some improvements.
@@ -27,12 +27,12 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
 };
 ?>
 
-<dl class="block-resource block-values-selected-properties">
+<dl class="block-resource block-metadata">
     <?php
     $values = $resource->values();
-    foreach ($selectedPropertiesByGroup as $group => $properties):
+    foreach ($metadataByGroup as $group => $fields):
         // Get values ordered by the option.
-        $selectedValues = array_filter(array_replace(array_intersect_key($properties, $values), array_intersect_key($values, $properties)));
+        $selectedValues = array_filter(array_replace(array_intersect_key($fields, $values), array_intersect_key($values, $fields)));
         if (!count($selectedValues)) continue;
         [$groupClass, $groupLabel] = strpos($group, '=') === false ? [$group, ''] : array_map('trim', explode('=', $group, 2));
     ?>
@@ -54,7 +54,7 @@ $filterLocaleCallback = function (\Omeka\Api\Representation\ValueRepresentation 
                 continue;
             }
             $property = $propertyData['property'];
-            $propertyLabel = $properties[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
+            $propertyLabel = $fields[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
             if ('term' === $labelInfo) {
                 $propertyTerm = $property->term();
             } elseif ('vocab' === $labelInfo) {

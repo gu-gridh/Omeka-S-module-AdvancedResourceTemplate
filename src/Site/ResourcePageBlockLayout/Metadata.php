@@ -7,13 +7,13 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface;
 
 /**
- * Display values of selected properties of the resource.
+ * Display selected metadata of the resource.
  */
-class ValuesSelectedProperties implements ResourcePageBlockLayoutInterface
+class Metadata implements ResourcePageBlockLayoutInterface
 {
     public function getLabel() : string
     {
-        return 'Values of selected properties'; // @translate
+        return 'Metadata'; // @translate
     }
 
     public function getCompatibleResourceNames() : array
@@ -29,18 +29,19 @@ class ValuesSelectedProperties implements ResourcePageBlockLayoutInterface
     {
         $plugins = $view->getHelperPluginManager();
         $siteSetting = $plugins->get('siteSetting');
-        $selectedProperties = $siteSetting('advancedresourcetemplate_selected_properties');
-        if (!$selectedProperties) {
+
+        $metadataByGroup = $siteSetting('advancedresourcetemplate_block_metadata_fields');
+        if (!$metadataByGroup) {
             $view->logger()->warn(
-                'The block Selected properties is appended for {resource_type}, but no properties are configured.', // @translate
+                'The block Metadata is appended for {resource_type}, but no metadata are configured.', // @translate
                 ['resource_type' => $resource->resourceName()]
             );
             return '';
         }
 
-        return $view->partial('common/resource-page-block-layout/resource-values-selected-properties', [
+        return $view->partial('common/resource-page-block-layout/metadata', [
             'resource' => $resource,
-            'selectedPropertiesByGroup' => $selectedProperties,
+            'metadataByGroup' => $metadataByGroup,
         ]);
     }
 }

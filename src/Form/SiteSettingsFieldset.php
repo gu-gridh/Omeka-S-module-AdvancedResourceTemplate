@@ -40,16 +40,16 @@ class SiteSettingsFieldset extends Fieldset
             ->addElementsPropertyDisplay()
 
             ->add([
-                'name' => 'advancedresourcetemplate_selected_properties',
+                'name' => 'advancedresourcetemplate_block_metadata_fields',
                 'type' => CommonElement\GroupTextarea::class,
                 'options' => [
                     'element_group' => 'resources',
-                    'label' => 'Properties for resource block Selected values', // @translate
+                    'label' => 'Metadata for resource block Metadata', // @translate
                     'info' => 'This option may be used to display a short record. Each line is the term and the optional alternatif label. A specific label can be set on each line, separated with a "=". A division to group a list of properties may be added with "# div-class" and an optional label separated with a "=".', // @translate
                     'as_key_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'advancedresourcetemplate_selected_properties',
+                    'id' => 'advancedresourcetemplate_block_metadata_fields',
                     'rows' => 5,
                     'placeholder' => '# values-title
 dcterms:title

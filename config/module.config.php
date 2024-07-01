@@ -84,7 +84,7 @@ return [
     ],
     'resource_page_block_layouts' => [
         'invokables' => [
-            'valuesSelectedProperties' => Site\ResourcePageBlockLayout\ValuesSelectedProperties::class,
+            'metadata' => Site\ResourcePageBlockLayout\Metadata::class,
         ],
     ],
     'form_elements' => [
@@ -214,9 +214,9 @@ return [
         'site_settings' => [
             'advancedresourcetemplate_properties_display_site' => '',
             'advancedresourcetemplate_properties_display' => [],
-            'advancedresourcetemplate_selected_properties' => [],
             'advancedresourcetemplate_properties_as_search_whitelist' => [],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
+            'advancedresourcetemplate_block_metadata_fields' => [],
         ],
     ],
 ];
