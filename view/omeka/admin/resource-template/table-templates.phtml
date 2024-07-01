@@ -60,6 +60,14 @@ foreach ($resourceTemplates as $resourceTemplate) {
         </tr>
     </thead>
     <tbody>
+        <tr>
+            <td><?= $escape($translate('Class')) ?></td>
+            <?php foreach ($resourceTemplates as $resourceTemplate):
+                $class = $resourceTemplate->resourceClass();
+                ?>
+            <td><?= $class ? sprintf('<span class="template-class-term">%s</span> / <span class="template-class-label">%s</span>', $class->term(), $translate($class->label())) : '' ?></td>
+            <?php endforeach; ?>
+        </tr>
         <?php foreach ($rtpLabels as $termK => $labels):
             $term = strtok($termK, '/');
         ?>

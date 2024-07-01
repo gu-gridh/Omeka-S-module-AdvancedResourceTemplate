@@ -28,7 +28,8 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
             $qQuery['per_page'],
             $qQuery['sort_by'],
             $qQuery['sort_order'],
-            $qQuery['sort_by_default']
+            $qQuery['sort_by_default'],
+            $qQuery['sort_order_default']
         );
 
         $form = new \Laminas\Form\Form();
@@ -65,8 +66,16 @@ class ResourceTemplateControllerDelegator extends \Omeka\Controller\Admin\Resour
 
         $form->setData($query);
 
-        // Don't output any result by default or when the form is invalid.
-        if ($qQuery && !$form->isValid()) {
+        // Output the four most used templates by default.
+        // Don't output any result when the form is invalid.
+        if (!$qQuery) {
+            // Api "returnScalar" does not manage search by item count.
+            $query = [
+                'sort_by' => 'item_count',
+                'sort_order' => 'desc',
+                'limit' => 4,
+            ];
+        } elseif ($qQuery && !$form->isValid()) {
             $query['id'] = [-1];
         } else {
             $ids = $query['id'] ?? [];
