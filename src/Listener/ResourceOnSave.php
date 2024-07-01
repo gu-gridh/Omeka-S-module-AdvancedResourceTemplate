@@ -30,13 +30,11 @@ class ResourceOnSave
      */
     protected $services;
 
-    /**
-     * @param \Laminas\ServiceManager\ServiceLocatorInterface $services
-     */
     public function __construct(ServiceLocatorInterface $services)
     {
         $this->services = $services;
-        $this->easyMeta = $services->get('EasyMeta');
+        $this->api = $this->services->get('Omeka\ApiManager');
+        $this->easyMeta = $this->services->get('EasyMeta');
     }
 
     public function handleTemplateSettingsOnSave(Event $event): void
@@ -53,7 +51,6 @@ class ResourceOnSave
             return;
         }
 
-        $this->api = $this->getServiceLocator()->get('Omeka\ApiManager');
         try {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
             $template = $this->api->read('resource_templates', ['id' => $templateId])->getContent();
@@ -167,8 +164,7 @@ class ResourceOnSave
         // Update open custom vocabs in any cases, when checks are skipped.
         $this->updateCustomVocabOpen($event);
 
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
+        $settings = $this->services->get('Omeka\Settings');
         $skipChecks = (bool) $settings->get('advancedresourcetemplate_skip_checks');
         if ($skipChecks) {
             return;
@@ -187,7 +183,7 @@ class ResourceOnSave
         $errorStore = $event->getParam('errorStore');
 
         $directMessage = $this->displayDirectMessage();
-        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
+        $messenger = $directMessage ? $this->services->get('ControllerPluginManager')->get('messenger') : null;
 
         // Template level.
 
@@ -244,17 +240,17 @@ class ResourceOnSave
         ErrorStore $errorStore,
         bool $directMessage
     ): void {
-        $services = $this->getServiceLocator();
         $template = $resource->resourceTemplate();
         $resourceId = (int) $resource->id();
-        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
+        $messenger = $directMessage ? $this->services->get('ControllerPluginManager')->get('messenger') : null;
 
         // Warning: to use $resource->jsonSerialize() here for debug output a doctrine error.
 
         foreach ($template->resourceTemplateProperties() as $templateProperty) {
             foreach ($templateProperty->data() as $rtpData) {
-                $propertyId = $templateProperty->property()->id();
-                $propertyTerm = $this->easyMeta->propertyTerm($propertyId);
+                $property = $templateProperty->property();
+                $propertyId = $property->id();
+                $propertyTerm = $property->term();
                 $inputControl = (string) $rtpData->dataValue('input_control');
                 if (strlen($inputControl)) {
                     // Check that the input control is a valid regex first.
@@ -273,7 +269,7 @@ class ResourceOnSave
                             'The html input pattern "{pattern}" for template {template} cannot be processed.', // @translate
                             ['pattern' => $inputControl, 'template' => $template->label()]
                         );
-                        $services->get('Omeka\Logger')->warn((string) $message);
+                        $this->services->get('Omeka\Logger')->warn((string) $message);
                     } else {
                         foreach ($resource->value($propertyTerm, ['all' => true, 'type' => 'literal']) as $value) {
                             $val = $value->value();
@@ -356,7 +352,7 @@ class ResourceOnSave
                 if ($uniqueValue) {
                     $values = $resource->value($propertyTerm, ['all' => true]);
                     if ($values) {
-                        $connection = $services->get('Omeka\Connection');
+                        $connection = $this->services->get('Omeka\Connection');
                         $sqlWhere = [];
                         // Get all values by main type in one query.
                         $bind = [
@@ -439,8 +435,7 @@ SQL;
             return;
         }
 
-        $services = $this->getServiceLocator();
-        $entityManager = $services->get('Omeka\EntityManager');
+        $entityManager = $this->services->get('Omeka\EntityManager');
 
         $vaDefaultTemplate = null;
         $rtData = $entityManager->getRepository(\AdvancedResourceTemplate\Entity\ResourceTemplateData::class)
@@ -483,7 +478,7 @@ SQL;
         $vaTemplate = null;
         $vaTemplateOption = null;
 
-        $entityManager = $this->getServiceLocator()->get('Omeka\EntityManager');
+        $entityManager = $this->services->get('Omeka\EntityManager');
 
         $property = $value->getProperty();
         $rtp = $entityManager->getRepository(\Omeka\Entity\ResourceTemplateProperty::class)
@@ -529,8 +524,7 @@ SQL;
     protected function displayDirectMessage(): bool
     {
         /** @var \Omeka\Mvc\Status $status */
-        $services = $this->getServiceLocator();
-        $status = $services->get('Omeka\Status');
+        $status = $this->services->get('Omeka\Status');
         $routeMatch = $status->getRouteMatch();
         // RouteMatch may be unavailable during background process.
         $routeName = $routeMatch ? $routeMatch->getMatchedRouteName() : null;
@@ -582,8 +576,7 @@ SQL;
             return;
         }
 
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
+        $api = $this->services->get('Omeka\ApiManager');
 
         $customVocabs = [];
 
@@ -627,7 +620,7 @@ SQL;
         }
 
         /** @var \Omeka\Permissions\Acl $acl */
-        $acl = $services->get('Omeka\Acl');
+        $acl = $this->services->get('Omeka\Acl');
         $roles = $acl->getRoles();
         $acl
             ->allow(
@@ -638,7 +631,7 @@ SQL;
 
         $errorStore = $event->getParam('errorStore');
         $directMessage = $this->displayDirectMessage();
-        $messenger = $directMessage ? $services->get('ControllerPluginManager')->get('messenger') : null;
+        $messenger = $directMessage ? $this->services->get('ControllerPluginManager')->get('messenger') : null;
 
         foreach ($customVocabs as $customVocab) {
             if (!$customVocab['new']) {
@@ -692,8 +685,7 @@ SQL;
         /**
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
-        $services = $this->getServiceLocator();
-        $mapper = $services->get('ControllerPluginManager')->get('artMapper');
+        $mapper = $this->services->get('ControllerPluginManager')->get('artMapper');
 
         $newResourceData = $mapper
             ->setMapping($mapping['automatic_values']['mapping'])
@@ -816,9 +808,8 @@ SQL;
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\FieldNameToProperty $fieldNameToProperty
          * @var \AdvancedResourceTemplate\Mvc\Controller\Plugin\ArtMapper $mapper
          */
-        $services = $this->getServiceLocator();
-        $plugins = $services->get('ControllerPluginManager');
-        $api = $services->get('Omeka\ApiManager');
+        $plugins = $this->services->get('ControllerPluginManager');
+        $api = $this->services->get('Omeka\ApiManager');
         $fieldNameToProperty = $plugins->get('fieldNameToProperty');
         $mapper = $plugins->get('artMapper');
 
@@ -833,7 +824,7 @@ SQL;
             } else {
                 // Check validity of the data type.
                 /** @var \Omeka\DataType\Manager $dataTypeManager */
-                $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
+                $dataTypeManager = $this->services->get('Omeka\DataTypeManager');
                 if (!$dataTypeManager->has($automaticValueArray['type'])) {
                     return null;
                 }
@@ -995,7 +986,7 @@ SQL;
         }
 
         /** @var \Omeka\Api\Manager $api */
-        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $api = $this->services->get('Omeka\ApiManager');
 
         $sortByLinkedProperty = function ($a, $b) use ($api, $orderByLinkedResourceProperties): int {
             $aId = empty($a['value_resource_id']) ? 0 : (int) $a['value_resource_id'];
