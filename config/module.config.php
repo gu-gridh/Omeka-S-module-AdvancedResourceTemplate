@@ -216,8 +216,29 @@ return [
             'advancedresourcetemplate_properties_display' => [],
             'advancedresourcetemplate_properties_as_search_whitelist' => [],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
-            'advancedresourcetemplate_block_metadata_fields' => [],
+            'advancedresourcetemplate_block_metadata_fields' => [
+                'values-type' => [
+                    'dcterms:type' => '',
+                ],
+                'values-creator' => [
+                    'dcterms:creator' => '',
+                ],
+                'values-date' => [
+                    'dcterms:date' => '',
+                    'dcterms:created' => '',
+                    'dcterms:issued' => '',
+                ],
+                'values-subject' => [
+                    'dcterms:subject' => '',
+                ],
+                'values-rights = Terms of use' => [
+                    'dcterms:rights' => '',
+                    'dcterms:license' => '',
+                ],
+            ],
             'advancedresourcetemplate_block_metadata_show_label' => false,
+            'advancedresourcetemplate_block_metadata_show_info' => 'none',
+            'advancedresourcetemplate_block_metadata_show_locale' => false,
         ],
     ],
 ];

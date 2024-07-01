@@ -10,14 +10,18 @@
 
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 $siteSetting = $plugins->get('siteSetting');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
-$showLabel = (bool) $siteSetting('advancedresourcetemplate_block_metadata_show_label');
+$components = $siteSetting('advancedresourcetemplate_block_metadata_components', []);
 
-$labelInfo = $siteSetting('property_label_information', 'none');
-$showLocale = (bool) $siteSetting('show_locale_label', true);
+$showLabel = in_array('value_label', $components);
+$showTerm = in_array('value_term', $components);
+$showVocab = in_array('value_vocab', $components);
+$showLocale = in_array('value_locale', $components);
+
 $filterLocale = (bool) $siteSetting('filter_locale_values');
 $lang = $this->lang();
 $langValue = $filterLocale ? [$lang, ''] : null;
@@ -39,6 +43,9 @@ if ($showLabel) {
     $tagMain = 'div';
     $tagVal = 'li';
 }
+
+$this->headLink()
+    ->appendStylesheet($assetUrl('css/advanced-resource-template.css', 'AdvancedResourceTemplate'));
 ?>
 
 <<?= $tagMain ?> class="block-resource block-metadata">
@@ -70,17 +77,17 @@ if ($showLabel) {
             $property = $propertyData['property'];
             if ($showLabel) {
                 $propertyLabel = $fields[$term] ?: $propertyData['alternate_label'] ?: $translate($property->label());
-                if ('term' === $labelInfo) {
-                    $propertyTerm = $property->term();
-                } elseif ('vocab' === $labelInfo) {
-                    $propertyTerm = $property->vocabulary()->label();
-                } else {
-                    $propertyTerm = null;
-                }
             } else {
                 $propertyLabel = null;
+            }
+            if ($showTerm) {
+                $propertyTerm = $property->term();
+            } elseif ($showVocab) {
+                $propertyTerm = $property->vocabulary()->label();
+            } else {
                 $propertyTerm = null;
             }
+
             ?>
         <div class="property">
             <?php if ($showLabel): ?>

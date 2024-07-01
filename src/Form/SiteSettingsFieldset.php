@@ -75,14 +75,20 @@ dcterms:license
                 ],
             ])
             ->add([
-                'name' => 'advancedresourcetemplate_block_metadata_show_label',
-                'type' => CommonElement\OptionalCheckbox::class,
+                'name' => 'advancedresourcetemplate_block_metadata_components',
+                'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'element_group' => 'resources',
-                    'label' => 'Show metadata label in block Metadata', // @translate
+                    'label' => 'Element for block Metadata', // @translate
+                    'value_options' => [
+                        'value_label' => 'Metadata label', // @translate
+                        'value_term' => 'Property term', // @translate
+                        'value_vocab' => 'Vocabulary', // @translate
+                        'value_locale' => 'Locale of the value', // @translate
+                    ],
                 ],
                 'attributes' => [
-                    'id' => 'advancedresourcetemplate_block_metadata_show_label',
+                    'id' => 'advancedresourcetemplate_block_metadata_components',
                 ],
             ])
         ;
