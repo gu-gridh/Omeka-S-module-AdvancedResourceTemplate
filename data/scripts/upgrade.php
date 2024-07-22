@@ -28,10 +28,10 @@ $messenger = $plugins->get('messenger');
 
 $localConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 
-if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.60')) {
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.61')) {
     $message = new \Omeka\Stdlib\Message(
         'The module %1$s should be upgraded to version %2$s or later.', // @translate
-        'Common', '3.4.60'
+        'Common', '3.4.61'
     );
     throw new ModuleCannotInstallException((string) $message);
 }
