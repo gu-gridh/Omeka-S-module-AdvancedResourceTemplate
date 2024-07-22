@@ -493,6 +493,12 @@ class Module extends AbstractModule
             'view.layout',
             [$this, 'handleViewLayoutResourceTemplate']
         );
+        // Modify display of resource template to add a button for new resource.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ResourceTemplate',
+            'view.browse.actions',
+            [$this, 'appendButtonActionNewResource']
+        );
 
         // Add elements to the resource template form.
         $sharedEventManager->attach(
@@ -1925,6 +1931,48 @@ class Module extends AbstractModule
         $vars->offsetSet('content', $html);
     }
 
+    public function appendButtonActionNewResource(Event $event): void
+    {
+        /**
+         * @var \Laminas\View\Renderer\PhpRenderer $view
+         * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+         * @var \Omeka\View\Helper\UserIsAllowed $userIsAllowed
+         */
+
+        $services = $this->getServiceLocator();
+        // Don't add id for anonymous creation (for module Contribute).
+        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
+        if (!$user) {
+            return;
+        }
+
+        $resourceTemplate = $event->getParam('resource');
+        $useForResources = $resourceTemplate->dataValue('use_for_resources');
+        if (!$useForResources || in_array('items', $useForResources)) {
+            $resourceLabel = 'item';
+            $controllerName = 'item';
+            $resourceEntity = \Omeka\Entity\Item::class;
+        } elseif (in_array('item_sets', $useForResources)) {
+            $resourceLabel = 'item set';
+            $controllerName = 'item-set';
+            $resourceEntity = \Omeka\Entity\ItemSet::class;
+        } else {
+            return;
+        }
+
+        $plugins = $services->get('ViewHelperManager');
+        $userIsAllowed = $plugins->get('userIsAllowed');
+        if (!$userIsAllowed($resourceEntity, 'create')) {
+            return;
+        }
+
+        $translate = $plugins->get('translate');
+        $urlHelper = $plugins->get('url');
+        $hyperlink = $plugins->get('hyperlink');
+
+        $url = $urlHelper('admin/default', ['controller' => $controllerName, 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]]);
+        echo sprintf('<li>%s</li>', $hyperlink('', $url, ['class' => 'o-icon-add', 'title' => sprintf($translate('Add new %s'), $translate($resourceLabel))]));
+    }
 
     public function addResourceTemplateFormElements(Event $event): void
     {
