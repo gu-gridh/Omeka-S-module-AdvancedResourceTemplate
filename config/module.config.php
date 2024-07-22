@@ -38,6 +38,8 @@ $defaultPropertyBlacklist = [
     'bibo:sici',
     'bibo:upc',
     'bibo:uri',
+    'curation:data',
+    'curation:note',
 ];
 
 return [
@@ -203,7 +205,9 @@ return [
             'advancedresourcetemplate_skip_private_values' => false,
             'advancedresourcetemplate_properties_display_admin' => false,
             'advancedresourcetemplate_properties_display' => [],
-            'advancedresourcetemplate_properties_as_search_whitelist' => [],
+            'advancedresourcetemplate_properties_as_search_whitelist' => [
+                'all',
+            ],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
             // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
@@ -214,7 +218,9 @@ return [
         'site_settings' => [
             'advancedresourcetemplate_properties_display_site' => '',
             'advancedresourcetemplate_properties_display' => [],
-            'advancedresourcetemplate_properties_as_search_whitelist' => [],
+            'advancedresourcetemplate_properties_as_search_whitelist' => [
+                'all',
+            ],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
             'advancedresourcetemplate_block_metadata_fields' => [
                 'values-type' => [
