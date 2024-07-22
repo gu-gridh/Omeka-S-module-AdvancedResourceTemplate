@@ -13,7 +13,7 @@ trait TraitPropertyValuesDisplay
                 'name' => 'advancedresourcetemplate_properties_display',
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
-                    'element_group' => 'resources',
+                    'element_group' => 'metadata_display',
                     'label' => 'Display of property values', // @translate
                     'value_options' => [
                         // Value.
@@ -143,7 +143,7 @@ trait TraitPropertyValuesDisplay
                 'name' => 'advancedresourcetemplate_properties_as_search_whitelist',
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
-                    'element_group' => 'resources',
+                    'element_group' => 'metadata_display',
                     'label' => 'Properties to display as search link (whitelist)', // @translate
                     'term_as_value' => true,
                     'prepend_value_options' => [
@@ -161,7 +161,7 @@ trait TraitPropertyValuesDisplay
                 'name' => 'advancedresourcetemplate_properties_as_search_blacklist',
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
-                    'element_group' => 'resources',
+                    'element_group' => 'metadata_display',
                     'label' => 'Properties not to display as search link (blacklist)', // @translate
                     'term_as_value' => true,
                 ],
