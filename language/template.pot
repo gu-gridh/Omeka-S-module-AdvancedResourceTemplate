@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 00:00+0000\n"
+"POT-Creation-Date: 2024-07-22 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,28 +28,33 @@ msgid ""
 "{version} or later."
 msgstr ""
 
-#: Module.php:967
+#: Module.php:1011 Module.php:1329
 msgid "Search this value"
 msgstr ""
 
-#: Module.php:968
+#: Module.php:1012 Module.php:1330
 msgid "Show this item"
 msgstr ""
 
-#: Module.php:969
+#: Module.php:1013 Module.php:1331
 msgid "Show this media"
 msgstr ""
 
-#: Module.php:970
+#: Module.php:1014 Module.php:1332
 msgid "Show this item set"
 msgstr ""
 
-#: Module.php:971
+#: Module.php:1015 Module.php:1333
 msgid "Show this resource"
 msgstr ""
 
-#: Module.php:972
+#: Module.php:1016 Module.php:1334
 msgid "Open this external uri in a new tab"
+msgstr ""
+
+#: Module.php:1974
+#, php-format
+msgid "Add new %s"
 msgstr ""
 
 #: src/Autofiller/GenericAutofiller.php:58
@@ -73,24 +78,47 @@ msgstr ""
 msgid "Default language?"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:36
+#: view/omeka/admin/resource-template/show.phtml:39
+#, php-format
+msgid "Browse %d items"
+msgstr ""
+
+#: view/omeka/admin/resource-template/show.phtml:42
+#, php-format
+msgid "Browse %d item sets"
+msgstr ""
+
+#: view/omeka/admin/resource-template/show.phtml:45
+#, php-format
+msgid "Browse %d media"
+msgstr ""
+
+#: view/omeka/admin/resource-template/show.phtml:51
 msgid "As csv"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:37
+#: view/omeka/admin/resource-template/show.phtml:52
 msgid "As tsv"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:38
+#: view/omeka/admin/resource-template/show.phtml:53
 msgid "As json"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:64
+#: view/omeka/admin/resource-template/show.phtml:79
 msgid "Other settings"
 msgstr ""
 
-#: view/omeka/admin/resource-template/show.phtml:126
+#: view/omeka/admin/resource-template/show.phtml:141
 msgid "Advanced settings"
+msgstr ""
+
+#: view/omeka/admin/resource-template/table-templates.phtml:47
+msgid "Table of labels"
+msgstr ""
+
+#: view/omeka/admin/resource-template/table-templates.phtml:93
+msgid "Select resource templates above to compare their labels."
 msgstr ""
 
 #: data/scripts/upgrade.php:97
@@ -145,146 +173,152 @@ msgid ""
 "(require Omeka S v4.1)."
 msgstr ""
 
-#: data/scripts/upgrade.php:348
+#: data/scripts/upgrade.php:362
 msgid ""
 "It’s now possible to limit templates available by resource, for example the "
 "template \"Incunable\" for items only and the template \"Folio\" for medias "
 "only."
 msgstr ""
 
-#: data/scripts/upgrade.php:353
+#: data/scripts/upgrade.php:367
 msgid ""
 "It’s now possible to specify templates by property for value annotations."
 msgstr ""
 
-#: data/scripts/upgrade.php:358
+#: data/scripts/upgrade.php:372
 msgid ""
 "All existing templates are made available by items only. Check your "
 "templates if you need."
 msgstr ""
 
-#: data/scripts/upgrade.php:363
+#: data/scripts/upgrade.php:377
 msgid ""
 "If you use specific templates, you may have to check this new parameter."
 msgstr ""
 
-#: data/scripts/upgrade.php:370
+#: data/scripts/upgrade.php:384
 msgid ""
 "It’s now possible to specify templates for annotations of module Annotate."
 msgstr ""
 
-#: data/scripts/upgrade.php:378
+#: data/scripts/upgrade.php:392
 msgid "A new main setting was added to hide private values in public sites."
 msgstr ""
 
-#: data/scripts/upgrade.php:518
+#: data/scripts/upgrade.php:532
 msgid ""
 "Value annotations can now have a resource class and an alternative label or "
 "comment."
 msgstr ""
 
-#: data/scripts/upgrade.php:524
+#: data/scripts/upgrade.php:538
 msgid ""
 "A job is added in tasks of the module {link}Easy Admin{link_end} to fill the "
 "annotation templates and classes when needed."
 msgstr ""
 
-#: data/scripts/upgrade.php:540
+#: data/scripts/upgrade.php:554
 msgid ""
 "The feature to display the property select with all alternative labels of "
 "templates was moved to a new module {link}Alternative Label "
 "Select{link_end}. You should install it if you need it."
 msgstr ""
 
-#: data/scripts/upgrade.php:556
+#: data/scripts/upgrade.php:570
 msgid ""
 "A new option allows to display property values as search links, or to add a "
 "search icon to values, compatible with module {link}Advanced "
 "search{link_end}."
 msgstr ""
 
-#: Module.php:1305
+#: data/scripts/upgrade.php:592
+msgid ""
+"A new resource block was added to display selected metadata, for example for "
+"a short record."
+msgstr ""
+
+#: Module.php:1625
 msgid "The query to attach items cannot contain the item set itself."
 msgstr ""
 
-#: Module.php:1329
+#: Module.php:1649
 msgid ""
 "The query for the item set was changed: a job is run in background to detach "
 "and to attach items (job {link_job}#{job_id}{link_end}, {link_log}"
 "logs{link_end})."
 msgstr ""
 
-#: Module.php:1524
+#: Module.php:1844
 msgid "Query to attach items automatically to this item set"
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:198
+#: src/Listener/ResourceOnSave.php:194
 msgid "This template cannot be used for this resource."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:208
+#: src/Listener/ResourceOnSave.php:204
 msgid "A class is required."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:218
+#: src/Listener/ResourceOnSave.php:214
 msgid "The class should be {resource_class}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:224
+#: src/Listener/ResourceOnSave.php:220
 msgid "The class should be one of {resource_classes}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:273
+#: src/Listener/ResourceOnSave.php:269
 msgid ""
 "The html input pattern \"{pattern}\" for template {template} cannot be "
 "processed."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:282
+#: src/Listener/ResourceOnSave.php:278
 msgid ""
 "The value \"{value}\" for term {property} does not follow the input pattern "
 "\"{pattern}\"."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:301
+#: src/Listener/ResourceOnSave.php:297
 msgid ""
 "The value for term {property} is shorter ({length} characters) than the "
 "minimal size ({number} characters)."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:311
+#: src/Listener/ResourceOnSave.php:307
 msgid ""
 "The value for term {property} is longer ({length} characters) than the "
 "maximal size ({number} characters)."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:333
+#: src/Listener/ResourceOnSave.php:329
 msgid ""
 "The number of values ({count}) for term {property} is lower than the minimal "
 "number of {number}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:344
+#: src/Listener/ResourceOnSave.php:340
 msgid ""
 "The number of values ({count}) for term {property} is greater than the "
 "maximal number of {number}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:403
+#: src/Listener/ResourceOnSave.php:399
 msgid ""
 "The value for term {property} should be unique, but already set for resource "
 "#{resource_id}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:654
+#: src/Listener/ResourceOnSave.php:647
 msgid "New descriptor appended to custom vocab \"{custom_vocab}\": {value}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:659
+#: src/Listener/ResourceOnSave.php:652
 msgid "New descriptors appended to custom vocab \"{custom_vocab}\": {values}."
 msgstr ""
 
-#: src/Listener/ResourceOnSave.php:667
+#: src/Listener/ResourceOnSave.php:660
 msgid ""
 "Unable to append new descriptors to custom vocab \"{custom_vocab}\":  {error}"
 msgstr ""
@@ -315,56 +349,68 @@ msgstr ""
 msgid "Advanced Resource Template"
 msgstr ""
 
-#: src/Form/SiteSettingsFieldset.php:30
-msgid "Mode of display of property values"
+#: src/Form/SiteSettingsFieldset.php:16
+msgid "Block Resource metadata"
 msgstr ""
 
-#: src/Form/SiteSettingsFieldset.php:32
-msgid "Default display"
+#: src/Form/SiteSettingsFieldset.php:17 src/Form/SettingsFieldset.php:17
+msgid "Resource metadata display"
 msgstr ""
 
 #: src/Form/SiteSettingsFieldset.php:33
+msgid "Mode of display of property values"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:35
+msgid "Default display"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:36
 msgid "Use main settings"
 msgstr ""
 
-#: src/Form/SiteSettingsFieldset.php:34
+#: src/Form/SiteSettingsFieldset.php:37
 msgid "Use site settings below"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:29
-msgid "Elements of resource form to display"
+#: src/Form/SiteSettingsFieldset.php:53
+msgid "Metadata for resource block Metadata"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:54
+msgid ""
+"This option may be used to display a short record. Each line is the term and "
+"the optional alternatif label. A specific label can be set on each line, "
+"separated with a \"=\". A division to group a list of properties may be "
+"added with \"# div-class\" and an optional label separated with a \"=\"."
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:85
+msgid "Element for block Metadata"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:87
+msgid "Metadata label"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:88
+msgid "Property term"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:90
+msgid "Locale of the value"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:16
+msgid "Resource edition"
 msgstr ""
 
 #: src/Form/SettingsFieldset.php:31
-msgid "Collapse Metadata description by default"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:32
-msgid "Button Metadata description"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:33
-msgid "Button Language"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:34
-msgid "Button Visibility"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:35
-msgid "Button Value annotation"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:36
-msgid "Button More actions"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:49
 msgid ""
 "Skip checking advanced template settings to allow to save an invalid record"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:50
+#: src/Form/SettingsFieldset.php:32
 msgid ""
 "For example if a value is longer than the specified length, it will be saved "
 "anyway.\n"
@@ -373,11 +419,39 @@ msgid ""
 "It does not skip core checks, in particular required properties."
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:63
+#: src/Form/SettingsFieldset.php:45
+msgid "Elements of resource form to display"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:47
+msgid "Collapse Metadata description by default"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:48
+msgid "Button Metadata description"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:49
+msgid "Button Language"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:50
+msgid "Button Visibility"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:51
+msgid "Button Value annotation"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:52
+msgid "Button More actions"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:65
 msgid "Append properties to resource form"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:64
+#: src/Form/SettingsFieldset.php:66
 msgid ""
 "When no template is selected in resource form, the property selector may be "
 "available or not to force to select a template.\n"
@@ -385,29 +459,29 @@ msgid ""
 "addition according to this setting."
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:67
+#: src/Form/SettingsFieldset.php:69
 msgid "Allow"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:68
+#: src/Form/SettingsFieldset.php:70
 msgid "Forbid"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:80
-msgid "Skip private values on sites, even when user is connected"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:92
-msgid "Use property display settings in admin board"
-msgstr ""
-
-#: src/Form/SettingsFieldset.php:105
+#: src/Form/SettingsFieldset.php:83
 #: src/Form/ResourceTemplateDataFieldset.php:184
 msgid "Autofillers"
 msgstr ""
 
-#: src/Form/SettingsFieldset.php:106
+#: src/Form/SettingsFieldset.php:84
 msgid "The autofillers should be set in selected templates params."
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:98
+msgid "Skip private values on sites, even when user is connected"
+msgstr ""
+
+#: src/Form/SettingsFieldset.php:110
+msgid "Use property display settings in admin board"
 msgstr ""
 
 #: src/Form/ResourceTemplateDataFieldset.php:26
@@ -511,12 +585,12 @@ msgid ""
 "property, just skip the property term."
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:284
+#: src/Form/ResourceTemplateDataFieldset.php:285
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:358
 msgid "More settings"
 msgstr ""
 
-#: src/Form/ResourceTemplateDataFieldset.php:285
+#: src/Form/ResourceTemplateDataFieldset.php:286
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:359
 msgid ""
 "Allow to pass some settings, usually for theme and generally via key-value "
@@ -556,19 +630,19 @@ msgid "Unique value among resources"
 msgstr ""
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:131
-msgid "Order linked resources by properties"
-msgstr ""
-
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:144
 msgid "Locked value once saved"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:157
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:144
 msgid "Property disabled in form (editable only by api/job)"
 msgstr ""
 
-#: src/Form/ResourceTemplatePropertyDataFieldset.php:170
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:157
 msgid "Separator to split a literal value"
+msgstr ""
+
+#: src/Form/ResourceTemplatePropertyDataFieldset.php:169
+msgid "Order linked resources by properties"
 msgstr ""
 
 #: src/Form/ResourceTemplatePropertyDataFieldset.php:182
@@ -604,69 +678,86 @@ msgstr ""
 msgid "Display of property values"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:21
+#: src/Form/TraitPropertyValuesDisplay.php:22
 msgid "Value as search"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:28
+#: src/Form/TraitPropertyValuesDisplay.php:29
 msgid "Value as advanced search (module or fallback)"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:35
+#: src/Form/TraitPropertyValuesDisplay.php:36
 msgid "Display linked resource as simple text"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:42
+#: src/Form/TraitPropertyValuesDisplay.php:43
 msgid "Display uri as simple text"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:49
+#: src/Form/TraitPropertyValuesDisplay.php:51
 msgid "Prepend an icon for search link"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:56
+#: src/Form/TraitPropertyValuesDisplay.php:58
 msgid "Prepend an icon for advanced search link (module or fallback)"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:63
+#: src/Form/TraitPropertyValuesDisplay.php:65
 msgid "Prepend an icon for linked resource"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:70
+#: src/Form/TraitPropertyValuesDisplay.php:72
 msgid "Prepend an icon for external uri"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:77
+#: src/Form/TraitPropertyValuesDisplay.php:80
 msgid "Append an icon for search link"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:84
+#: src/Form/TraitPropertyValuesDisplay.php:87
 msgid "Append an icon for advanced search link (module or fallback)"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:91
+#: src/Form/TraitPropertyValuesDisplay.php:94
 msgid "Append an icon for linked resource"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:98
+#: src/Form/TraitPropertyValuesDisplay.php:101
 msgid "Append an icon for external uri"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:115
+#: src/Form/TraitPropertyValuesDisplay.php:109
+msgid "Append an icon for search link, only in record"
+msgstr ""
+
+#: src/Form/TraitPropertyValuesDisplay.php:116
+msgid ""
+"Append an icon for advanced search link, only in record (module or fallback)"
+msgstr ""
+
+#: src/Form/TraitPropertyValuesDisplay.php:123
+msgid "Append an icon for linked resource, only in record"
+msgstr ""
+
+#: src/Form/TraitPropertyValuesDisplay.php:130
+msgid "Append an icon for external uri, only in record"
+msgstr ""
+
+#: src/Form/TraitPropertyValuesDisplay.php:147
 msgid "Properties to display as search link (whitelist)"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:118
+#: src/Form/TraitPropertyValuesDisplay.php:150
 msgid "All properties"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:125
-#: src/Form/TraitPropertyValuesDisplay.php:140
+#: src/Form/TraitPropertyValuesDisplay.php:157
+#: src/Form/TraitPropertyValuesDisplay.php:172
 msgid "Select properties…"
 msgstr ""
 
-#: src/Form/TraitPropertyValuesDisplay.php:133
-msgid "Properties to display as search link (blacklist)"
+#: src/Form/TraitPropertyValuesDisplay.php:165
+msgid "Properties not to display as search link (blacklist)"
 msgstr ""
 
 #: src/Form/ResourceTemplateImportForm.php:15
@@ -778,41 +869,45 @@ msgstr ""
 msgid "The service \"{service}\" is not available."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:359
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:571
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:50
+msgid "Select resource templates"
+msgstr ""
+
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:447
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:659
 msgid ""
 "The template has duplicate properties. They are mixed in the form, but will "
 "be imported separately."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:368
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:456
 msgid "Wrong media type \"{media_type}\" for file."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:392
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:480
 msgid "The file does not contain any row."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:498
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:586
 msgid "There is no valid template properties."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:543
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:631
 #, php-format
 msgid "The alternative label for a duplicate property (%s) should be unique."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:564
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:652
 msgid "File cannot be checked or saved."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1081
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1169
 msgid ""
 "When multiple fields use the same property, only one field can be without "
 "data type."
 msgstr ""
 
-#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1084
+#: src/Controller/Admin/ResourceTemplateControllerDelegator.php:1172
 msgid ""
 "When multiple fields use the same property, the data types must be unique "
 "among them."
@@ -822,11 +917,17 @@ msgstr ""
 msgid "Missing autofiller configuration."
 msgstr ""
 
-#: config/module.config.php:183
+#: src/Site/ResourcePageBlockLayout/Metadata.php:36
+msgid ""
+"The block Metadata is appended for {resource_type}, but no metadata are "
+"configured."
+msgstr ""
+
+#: config/module.config.php:190
 msgid "New value"
 msgstr ""
 
-#: config/module.config.php:184
+#: config/module.config.php:191
 msgid "No results"
 msgstr ""
 

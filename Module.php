@@ -40,10 +40,10 @@ class Module extends AbstractModule
         $plugins = $services->get('ControllerPluginManager');
         $translate = $plugins->get('translate');
 
-        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.57')) {
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.61')) {
             $message = new \Omeka\Stdlib\Message(
                 $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Common', '3.4.57'
+                'Common', '3.4.61'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -180,32 +180,12 @@ class Module extends AbstractModule
             [$this, 'validateEntityHydratePost']
         );
         $sharedEventManager->attach(
-            \Omeka\Api\Adapter\ItemAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\MediaAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.hydrate.post',
             [$this, 'validateEntityHydratePost']
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\ItemSetAdapter::class,
-            'api.hydrate.post',
-            [$this, 'validateEntityHydratePost']
-        );
-        $sharedEventManager->attach(
-            \Annotate\Api\Adapter\AnnotationAdapter::class,
             'api.hydrate.post',
             [$this, 'validateEntityHydratePost']
         );
@@ -398,11 +378,54 @@ class Module extends AbstractModule
             -100
         );
 
-        // Display some property values with a search link.
+        // Display some property values with a search link or icons.
         $sharedEventManager->attach(
             \Omeka\Api\Representation\ValueRepresentation::class,
             'rep.value.html',
             [$this, 'handleRepresentationValueHtml']
+        );
+
+        // Display some property values with a search link or icons in
+        // resource/show only.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Item',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Media',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ItemSet',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Annotate\Controller\Admin\AnnotationController',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Site\Item',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Site\Media',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Site\ItemSet',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
+        );
+        $sharedEventManager->attach(
+            'Annotate\Controller\Site\AnnotationController',
+            'view.show.value',
+            [$this, 'handleViewResourceShowValue']
         );
 
         // Add css/js to some admin pages.
@@ -440,12 +463,14 @@ class Module extends AbstractModule
             [$this, 'addAdvancedTabElements']
         );
 
+        // Modify the resource form for templates or set one by default.
         $sharedEventManager->attach(
             \Omeka\Form\ResourceForm::class,
             'form.add_elements',
             [$this, 'handleResourceForm']
         );
 
+        // Append settings and site settings.
         $sharedEventManager->attach(
             \Omeka\Form\SettingForm::class,
             'form.add_elements',
@@ -456,13 +481,26 @@ class Module extends AbstractModule
             'form.add_input_filters',
             [$this, 'handleMainSettingsFilters']
         );
-
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
             'form.add_elements',
             [$this, 'handleSiteSettings']
         );
 
+        // Modify display of resource template to add a button.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ResourceTemplate',
+            'view.layout',
+            [$this, 'handleViewLayoutResourceTemplate']
+        );
+        // Modify display of resource template to add a button for new resource.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ResourceTemplate',
+            'view.browse.actions',
+            [$this, 'appendButtonActionNewResource']
+        );
+
+        // Add elements to the resource template form.
         $sharedEventManager->attach(
             // \Omeka\Form\ResourceTemplateForm::class,
             \AdvancedResourceTemplate\Form\ResourceTemplateForm::class,
@@ -819,6 +857,8 @@ class Module extends AbstractModule
 
     /**
      * Convert selected property values to links.
+     *
+     * @todo Factorize handleRepresentationValueHtml() and handleViewResourceShowValue().
      */
     public function handleRepresentationValueHtml(Event $event): void
     {
@@ -827,7 +867,7 @@ class Module extends AbstractModule
          * @var \Omeka\Settings\Settings $settings
          * @var \Omeka\Settings\SiteSettings $siteSettings
          * @var \Omeka\Mvc\Status $status
-         * @var \Laminas\Mvc\Controller\Plugin\Url $url
+         * @var \Omeka\View\Helper\Url $url
          * @var \Omeka\View\Helper\Hyperlink $hyperlink
          * @var \Laminas\View\Helper\EscapeHtml $escape
          * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
@@ -908,10 +948,11 @@ class Module extends AbstractModule
                 return;
             }
 
-            $plugins = $services->get('ControllerPluginManager');
             $helpers = $services->get('ViewHelperManager');
 
-            $url = $plugins->get('url');
+            // Don't use plugin url because it requires a valid controller in
+            // background job.
+            $url = $helpers->get('url');
             $escape = $helpers->get('escapeHtml');
             $translate = $helpers->get('translate');
             $hyperlink = $helpers->get('hyperlink');
@@ -926,6 +967,7 @@ class Module extends AbstractModule
             $display['icon_uri'] = $display['prepend_icon_uri'] || $display['append_icon_uri'];
             $display['search'] = $display['value_search'] || $display['icon_search'];
             $display['default'] = !$display['value_search'] && !$display['value_advanced_search'];
+            $display['advanced_search'] = false;
 
             if ($advancedSearchConfig) {
                 $display['icon_advanced_search'] = $display['prepend_icon_advanced_search'] || $display['append_icon_advanced_search'];
@@ -936,12 +978,14 @@ class Module extends AbstractModule
                 $isInternalSearch = $querier instanceof \AdvancedSearch\Querier\InternalQuerier;
                 // Fallback to standard search for module Advanced search.
                 if ($display['advanced_search'] && (!$querier || $querier instanceof \AdvancedSearch\Querier\NoopQuerier)) {
+                    // Update derivative display keys first to get fallback.
                     $display['value_search'] = $display['value_search'] || $display['value_advanced_search'];
                     $display['prepend_icon_search'] = $display['prepend_icon_search'] || $display['prepend_icon_advanced_search'];
                     $display['append_icon_search'] = $display['append_icon_search'] || $display['append_icon_advanced_search'];
                     $display['icon_search'] = $display['prepend_icon_search'] || $display['append_icon_search'];
                     $display['search'] = $display['value_search'] || $display['icon_search'];
                     $display['default'] = !$display['value_search'];
+                    // Reset derivative display keys for advanced search.
                     $display['value_advanced_search'] = false;
                     $display['prepend_icon_advanced_search'] = false;
                     $display['append_icon_advanced_search'] = false;
@@ -982,13 +1026,14 @@ class Module extends AbstractModule
             return;
         }
 
-        $html = $event->getParam('html');
         $resource = $value->resource();
         $controllerName = $resource->getControllerName();
         if (!$controllerName) {
             $display = false;
             return;
         }
+
+        $html = $event->getParam('html');
 
         $vr = $value->valueResource();
         $uri = $value->uri();
@@ -1020,7 +1065,7 @@ class Module extends AbstractModule
 
         if ($display['search']) {
             if ($vr) {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
@@ -1030,7 +1075,7 @@ class Module extends AbstractModule
                     ]]
                 );
             } else {
-                $searchUrl = $url->fromRoute(
+                $searchUrl = $url(
                     $isAdmin ? 'admin/default' : 'site/resource',
                     ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
                     ['query' => [
@@ -1144,6 +1189,281 @@ class Module extends AbstractModule
         }
 
         $event->setParam('html', implode(' ', array_filter($result, 'strlen')));
+    }
+
+    /**
+     * Append icons to selected property values.
+     *
+     * @todo Factorize handleRepresentationValueHtml() and handleViewResourceShowValue().
+     */
+    public function handleViewResourceShowValue(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Representation\ValueRepresentation $value
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Settings\SiteSettings $siteSettings
+         * @var \Omeka\Mvc\Status $status
+         * @var \Omeka\View\Helper\Url $url
+         * @var \Laminas\View\Helper\EscapeHtml $escape
+         * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
+         * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $advancedSearchConfig
+         */
+        static $isAdmin;
+        static $isSite;
+        static $display;
+        static $whitelist;
+        static $blacklist;
+        static $whitelistAll;
+        static $url;
+        static $escapeAttr;
+        static $siteSlug;
+        static $text;
+        static $advancedSearchConfig;
+        static $isInternalSearch;
+
+        if ($display === false) {
+            return;
+        } elseif ($display === null) {
+            $services = $this->getServiceLocator();
+            $status = $services->get('Omeka\Status');
+            $isSite = $status->isSiteRequest();
+            $isAdmin = $status->isAdminRequest();
+            $settings = $services->get('Omeka\Settings');
+            // Warning: some background jobs may need to get full html.
+            if (!$isSite && !$isAdmin) {
+                $display = false;
+                return;
+            } elseif ($isSite) {
+                $siteSettings = $services->get('Omeka\Settings\Site');
+                $displaySite = $siteSettings->get('advancedresourcetemplate_properties_display_site');
+                if ($displaySite === 'site') {
+                    $sSettings = $siteSettings;
+                } elseif ($displaySite === 'main') {
+                    $sSettings = $settings;
+                } else {
+                    $display = false;
+                    return;
+                }
+            } elseif (!$settings->get('advancedresourcetemplate_properties_display_admin')) {
+                $display = false;
+                return;
+            } else {
+                // Admin.
+                $sSettings = $settings;
+            }
+
+            $allowed = [
+                'record_append_icon_search',
+                'record_append_icon_advanced_search',
+                'record_append_icon_resource',
+                'record_append_icon_uri',
+            ];
+
+            $display = (array) $sSettings->get('advancedresourcetemplate_properties_display', []);
+            $display = array_values(array_intersect($allowed, $display));
+            if (!$display) {
+                $display = false;
+                return;
+            }
+
+            $whitelist = $sSettings->get('advancedresourcetemplate_properties_as_search_whitelist', []);
+            $blacklist = $sSettings->get('advancedresourcetemplate_properties_as_search_blacklist', []);
+            $whitelistAll = in_array('all', $whitelist);
+            if (!$whitelist) {
+                $display = false;
+                return;
+            }
+
+            $helpers = $services->get('ViewHelperManager');
+
+            // Don't use plugin url because it requires a valid controller in
+            // background job.
+            $url = $helpers->get('url');
+            $escape = $helpers->get('escapeHtml');
+            $translate = $helpers->get('translate');
+            $escapeAttr = $helpers->get('escapeHtmlAttr');
+            $advancedSearchConfig = $helpers->has('searchConfigCurrent') ? $helpers->get('searchConfigCurrent') : null;
+            $siteSlug = $isSite ? $status->getRouteParam('site-slug') : null;
+
+            $display = array_replace(array_fill_keys($allowed, false), array_fill_keys($display, true));
+
+            $display['icon_search'] = $display['record_append_icon_search'];
+            $display['icon_resource'] = $display['record_append_icon_resource'];
+            $display['icon_uri'] = $display['record_append_icon_uri'];
+            $display['search'] = $display['icon_search'];
+
+            if ($advancedSearchConfig && !empty($display['record_append_icon_advanced_search'])) {
+                $display['icon_advanced_search'] = $display['record_append_icon_advanced_search'];
+                $display['advanced_search'] = $display['icon_advanced_search'];
+                $advancedSearchConfig = $display['advanced_search'] ? $advancedSearchConfig() : null;
+                $engine = $advancedSearchConfig ? $advancedSearchConfig->engine() : null;
+                $querier = $engine ? $engine->querier() : null;
+                $isInternalSearch = $querier instanceof \AdvancedSearch\Querier\InternalQuerier;
+                // Fallback to standard search for module Advanced search.
+                if ($display['advanced_search'] && (!$querier || $querier instanceof \AdvancedSearch\Querier\NoopQuerier)) {
+                    $display['record_append_icon_search'] = true;
+                    $display['record_append_icon_advanced_search'] = false;
+                    $display['icon_search'] = true;
+                    $display['icon_advanced_search'] = false;
+                    $display['search'] = true;
+                    $display['advanced_search'] = false;
+                }
+            } else {
+                $display['advanced_search'] = false;
+            }
+
+            // In admin, the links for linked resource and uri are appended by
+            // default, so don't append them twice.
+            // Furthermore, there may be an issue with the icon used in site.
+            if ($isAdmin) {
+                if ($display['record_append_icon_resource']) {
+                    $display['record_append_icon_resource'] = false;
+                    $display['icon_resource'] = false;
+                }
+                if ($display['record_append_icon_uri']) {
+                    $display['record_append_icon_uri'] = false;
+                    $display['icon_uri'] = false;
+                }
+            }
+
+            $text['search'] = $escape($translate('Search this value')); // @translate
+            $text['item'] = $escape($translate('Show this item')); // @translate
+            $text['media'] = $escape($translate('Show this media')); // @translate
+            $text['item-set'] = $escape($translate('Show this item set')); // @translate
+            $text['resource'] = $escape($translate('Show this resource')); // @translate
+            $text['uri'] = $escape($translate('Open this external uri in a new tab')); // @translate
+        }
+
+        $value = $event->getParam('value');
+        $property = $value->property()->term();
+        if ($whitelistAll) {
+            if (in_array($property, $blacklist)) {
+                return;
+            }
+        } elseif (!in_array($property, $whitelist)) {
+            return;
+        }
+
+        $resource = $value->resource();
+        $controllerName = $resource->getControllerName();
+        if (!$controllerName) {
+            $display = false;
+            return;
+        }
+
+        $vr = $value->valueResource();
+        $uri = $value->uri();
+        $val = (string) $value->value();
+
+        $result = [
+            'record_append_icon_search' => '',
+            'record_append_icon_advanced_search' => '',
+            'record_append_icon_resource' => '',
+            'record_append_icon_uri' => '',
+        ];
+
+        if ($display['search']) {
+            if ($vr) {
+                $searchUrl = $url(
+                    $isAdmin ? 'admin/default' : 'site/resource',
+                    ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                    ['query' => [
+                        'property[0][property]' => $property,
+                        'property[0][type]' => 'res',
+                        'property[0][text]' => $vr->id(),
+                    ]]
+                );
+            } else {
+                $searchUrl = $url(
+                    $isAdmin ? 'admin/default' : 'site/resource',
+                    ['site-slug' => $siteSlug, 'controller' => $controllerName, 'action' => 'browse'],
+                    ['query' => [
+                        'property[0][property]' => $property,
+                        'property[0][type]' => 'eq',
+                        'property[0][text]' => $uri ?: $val,
+                    ]]
+                );
+            }
+            if ($display['icon_search']) {
+                $htmlIconSearch = sprintf('<a href="%1$s" class="metadata-search-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['record_append_icon_search'] = $display['record_append_icon_search'] ? $htmlIconSearch : '';
+            }
+        }
+
+        if ($display['advanced_search']) {
+            $uriOrVal = $uri ?: $val;
+
+            // For solr, at the choice of the administrator, the index may use
+            // the real title for the value resource and no id.
+
+            // There is currently no way to convert a query to a request, so do
+            // it manually, because terms are managed in all queriers anyway.
+
+            if ($isInternalSearch) {
+                $urlQuery = [
+                    'filter' => [[
+                        'field' => $property,
+                        'type' => $vr ? 'res' : 'eq',
+                        'value' => $vr ? $vr->id() : $uriOrVal,
+                    ]],
+                ];
+            } else {
+                // For resource, the id may or may not be indexed in Solr, so
+                // use title. And the property may not be indexed too, anyway.
+                if ($vr) {
+                    $urlQuery = ['filter' => [
+                        [
+                            'field' => $property,
+                            'type' => 'res',
+                            'value' => $vr->id(),
+                        ],
+                        [
+                            'join' => 'or',
+                            'field' => $property,
+                            'type' => 'eq',
+                            'value' => $vr->displayTitle(),
+                        ],
+                    ]];
+                } else {
+                    $urlQuery = [
+                        'filter' => [[
+                            'field' => $property,
+                            'type' => 'eq',
+                            'value' => $uriOrVal,
+                        ]],
+                    ];
+                }
+            }
+            $searchUrl = $isAdmin
+                ? $advancedSearchConfig->adminSearchUrl(false, $urlQuery)
+                : $advancedSearchConfig->siteUrl($siteSlug, false, $urlQuery);
+            if ($display['icon_advanced_search']) {
+                $htmlIconSearch = sprintf('<a href="%1$s" class="metadata-search-link" ><span title="%2$s" class="o-icon-search"></span></a>', $escapeAttr($searchUrl), $text['search']);
+                $result['record_append_icon_advanced_search'] = $display['record_append_icon_advanced_search'] ? $htmlIconSearch : '';
+            }
+        }
+
+        if ($display['icon_resource'] && $vr) {
+            $vrType = $vr->getControllerName() ?? 'resource';
+            $vrName = $vr->resourceName() ?? 'resources';
+            $vrUrl = $isAdmin ? $vr->adminUrl() : $vr->siteUrl($siteSlug);
+            $htmlIconResource = $isAdmin
+                ? sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="resource-name"></a>', $escapeAttr($vrUrl), $text[$vrType])
+                : sprintf('<a href="%1$s" class="resource-link"><span title="%2$s" class="o-icon-%3$s resource-name"></span></a>', $escapeAttr($vrUrl), $text[$vrType], $vrName);
+            $result['record_append_icon_resource'] = $display['record_append_icon_resource'] ? $htmlIconResource : '';
+        }
+
+        if ($display['icon_uri'] && $uri) {
+            $htmlIconUri = sprintf($isAdmin
+                ? '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener" title="%2$s"></a>'
+                : '<a href="%1$s" class="uri-value-link" target="_blank" rel="noopener"><span title="%2$s" class="o-icon-external"></span></a>',
+                $escapeAttr($uri),
+                $text['uri']
+                );
+            $result['record_append_icon_uri'] = $display['record_append_icon_uri'] ? $htmlIconUri : '';
+        }
+
+        echo implode(' ', array_filter($result, 'strlen'));
     }
 
     public function preBatchUpdateItems(Event $event): void
@@ -1583,6 +1903,75 @@ class Module extends AbstractModule
         /** @var \Laminas\View\Helper\HeadStyle headStyle */
         $headStyle = $this->getServiceLocator()->get('ViewHelperManager')->get('headStyle');
         $headStyle->appendStyle('.group-br::before { display: block; content: ""; }');
+    }
+
+    public function handleViewLayoutResourceTemplate(Event $event): void
+    {
+        /** @var \Laminas\View\Renderer\PhpRenderer $view */
+        $view = $event->getTarget();
+        $params = $view->params()->fromRoute();
+        $action = $params['action'] ?? 'browse';
+        if ($action !== 'browse') {
+            return;
+        }
+
+        $linkTableLabels = $view->hyperlink('Compare templates', $view->url('admin/default', ['action' => 'table-templates'], true), ['class' => 'button']);
+
+        /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
+        // Normally, the current resource should be present in vars.
+        $vars = $view->vars();
+        $html = $vars->offsetGet('content');
+        $html = preg_replace(
+            '~<div id="page-actions">(.*?)</div>~s',
+            '<div id="page-actions">' . $linkTableLabels . '$1</div>',
+            $html,
+            1
+        );
+
+        $vars->offsetSet('content', $html);
+    }
+
+    public function appendButtonActionNewResource(Event $event): void
+    {
+        /**
+         * @var \Laminas\View\Renderer\PhpRenderer $view
+         * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+         * @var \Omeka\View\Helper\UserIsAllowed $userIsAllowed
+         */
+
+        $services = $this->getServiceLocator();
+        // Don't add id for anonymous creation (for module Contribute).
+        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
+        if (!$user) {
+            return;
+        }
+
+        $resourceTemplate = $event->getParam('resource');
+        $useForResources = $resourceTemplate->dataValue('use_for_resources');
+        if (!$useForResources || in_array('items', $useForResources)) {
+            $resourceLabel = 'item';
+            $controllerName = 'item';
+            $resourceEntity = \Omeka\Entity\Item::class;
+        } elseif (in_array('item_sets', $useForResources)) {
+            $resourceLabel = 'item set';
+            $controllerName = 'item-set';
+            $resourceEntity = \Omeka\Entity\ItemSet::class;
+        } else {
+            return;
+        }
+
+        $plugins = $services->get('ViewHelperManager');
+        $userIsAllowed = $plugins->get('userIsAllowed');
+        if (!$userIsAllowed($resourceEntity, 'create')) {
+            return;
+        }
+
+        $translate = $plugins->get('translate');
+        $urlHelper = $plugins->get('url');
+        $hyperlink = $plugins->get('hyperlink');
+
+        $url = $urlHelper('admin/default', ['controller' => $controllerName, 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]]);
+        echo sprintf('<li>%s</li>', $hyperlink('', $url, ['class' => 'o-icon-add', 'title' => sprintf($translate('Add new %s'), $translate($resourceLabel))]));
     }
 
     public function addResourceTemplateFormElements(Event $event): void

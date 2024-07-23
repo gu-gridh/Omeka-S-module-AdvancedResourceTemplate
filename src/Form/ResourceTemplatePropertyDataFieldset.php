@@ -125,19 +125,6 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'order_by_linked_resource_properties',
-                'type' => OmekaElement\ArrayTextarea::class,
-                'options' => [
-                    'label' => 'Order linked resources by properties', // @translate
-                    'as_key_value' => true,
-                ],
-                'attributes' => [
-                    // 'id' => 'value_languages',
-                    'class' => 'setting',
-                    'data-setting-key' => 'order_by_linked_resource_properties',
-                ],
-            ])
-            ->add([
                 'name' => 'locked_value',
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
@@ -173,6 +160,19 @@ class ResourceTemplatePropertyDataFieldset extends Fieldset
                     // 'id' => 'split_separator',
                     'class' => 'setting',
                     'data-setting-key' => 'split_separator',
+                ],
+            ])
+            ->add([
+                'name' => 'order_by_linked_resource_properties',
+                'type' => OmekaElement\ArrayTextarea::class,
+                'options' => [
+                    'label' => 'Order linked resources by properties', // @translate
+                    'as_key_value' => true,
+                ],
+                'attributes' => [
+                    // 'id' => 'value_languages',
+                    'class' => 'setting',
+                    'data-setting-key' => 'order_by_linked_resource_properties',
                 ],
             ])
             ->add([

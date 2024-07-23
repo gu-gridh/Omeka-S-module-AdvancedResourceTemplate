@@ -5,9 +5,15 @@
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
  */
 
-// Copy of original file + css + resource template data and resource template properties data + export csv/tsv.
+// Copy of original file
+// + css
+// + resource template data and resource template properties data
+// + export csv/tsv
+// + buttons new resource
+// + buttons browse
 
 $plugins = $this->getHelperPluginManager();
+$api = $plugins->get('api');
 $translate = $plugins->get('translate');
 $escape = $plugins->get('escapeHtml');
 $url = $plugins->get('url');
@@ -28,6 +34,15 @@ $this->htmlElement('body')->appendAttribute('class', 'resource-templates show');
         <?php endif; ?>
         <?php if (!$useForResources || in_array('item_sets', $useForResources)): ?>
         <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item-set', 'action' => 'add'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= $translate('New item set') ?></a>
+        <?php endif; ?>
+        <?php if (!$useForResources || in_array('items', $useForResources)): ?>
+        <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= sprintf($translate('Browse %d items'), $api->search('items', ['resource_template_id' => $resourceTemplate->id()])->getTotalResults()) ?></a>
+        <?php endif; ?>
+        <?php if (!$useForResources || in_array('item_sets', $useForResources)): ?>
+        <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'item-set'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= sprintf($translate('Browse %d item sets'), $api->search('item_sets', ['resource_template_id' => $resourceTemplate->id()])->getTotalResults()) ?></a>
+        <?php endif; ?>
+        <?php if (!$useForResources || in_array('media', $useForResources)): ?>
+        <a class="button" href="<?= $escape($url('admin/default', ['controller' => 'media'], ['query' => ['resource_template_id' => $resourceTemplate->id()]])) ?>"><?= sprintf($translate('Browse %d media'), $api->search('media', ['resource_template_id' => $resourceTemplate->id()])->getTotalResults()) ?></a>
         <?php endif; ?>
         <a href="#" class="button expand" aria-label="<?= $translate('Expand') ?>" title="<?= $translate('Expand') ?>">
             <?= $translate('Export') ?>

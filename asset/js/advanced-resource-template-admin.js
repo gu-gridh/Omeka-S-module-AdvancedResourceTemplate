@@ -212,7 +212,7 @@
             if (!rtpData) {
                 return;
             }
-            if (typeof rtpData.property_read_only === undefined || rtpData.property_read_only !== "yes") {
+            if (typeof rtpData.property_read_only === undefined || !valueIsTrue(rtpData.property_read_only)) {
                 return;
             }
             field.find('.inputs .values :input:not([type=hidden])').each(function (idx, el) {
