@@ -28,10 +28,10 @@ $messenger = $plugins->get('messenger');
 
 $localConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 
-if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.57')) {
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.61')) {
     $message = new \Omeka\Stdlib\Message(
         'The module %1$s should be upgraded to version %2$s or later.', // @translate
-        'Common', '3.4.57'
+        'Common', '3.4.61'
     );
     throw new ModuleCannotInstallException((string) $message);
 }
@@ -317,6 +317,20 @@ SQL;
     if ($thesaurusTemplateConcept) {
         $thesaurusTemplates[] = $thesaurusTemplateConcept->id();
     }
+    $thesaurusTemplateSchemeId = $settings->get('thesaurus_skos_scheme_template_id');
+    if ($thesaurusTemplateSchemeId) {
+        $thesaurusTemplateScheme = $api->searchOne('resource_templates', ['id' => $thesaurusTemplateSchemeId])->getContent();
+        if ($thesaurusTemplateScheme) {
+            $thesaurusTemplates[] = $thesaurusTemplateScheme->id();
+        }
+    }
+    $thesaurusTemplateConceptId = $settings->get('thesaurus_skos_concept_template_id');
+    if ($thesaurusTemplateConceptId) {
+        $thesaurusTemplateConcept = $api->searchOne('resource_templates', ['id' => $thesaurusTemplateConceptId])->getContent();
+        if ($thesaurusTemplateConcept) {
+            $thesaurusTemplates[] = $thesaurusTemplateConcept->id();
+        }
+    }
     $thesaurusTemplates = array_unique(array_map('intval', $thesaurusTemplates));
 
     foreach ($templateDatas as $id => $templateRow) {
@@ -561,4 +575,21 @@ if (version_compare((string) $oldVersion, '3.4.31', '<')) {
     );
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
+}
+
+if (version_compare((string) $oldVersion, '3.4.32', '<')) {
+    $blockMetadataFields = $localConfig['advancedresourcetemplate']['site_settings']['advancedresourcetemplate_block_metadata_fields'] ?? [];
+    $blockMetadataComponents = $localConfig['advancedresourcetemplate']['site_settings']['advancedresourcetemplate_block_metadata_components'] ?? [];
+    $siteSettings = $services->get('Omeka\Settings\Site');
+    $siteIds = $api->search('sites', [], ['returnScalar' => 'id'])->getContent();
+    foreach ($siteIds as $siteId) {
+        $siteSettings->setTargetId($siteId);
+        $siteSettings->set('advancedresourcetemplate_block_metadata_fields', $blockMetadataFields);
+        $siteSettings->set('advancedresourcetemplate_block_metadata_components', $blockMetadataComponents);
+    }
+
+    $message = new PsrMessage(
+        'A new resource block was added to display selected metadata, for example for a short record.' // @translate
+    );
+    $messenger->addSuccess($message);
 }

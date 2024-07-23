@@ -38,6 +38,8 @@ $defaultPropertyBlacklist = [
     'bibo:sici',
     'bibo:upc',
     'bibo:uri',
+    'curation:data',
+    'curation:note',
 ];
 
 return [
@@ -80,6 +82,11 @@ return [
         'controller_map' => [
             // Manage the view like the core.
             Controller\Admin\ResourceTemplateControllerDelegator::class => 'omeka/admin/resource-template',
+        ],
+    ],
+    'resource_page_block_layouts' => [
+        'invokables' => [
+            'metadata' => Site\ResourcePageBlockLayout\Metadata::class,
         ],
     ],
     'form_elements' => [
@@ -198,7 +205,9 @@ return [
             'advancedresourcetemplate_skip_private_values' => false,
             'advancedresourcetemplate_properties_display_admin' => false,
             'advancedresourcetemplate_properties_display' => [],
-            'advancedresourcetemplate_properties_as_search_whitelist' => [],
+            'advancedresourcetemplate_properties_as_search_whitelist' => [
+                'all',
+            ],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
             // The default autofillers are in /data/mapping/mappings.ini.
             'advancedresourcetemplate_autofillers' => [],
@@ -209,8 +218,33 @@ return [
         'site_settings' => [
             'advancedresourcetemplate_properties_display_site' => '',
             'advancedresourcetemplate_properties_display' => [],
-            'advancedresourcetemplate_properties_as_search_whitelist' => [],
+            'advancedresourcetemplate_properties_as_search_whitelist' => [
+                'all',
+            ],
             'advancedresourcetemplate_properties_as_search_blacklist' => $defaultPropertyBlacklist,
+            'advancedresourcetemplate_block_metadata_fields' => [
+                'values-type' => [
+                    'dcterms:type' => '',
+                ],
+                'values-creator' => [
+                    'dcterms:creator' => '',
+                ],
+                'values-date' => [
+                    'dcterms:date' => '',
+                    'dcterms:created' => '',
+                    'dcterms:issued' => '',
+                ],
+                'values-subject' => [
+                    'dcterms:subject' => '',
+                ],
+                'values-rights = Terms of use' => [
+                    'dcterms:rights' => '',
+                    'dcterms:license' => '',
+                ],
+            ],
+            'advancedresourcetemplate_block_metadata_show_label' => false,
+            'advancedresourcetemplate_block_metadata_show_info' => 'none',
+            'advancedresourcetemplate_block_metadata_show_locale' => false,
         ],
     ],
 ];

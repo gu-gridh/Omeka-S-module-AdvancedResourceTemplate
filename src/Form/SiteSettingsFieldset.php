@@ -13,7 +13,8 @@ class SiteSettingsFieldset extends Fieldset
     protected $label = 'Advanced Resource Template'; // @translate
 
     protected $elementGroups = [
-        'resources' => 'Resources', // @translate
+        'block_metadata' => 'Block Resource metadata', // @translate
+        'metadata_display' => 'Resource metadata display', // @translate
     ];
 
     public function init(): void
@@ -22,11 +23,13 @@ class SiteSettingsFieldset extends Fieldset
             ->setAttribute('id', 'advanded-resource-template')
             ->setOption('element_groups', $this->elementGroups)
 
+            // Display of metadata.
+
             ->add([
                 'name' => 'advancedresourcetemplate_properties_display_site',
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
-                    'element_group' => 'resources',
+                    'element_group' => 'metadata_display',
                     'label' => 'Mode of display of property values', // @translate
                     'value_options' => [
                         '' => 'Default display', // @translate
@@ -39,6 +42,58 @@ class SiteSettingsFieldset extends Fieldset
                 ],
             ])
             ->addElementsPropertyDisplay()
+
+            // Block Metadata.
+
+            ->add([
+                'name' => 'advancedresourcetemplate_block_metadata_fields',
+                'type' => CommonElement\GroupTextarea::class,
+                'options' => [
+                    'element_group' => 'block_metadata',
+                    'label' => 'Metadata for resource block Metadata', // @translate
+                    'info' => 'This option may be used to display a short record. Each line is the term and the optional alternatif label. A specific label can be set on each line, separated with a "=". A division to group a list of properties may be added with "# div-class" and an optional label separated with a "=".', // @translate
+                    'as_key_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_block_metadata_fields',
+                    'rows' => 5,
+                    'placeholder' => '# values-type
+dcterms:type
+
+# values-creator
+dcterms:creator
+
+# values-date
+dcterms:date
+dcterms:created
+dcterms:issued
+
+# values-subject
+dcterms:subject
+
+# values-rights = Terms of use
+dcterms:rights
+dcterms:license
+',
+                ],
+            ])
+            ->add([
+                'name' => 'advancedresourcetemplate_block_metadata_components',
+                'type' => CommonElement\OptionalMultiCheckbox::class,
+                'options' => [
+                    'element_group' => 'block_metadata',
+                    'label' => 'Element for block Metadata', // @translate
+                    'value_options' => [
+                        'value_label' => 'Metadata label', // @translate
+                        'value_term' => 'Property term', // @translate
+                        'value_vocab' => 'Vocabulary', // @translate
+                        'value_locale' => 'Locale of the value', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'advancedresourcetemplate_block_metadata_components',
+                ],
+            ])
         ;
     }
 }
