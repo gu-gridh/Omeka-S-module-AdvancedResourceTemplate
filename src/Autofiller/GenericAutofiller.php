@@ -73,8 +73,23 @@ class GenericAutofiller extends AbstractAutofiller
                 $labelResult = $metadata['{__label__}'][0]['@value'];
                 unset($metadata['{__label__}']);
             }
+
+            // keep track of array of values
+            $res = [];
+            foreach ($metadata as $propLabel => $meta) {
+                $valArray = $meta[0]['@value'];
+                if (is_array($valArray) && count($valArray) > 1) {
+                    foreach ($valArray as $key => $val) {
+                        $new = $meta[0];
+                        $new['@value'] = $val;
+                        $res[$propLabel][$key] = $new;
+                    }
+                } else {
+                    $res[$propLabel] = $meta;
+                }
+            }
             $uriLabels[] = $labelResult;
-            $uriData[] = $metadata;
+            $uriData[] = $res;
         }
 
         return $this->finalizeSuggestions($uriLabels, $uriData, null);

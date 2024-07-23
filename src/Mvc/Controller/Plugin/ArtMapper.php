@@ -381,7 +381,18 @@ class ArtMapper extends AbstractPlugin
             if (!empty($target['replace'])) {
                 $target['replace']['{__value__}'] = $value;
                 $target['replace']['{__label__}'] = $value;
-                $transformed = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+                // keep track of array values (list of combined values)
+                if (is_array(array_values($target['replace'])[0])) {
+                    $size = count(array_values($target['replace'])[0]);
+                    $patterns = array_fill(0, $size, $target['pattern']);
+                    $transformed = [];
+                    foreach ($patterns as $key => $p) {
+                        $match = array_column(array_values($target['replace']),$key);
+                        $transformed[] = str_replace(array_keys($target['replace']), $match, $target['pattern']);
+                    }
+                } else {
+                    $transformed = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+                }
             }
             if (!empty($target['twig'])) {
                 $target['pattern'] = $transformed;
@@ -926,14 +937,27 @@ class ArtMapper extends AbstractPlugin
      *
      * @todo Find a way to keep the last level of array (list of subjects…).
      */
-    private function _flatArray(array &$array, &$flatArray, $keys = null): void
+    private function _flatArray(array &$array, &$flatArray, $keys = null, $sub = null): void
     {
         foreach ($array as $key => $value) {
             $nKey = str_replace(['.', '\\'], ['\.', '\\\\'], (string) $key);
             if (is_array($value)) {
-                $this->_flatArray($value, $flatArray, $keys . '.' . $nKey);
+                if (count($value) == 1 && is_numeric(array_keys($value)[0])) {
+                    // flatten array if only one value
+                    $flatArray[trim($keys . '.' . $nKey, '.')] = $value[0];
+                } elseif (is_numeric($nKey)) {
+                    // add key for later reference as array
+                    $this->_flatArray($value, $flatArray, $keys, $nKey);
+                } else {
+                    // add key to keys
+                    $this->_flatArray($value, $flatArray, $keys . '.' . $nKey, $sub);
+                }
             } else {
+              if ($sub !== null) {
+                $flatArray[trim($keys . '.' . $nKey, '.')][$sub] = $value;
+              } else {
                 $flatArray[trim($keys . '.' . $nKey, '.')] = $value;
+              }
             }
         }
     }
