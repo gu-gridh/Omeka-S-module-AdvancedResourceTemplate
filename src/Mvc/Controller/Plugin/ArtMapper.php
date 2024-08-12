@@ -391,7 +391,8 @@ class ArtMapper extends AbstractPlugin
                         $transformed[] = str_replace(array_keys($target['replace']), $match, $target['pattern']);
                     }
                 } else {
-                    $transformed = str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']);
+                    // filter out empty values
+                    $transformed = array_filter(array_values($target['replace'])) ? str_replace(array_keys($target['replace']), array_values($target['replace']), $target['pattern']) : $value;
                 }
             }
             if (!empty($target['twig'])) {
@@ -424,8 +425,10 @@ class ArtMapper extends AbstractPlugin
                 break;
             case 'literal':
             default:
-                $v['@value'] = $value;
-                $this->result[$target['field']][] = $v;
+                if (!empty($value)) {
+                    $v['@value'] = $value;
+                    $this->result[$target['field']][] = $v;
+                }
                 break;
         }
 
@@ -942,9 +945,15 @@ class ArtMapper extends AbstractPlugin
         foreach ($array as $key => $value) {
             $nKey = str_replace(['.', '\\'], ['\.', '\\\\'], (string) $key);
             if (is_array($value)) {
+                // flatten array if only one value
                 if (count($value) == 1 && is_numeric(array_keys($value)[0])) {
-                    // flatten array if only one value
-                    $flatArray[trim($keys . '.' . $nKey, '.')] = $value[0];
+                    if (is_array($value[0])) {
+                        foreach($value[0] as $k => $val) {
+                            $flatArray[trim($keys . '.' . $nKey . '.' . $k, '.')] = $val;
+                        }
+                    } else {
+                        $flatArray[trim($keys . '.' . $nKey, '.')] = $value[0];
+                    }
                 } elseif (is_numeric($nKey)) {
                     // add key for later reference as array
                     $this->_flatArray($value, $flatArray, $keys, $nKey);
